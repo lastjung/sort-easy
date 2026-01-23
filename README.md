@@ -7,10 +7,11 @@
 - **8+ Core Algorithms**:
   - `Bubble`, `Selection`, `Insertion` (Reverse Bubbling)
   - `Quick`, `Merge`, `Heap`, `Shell`, `Cocktail`
-- **YouTube Cinema Mode**: Automatically switches to an ultra-large single view when one algorithm is selected—optimized for 4K video recording.
-- **Deep Sea Emerald Theme**: A custom "Eye-Comfort" dark mode designed to reduce glare during long sessions.
-- **Independent Card Architecture**: Each algorithm has its own state, timer, and description, allowing simultaneous comparison.
-- **Audio Feedback**: Context-aware sound synthesis for every swap and comparison.
+- **Persistent Pause/Hold Engine**: Pause any algorithm mid-way and resume exactly where you left off. The timer persists across pauses for precise performance benchmarking.
+- **Cinema Mode (Zero-Scroll)**: Optimized for 4K video recording, automatically expanding to single-card view.
+- **Vibrant Neon Blue & Purple Theme**: High-contrast color palette (Blue base, Purple columns) with neon glows for maximum visibility in video content.
+- **Zero-Jitter Animation**: Smoothed animation engine with 20ms minimum frame time to prevent screen shaking during high-speed sorting.
+- **Audio Feedback**: Context-aware sine/saw/square wave synthesis for every swap and comparison.
 - **1-Based Positioning**: Educational-first coordinate system matches spoken explanations.
 
 ## 🚀 Tech Stack

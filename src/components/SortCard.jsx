@@ -169,17 +169,13 @@ const SortCard = ({
     } catch (err) {
       if (err.message !== 'STOP') console.error(err);
     } finally {
-      if (mySessionId === sessionIdRef.current) {
-        stopSorting();
-      }
+      if (mySessionId === sessionIdRef.current) stopSorting();
     }
   }, [arraySize, item, wait, playSound]);
 
-  // Handle outside run
+  // Handle outside signals
   useEffect(() => {
-    if (triggerRun > 0 && !sortingRef.current) {
-      handleStart();
-    }
+    if (triggerRun > 0 && !sortingRef.current) handleStart();
   }, [triggerRun, handleStart]);
 
   const formatTime = (ms) => {
@@ -190,8 +186,6 @@ const SortCard = ({
 
   return (
     <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
-      
-      {/* Card Header */}
       <div className={`${isCinema ? 'p-10' : 'p-6'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-4 mb-1 flex-wrap">
@@ -206,20 +200,11 @@ const SortCard = ({
         </div>
         <div className="flex flex-col items-end gap-3 ml-4">
            <div className={`flex items-center gap-2 px-5 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
-              {/* Local Controls (Minimal Ghost Style) */}
               <div className="flex items-center gap-1 mr-2 pr-2 border-r border-white/10">
-                <button
-                    onClick={localReset}
-                    className="p-1 text-slate-500 hover:text-white transition-colors"
-                    title="Reset"
-                >
+                <button onClick={localReset} className="p-1 text-slate-500 hover:text-white transition-colors" title="Reset">
                     <RotateCcw size={isCinema ? 20 : 14} />
                 </button>
-                <button
-                    onClick={isSorting ? stopSorting : handleStart}
-                    className={`p-1 transition-all active:scale-75 ${isSorting ? 'text-amber-500 hover:text-amber-400' : 'text-slate-500 hover:text-white'}`}
-                    title={isSorting ? "Pause" : "Run"}
-                >
+                <button onClick={isSorting ? stopSorting : handleStart} className={`p-1 transition-all active:scale-75 ${isSorting ? 'text-amber-500 hover:text-amber-400' : 'text-slate-500 hover:text-white'}`} title={isSorting ? "Pause" : "Run"}>
                     {isSorting ? <Pause size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill="none" />}
                 </button>
               </div>
@@ -235,7 +220,6 @@ const SortCard = ({
         </div>
       </div>
 
-      {/* Visualization Canvas */}
       <div className={`${isCinema ? 'p-10 flex-1' : 'p-4'} bg-black/10 flex flex-col justify-end`}>
         <SortChart 
           array={array}
