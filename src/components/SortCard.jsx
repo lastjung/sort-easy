@@ -141,14 +141,15 @@ const SortCard = ({
       {/* Card Header */}
       <div className={`${isCinema ? 'p-10' : 'p-6'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-4 mb-2 flex-wrap">
+          <div className="flex items-baseline gap-4 mb-1 flex-wrap">
             <span className={isCinema ? 'text-5xl' : 'text-3xl'}>{item.icon}</span>
             <h3 className={`${isCinema ? 'text-5xl' : 'text-2xl'} font-black text-white tracking-tighter truncate`}>{item.title}</h3>
-            <span className={`${isCinema ? 'text-xl' : 'text-xs'} font-black text-slate-500 uppercase tracking-[0.2em] self-end mb-1 ml-2`}>{item.complexity}</span>
+            <span className={`${isCinema ? 'text-xl' : 'text-xs'} font-black text-slate-500 uppercase tracking-[0.2em]`}>{item.complexity}</span>
+            <span className="mx-2 text-slate-700 hidden lg:inline">|</span>
+            <p className={`${isCinema ? 'text-2xl' : 'text-base'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
+              {description}
+            </p>
           </div>
-          <p className={`${isCinema ? 'text-2xl' : 'text-base'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
-            {description}
-          </p>
         </div>
         <div className="flex flex-col items-end gap-3 ml-4">
            <div className={`flex items-center gap-2 px-5 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
