@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Timer, Sparkles, Play, RotateCcw, Square } from 'lucide-react';
+import { Timer, Sparkles, Play, RotateCcw, Pause } from 'lucide-react';
 import SortChart from './SortChart';
 import { COLORS } from '../constants/colors';
 
@@ -54,6 +54,7 @@ const SortCard = ({
   const speedRef = useRef(speed);
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
+  const baseTimeRef = useRef(0); // Tracks time before pause
   const onRunningRef = useRef(onRunning);
 
   // Sync refs
@@ -61,10 +62,16 @@ const SortCard = ({
   useEffect(() => { onRunningRef.current = onRunning; }, [onRunning]);
 
   const stopSorting = useCallback(() => {
+    if (!sortingRef.current) return;
+    
     sessionIdRef.current++; // Instant session kill
     sortingRef.current = false;
     setIsSorting(false);
+    
+    // Save accumulated time
     if (timerRef.current) clearInterval(timerRef.current);
+    baseTimeRef.current += Date.now() - startTimeRef.current;
+    
     if (onRunningRef.current) onRunningRef.current(false);
   }, []);
 
@@ -77,6 +84,7 @@ const SortCard = ({
     setSortedIndices([]);
     setDescription(item.slogan);
     setElapsedTime(0);
+    baseTimeRef.current = 0; // Reset accumulated time
   }, [initialArray, item.slogan, stopSorting]);
 
   // Handle outside reset
@@ -94,10 +102,9 @@ const SortCard = ({
     if (triggerRun > 0 && !sortingRef.current) {
       handleStart();
     }
-  }, [triggerRun]);
+  }, [triggerRun, handleStart]);
 
   const wait = async (factor = 1) => {
-    // Stability & Speed balance
     const delay = 1001 - speedRef.current;
     const ms = Math.max(20, delay * factor); 
     await new Promise(resolve => setTimeout(resolve, ms));
@@ -108,22 +115,20 @@ const SortCard = ({
     playTone(freq, type, 0.1, volume, soundEnabled);
   };
 
-  const handleStart = async () => {
+  async function handleStart() {
     if (isSorting || sortingRef.current) return;
 
     const mySessionId = ++sessionIdRef.current;
     
-    // Explicitly set BOTH state and ref BEFORE starting anything
     sortingRef.current = true;
     setIsSorting(true);
     if (onRunningRef.current) onRunningRef.current(true); 
     
-    setElapsedTime(0);
     startTimeRef.current = Date.now();
     
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setElapsedTime(Date.now() - startTimeRef.current);
+      setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
     }, 50);
 
     const checkSession = () => {
@@ -159,12 +164,11 @@ const SortCard = ({
     } catch (err) {
       if (err.message !== 'STOP') console.error(err);
     } finally {
-      // Only clean up if this session is still the active one
       if (mySessionId === sessionIdRef.current) {
         stopSorting();
       }
     }
-  };
+  }
 
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000);
@@ -201,10 +205,10 @@ const SortCard = ({
                 </button>
                 <button
                     onClick={isSorting ? stopSorting : handleStart}
-                    className={`p-1 transition-all active:scale-75 ${isSorting ? 'text-rose-500 hover:text-rose-400' : 'text-slate-500 hover:text-white'}`}
-                    title={isSorting ? "Stop" : "Run"}
+                    className={`p-1 transition-all active:scale-75 ${isSorting ? 'text-amber-500 hover:text-amber-400' : 'text-slate-500 hover:text-white'}`}
+                    title={isSorting ? "Pause" : "Run"}
                 >
-                    {isSorting ? <Square size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill="none" />}
+                    {isSorting ? <Pause size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill="none" />}
                 </button>
               </div>
               <Timer size={isCinema ? 24 : 18} className="text-emerald-400" />

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, RotateCcw, Volume2, VolumeX, Square } from 'lucide-react';
+import { Play, RotateCcw, Volume2, VolumeX, Pause } from 'lucide-react';
 
 const FloatingActionDock = ({
   onRun,
@@ -36,20 +36,20 @@ const FloatingActionDock = ({
           <RotateCcw size={24} />
         </button>
 
-        {/* Global Play/Stop - The Main iOS style button */}
+        {/* Global Play/Pause - The Main iOS style button */}
         <button
           onClick={isAnyRunning ? onStop : onRun}
           disabled={!isAnyRunning && visibleCount === 0}
           className={`flex items-center gap-3 pl-5 pr-8 py-3 rounded-full text-white font-black transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_8px_30px_rgb(0,0,0,0.12)] ${
             isAnyRunning 
-              ? 'bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 shadow-rose-500/20' 
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-amber-500/20' 
               : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-500/20'
           }`}
         >
           <div className="bg-white/20 p-2 rounded-full">
-            {isAnyRunning ? <Square size={24} fill="white" /> : <Play size={24} fill="white" />}
+            {isAnyRunning ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" />}
           </div>
-          <span className="text-lg tracking-tight uppercase italic whitespace-nowrap">{isAnyRunning ? 'Stop All' : 'Run All'}</span>
+          <span className="text-lg tracking-tight uppercase italic whitespace-nowrap">{isAnyRunning ? 'Pause All' : 'Run All'}</span>
         </button>
 
         {/* Info Badge */}
