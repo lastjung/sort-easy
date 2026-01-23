@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import ControlPanel from './components/ControlPanel';
 import Dashboard from './components/Dashboard';
+import FloatingActionDock from './components/FloatingActionDock';
 import { ALGORITHMS } from './algorithms';
 
 function App() {
@@ -13,8 +14,9 @@ function App() {
   
   const [data, setData] = useState([]);
   const [triggerRun, setTriggerRun] = useState(0);
+  const [triggerStop, setTriggerStop] = useState(0);
   const [triggerReset, setTriggerReset] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
+  const [activeCount, setActiveCount] = useState(0);
 
   // Initial data generation
   const generateData = useCallback(() => {
@@ -26,6 +28,7 @@ function App() {
         [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     setData(newArray);
+    setActiveCount(0);
   }, [arraySize]);
 
   useEffect(() => {
@@ -36,7 +39,12 @@ function App() {
     setTriggerRun(prev => prev + 1);
   };
 
+  const handleStop = () => {
+    setTriggerStop(prev => prev + 1);
+  };
+
   const handleReset = () => {
+    setTriggerStop(prev => prev + 1);
     setTriggerReset(prev => prev + 1);
     generateData();
   };
@@ -68,7 +76,7 @@ function App() {
         toggleSelect={toggleSelect}
         onRun={handleRun}
         onReset={handleReset}
-        isAnyRunning={false} // Will need better sync for this later
+        isAnyRunning={activeCount > 0} 
       />
 
       <main className="relative">
@@ -79,8 +87,20 @@ function App() {
           soundEnabled={soundEnabled}
           volume={volume}
           triggerRun={triggerRun}
+          triggerStop={triggerStop}
           triggerReset={triggerReset}
           selectedIds={selectedIds}
+          onRunningChange={(count) => setActiveCount(count)}
+        />
+
+        <FloatingActionDock 
+          onRun={handleRun}
+          onStop={handleStop}
+          onReset={handleReset}
+          isAnyRunning={activeCount > 0} 
+          soundEnabled={soundEnabled}
+          setSoundEnabled={setSoundEnabled}
+          visibleCount={selectedIds.size}
         />
       </main>
 

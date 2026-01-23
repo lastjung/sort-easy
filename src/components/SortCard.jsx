@@ -35,8 +35,10 @@ const SortCard = ({
   soundEnabled, 
   volume,
   triggerRun, // To start from outside
+  triggerStop, // To stop from outside
   triggerReset, // To reset from outside
-  onComplete 
+  onComplete,
+  onRunning // To notify parent about execution state
 }) => {
   const [array, setArray] = useState([...initialArray]);
   const [isSorting, setIsSorting] = useState(false);
@@ -48,12 +50,21 @@ const SortCard = ({
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const sortingRef = useRef(false);
+  const sessionIdRef = useRef(0);
   const speedRef = useRef(speed);
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
 
   // Sync speed ref
   useEffect(() => { speedRef.current = speed; }, [speed]);
+
+  const stopSorting = useCallback(() => {
+    sessionIdRef.current++; // Instant session kill
+    sortingRef.current = false;
+    setIsSorting(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (onRunning) onRunning(false);
+  }, [onRunning]);
 
   const localReset = useCallback(() => {
     stopSorting();
@@ -64,12 +75,17 @@ const SortCard = ({
     setSortedIndices([]);
     setDescription(item.slogan);
     setElapsedTime(0);
-  }, [initialArray, item.slogan]);
+  }, [initialArray, item.slogan, stopSorting]);
 
   // Handle outside reset
   useEffect(() => {
     localReset();
   }, [initialArray, triggerReset, localReset]);
+
+  // Handle outside stop
+  useEffect(() => {
+    if (triggerStop > 0) stopSorting();
+  }, [triggerStop, stopSorting]);
 
   // Handle outside run
   useEffect(() => {
@@ -78,14 +94,9 @@ const SortCard = ({
     }
   }, [triggerRun, isSorting]);
 
-  const stopSorting = () => {
-    sortingRef.current = false;
-    setIsSorting(false);
-    if (timerRef.current) clearInterval(timerRef.current);
-  };
-
   const wait = async (factor = 1) => {
-    const ms = speedRef.current * factor;
+    // Prevent "shaking/falling" by ensuring a minimum frame time (min 20ms)
+    const ms = Math.max(20, speedRef.current * factor);
     await new Promise(resolve => setTimeout(resolve, ms));
     return sortingRef.current;
   };
@@ -95,16 +106,23 @@ const SortCard = ({
   };
 
   const handleStart = async () => {
-    if (isSorting) return;
+    if (isSorting || sortingRef.current) return;
 
+    const mySessionId = ++sessionIdRef.current;
     setIsSorting(true);
     sortingRef.current = true;
+    if (onRunning) onRunning(true); // Signal to Dashboard/App IMMEDIATELY
+    
     setElapsedTime(0);
     startTimeRef.current = Date.now();
     
     timerRef.current = setInterval(() => {
       setElapsedTime(Date.now() - startTimeRef.current);
     }, 50);
+
+    const checkSession = () => {
+      if (mySessionId !== sessionIdRef.current) throw new Error('STOP');
+    };
 
     const helpers = {
       array: [...array],
@@ -115,17 +133,27 @@ const SortCard = ({
       setSortedIndices,
       setDescription,
       playSound,
-      wait,
-      sortingRef
+      wait: async (f) => {
+        checkSession();
+        return await wait(f);
+      },
+      sortingRef,
+      checkSession
     };
 
-    const finished = await item.fn(helpers);
-
-    stopSorting();
-    if (finished && sortingRef.current === false) {
-      setSortedIndices([...Array(arraySize).keys()]);
-      setDescription("COMPLETED! ✨");
-      if (onComplete) onComplete(item.id, { time: elapsedTime });
+    try {
+      const finished = await item.fn(helpers);
+      if (finished && mySessionId === sessionIdRef.current) {
+        setSortedIndices([...Array(arraySize).keys()]);
+        setDescription("COMPLETED! ✨");
+        if (onComplete) onComplete({ time: elapsedTime });
+      }
+    } catch (err) {
+      if (err.message !== 'STOP') console.error(err);
+    } finally {
+      if (mySessionId === sessionIdRef.current) {
+        stopSorting();
+      }
     }
   };
 
@@ -153,6 +181,24 @@ const SortCard = ({
         </div>
         <div className="flex flex-col items-end gap-3 ml-4">
            <div className={`flex items-center gap-2 px-5 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
+              {/* Local Controls (Minimal Ghost Style) */}
+              <div className="flex items-center gap-1 mr-2 pr-2 border-r border-white/10">
+                <button
+                    onClick={localReset}
+                    className="p-1 text-slate-500 hover:text-white transition-colors"
+                    title="Reset"
+                >
+                    <RotateCcw size={isCinema ? 20 : 14} />
+                </button>
+                <button
+                    onClick={handleStart}
+                    disabled={isSorting}
+                    className={`p-1 transition-colors ${isSorting ? 'text-emerald-500' : 'text-slate-500 hover:text-white'}`}
+                    title="Run"
+                >
+                    <Play size={isCinema ? 22 : 16} fill={isSorting ? "currentColor" : "none"} />
+                </button>
+              </div>
               <Timer size={isCinema ? 24 : 18} className="text-emerald-400" />
               <span className={`${isCinema ? 'text-2xl' : 'text-lg'} font-mono font-black text-slate-200`}>{formatTime(elapsedTime)}</span>
            </div>
@@ -176,31 +222,6 @@ const SortCard = ({
           goodIndices={goodIndices}
           compareIndices={compareIndices}
         />
-      </div>
-
-      {/* Card Footer: Local Controls */}
-      <div className={`${isCinema ? 'px-10 py-8' : 'px-6 py-4'} bg-black/20 border-t border-white/5 flex items-center justify-between gap-6`}>
-          <div className={`${isCinema ? 'text-base' : 'text-sm'} font-bold text-slate-500 flex-1 line-clamp-1`}>
-             {item.desc}
-          </div>
-          <div className="flex gap-4">
-            <button
-                onClick={localReset}
-                className={`${isCinema ? 'p-4' : 'p-2.5'} bg-white/5 text-slate-400 rounded-2xl border border-white/10 shadow-sm hover:text-emerald-400 hover:border-emerald-400/30 transition-all active:scale-90`}
-                title="Reset this algorithm"
-              >
-                <RotateCcw size={isCinema ? 24 : 20} />
-            </button>
-            <button
-                onClick={handleStart}
-                disabled={isSorting}
-                className={`flex items-center gap-2 ${isCinema ? 'px-10 py-4 text-xl' : 'px-6 py-3 text-sm'} text-white font-black rounded-2xl shadow-xl transition-all active:scale-95 ${
-                  isSorting ? 'bg-slate-700 shadow-none' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/10'
-                }`}
-              >
-                {isSorting ? <><div className="w-3 h-3 rounded-full bg-white animate-pulse" /> RUNNING</> : <><Play size={isCinema ? 20 : 16} fill="currentColor" /> START</>}
-            </button>
-          </div>
       </div>
     </div>
   );

@@ -1,30 +1,30 @@
 export const COLORS = {
-    // State Colors (Deep Sea & Emerald Theme)
-    SORTED: 'from-emerald-400 to-emerald-600',       // Completed - Emerald Green
-    UNSORTED: 'from-cyan-400 to-cyan-600',           // Initial - Cyan Blue
-    COMPARE: 'from-amber-300 to-amber-500',          // Active - Gold/Amber
-    SWAP: 'from-rose-400 to-rose-600',               // Swap - Rose/Red
-    TARGET: 'from-teal-300 to-teal-500',            // Pivot/Focus - Teal
+    // State Colors (High Contrast for Video Recording)
+    SORTED: 'from-cyan-400 to-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.4)]', // Completed Elite Blue
+    UNSORTED: 'from-slate-500 to-slate-600',                                     // Idle Base
+    COMPARE: 'from-amber-400 to-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.6)]', // Active Compare (Yellow)
+    SWAP: 'from-emerald-400 to-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.6)]', // Active Swap (Green)
+    TARGET: 'from-rose-500 to-rose-600',                                           // Focus/Pivot (Red)
     
-    // Backgrounds (Premium Deep Dark - Eye Comfort)
+    // Backgrounds (Premium Deep Dark)
     BG_MAIN: 'bg-slate-950',
-    BG_CARD: 'bg-slate-900/40',                      // Dark Glass Card
-    BG_SECTION: 'bg-slate-800/40',                   // Header/Footer in card
+    BG_CARD: 'bg-slate-900/60',
+    BG_SECTION: 'bg-slate-800/40',
     
-    // Text (Low Eye-Strain)
-    TEXT_MAIN: 'text-slate-100',
+    // Text
+    TEXT_MAIN: 'text-slate-50',
     TEXT_MUTED: 'text-slate-400',
-    TEXT_ACCENT: 'text-emerald-400',
+    TEXT_ACCENT: 'text-cyan-400',
     
     // UI Accents
-    ACCENT: 'emerald-500',
-    ACCENT_HOVER: 'emerald-400'
+    ACCENT: 'cyan-500',
+    ACCENT_HOVER: 'cyan-400'
 };
 
 export const LEGEND_ITEMS = [
-    { label: 'Unsorted', color: 'bg-cyan-500' },
+    { label: 'Unsorted', color: 'bg-slate-500' },
     { label: 'Compare', color: 'bg-amber-400' },
-    { label: 'Swap', color: 'bg-rose-500' },
-    { label: 'Focus', color: 'bg-teal-400' },
-    { label: 'Sorted', color: 'bg-emerald-500' },
+    { label: 'Swap', color: 'bg-emerald-500' },
+    { label: 'Focus', color: 'bg-rose-500' },
+    { label: 'Sorted', color: 'bg-cyan-500' },
 ];

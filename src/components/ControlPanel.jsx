@@ -31,38 +31,14 @@ const ControlPanel = ({
             <h1 className="text-2xl font-black text-white tracking-tighter uppercase italic">SORT<span className="text-emerald-400">EASY</span></h1>
           </div>
 
-          <div className="flex items-center gap-4">
-             {/* Volume */}
-             <button 
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
-              >
-                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-              </button>
-
-              <div className="h-8 w-px bg-white/10 mx-2 hidden sm:block" />
-
-              <button
-                onClick={onReset}
-                className="flex items-center gap-2 px-5 py-2.5 bg-white/5 text-slate-300 font-bold rounded-xl border border-white/5 hover:bg-white/10 hover:text-white transition-all active:scale-95"
-              >
-                <RotateCcw size={18} /> <span>Reset All</span>
-              </button>
-
-              <button
-                onClick={onRun}
-                disabled={isAnyRunning || selectedIds.size === 0}
-                className={`flex items-center gap-2 px-8 py-2.5 text-white font-black rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isAnyRunning ? 'bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-500'
-                }`}
-              >
-                <Play size={18} fill="currentColor" /> <span>Run Selected</span>
-              </button>
+          <div className="flex items-center gap-6">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Advanced Environment Config</p>
           </div>
         </div>
 
-        {/* Bottom Row: Settings and Selectors */}
+        {/* Settings and Selectors */}
         <div className="flex flex-wrap items-center gap-8 py-2 border-t border-white/10 mt-2">
+
             
             {/* Speed & Size Sliders */}
             <div className="flex flex-wrap items-center gap-6 flex-1 min-w-[300px]">

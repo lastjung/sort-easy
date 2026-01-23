@@ -10,13 +10,35 @@ const Dashboard = ({
   soundEnabled, 
   volume,
   triggerRun,
+  triggerStop,
   triggerReset,
-  selectedIds // Set of IDs to show
+  selectedIds, // Set of IDs to show
+  onRunningChange
 }) => {
   const [results, setResults] = useState({});
+  const [activeAlgorithms, setActiveAlgorithms] = useState(new Set());
+
+  // Notify parent of active algorithm count
+  useEffect(() => {
+    if (onRunningChange) onRunningChange(activeAlgorithms.size);
+  }, [activeAlgorithms.size, onRunningChange]);
 
   const handleComplete = useCallback((id, stats) => {
     setResults(prev => ({ ...prev, [id]: stats }));
+    setActiveAlgorithms(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const handleRunning = useCallback((id, running) => {
+    setActiveAlgorithms(prev => {
+      const next = new Set(prev);
+      if (running) next.add(id);
+      else next.delete(id);
+      return next;
+    });
   }, []);
 
   // Filter based on selection
@@ -41,8 +63,10 @@ const Dashboard = ({
               soundEnabled={soundEnabled}
               volume={volume}
               triggerRun={triggerRun}
+              triggerStop={triggerStop}
               triggerReset={triggerReset}
-              onComplete={handleComplete}
+              onComplete={(stats) => handleComplete(algo.id, stats)}
+              onRunning={(running) => handleRunning(algo.id, running)}
             />
           </div>
         ))}
