@@ -200,80 +200,66 @@ export const insertionSort = async ({
   }) => {
     const arr = [...array];
     const n = arr.length;
-    let newSortedIndices = []; 
-
-    setDescription("Starting Insertion Sort...");
-    await wait(1);
     
-    // First element is implicitly "sorted"
-    newSortedIndices.push(0);
-    setSortedIndices([...newSortedIndices]);
+    // Initial state: 1st element is sorted (Green)
+    setSortedIndices([0]);
+    setDescription("Insertion Sort: Skipping the 1st element.");
+    await wait(1);
 
     for (let i = 1; i < n; i++) {
         if (!sortingRef.current) break;
-        if (!(await wait(1))) break;
-
-        let key = arr[i];
+        
         let j = i - 1;
         
-        setDescription(`Picking up ${key} to insert into the sorted part...`);
-        // Highlight Key (Target)
+        // Pick active target (Purple)
         setGoodIndices([i]); 
-        setCompareIndices([]);
-        setSwapIndices([]);
-        
-        await wait(1);
+        setDescription(`Step ${i + 1}: Picking index ${i}.`);
+        if (!(await wait(1))) break;
 
+        // Perform "Reverse Bubbling"
         while (j >= 0) {
             if (!sortingRef.current) break;
-            if (!(await wait(0))) break;
-            
-            // Compare
-            setCompareIndices([j]); // Comparing with this sorted element
-            setGoodIndices([j + 1]); // The 'hole' or current key position
-            setDescription(`Comparing ${key} with ${arr[j]}...`);
+
+            // 1. Compare (Yellow)
+            setCompareIndices([j, j + 1]);
+            setGoodIndices([]); 
+            setSwapIndices([]);
             playSound(300 + arr[j] * 5, 'sine');
-            
             if (!(await wait(0.8))) break;
 
-            if (arr[j] > key) {
-                // SHIFT
-                setDescription(`${arr[j]} > ${key}. Shifting ${arr[j]} to the right.`);
-                arr[j + 1] = arr[j]; // Shift
-                setArray([...arr]);
-                
-                // Visual for shifting
-                setSwapIndices([j, j + 1]); // Red for the shift action
+            if (arr[j] > arr[j + 1]) {
+                // 2. Swap (Red)
                 setCompareIndices([]);
+                setSwapIndices([j, j + 1]);
                 playSound(150, 'sawtooth');
                 
-                if (!(await wait(0.8))) break;
+                // Actual Swap for bubbling visual
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                setArray([...arr]);
                 
-                j = j - 1;
+                if (!(await wait(1))) break;
+                setSwapIndices([]);
+                j--;
             } else {
-                // Found the spot
-                setDescription(`${arr[j]} <= ${key}. Found the spot!`);
-                break; 
+                break;
             }
         }
-        
+
         if (!sortingRef.current) break;
-        
-        // Insert Key
-        arr[j + 1] = key;
-        setArray([...arr]);
-        setSwapIndices([]);
+
+        // Update Sorted range (Green)
         setCompareIndices([]);
-        setGoodIndices([j + 1]); // Show where it landed
-        setDescription(`Inserted ${key} at index ${j + 1}.`);
+        setSwapIndices([]);
+        setGoodIndices([]);
+        
+        let sortedRange = [];
+        for (let k = 0; k <= i; k++) sortedRange.push(k);
+        setSortedIndices(sortedRange);
+        
         playSound(600, 'square');
-        
         if (!(await wait(1))) break;
-        
-        // Update Sorted Indices (0 to i are now sorted)
-        newSortedIndices = [];
-        for(let k=0; k <= i; k++) newSortedIndices.push(k);
-        setSortedIndices([...newSortedIndices]);
     }
+    
+    setSortedIndices([...Array(n).keys()]);
     return true;
 };
