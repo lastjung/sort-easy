@@ -115,7 +115,7 @@ const SortCard = ({
     playTone(freq, type, 0.1, volume, soundEnabled);
   };
 
-  async function handleStart() {
+  const handleStart = useCallback(async () => {
     if (isSorting || sortingRef.current) return;
 
     const mySessionId = ++sessionIdRef.current;
@@ -168,7 +168,7 @@ const SortCard = ({
         stopSorting();
       }
     }
-  }
+  }, [array, isSorting, arraySize, elapsedTime, onComplete, item, stopSorting, wait, volume, soundEnabled]);
 
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000);
