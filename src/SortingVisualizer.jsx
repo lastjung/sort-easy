@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Timer } from 'lucide-react';
-import { bubbleSort, selectionSort, insertionSort } from './algorithms/sortingAlgorithms';
+import { ALGORITHMS } from './algorithms/index.js';
 import { LEGEND_ITEMS } from './constants/colors';
 import SortHeader from './components/SortHeader';
 import SortControls from './components/SortControls';
@@ -67,8 +67,13 @@ const SortingVisualizer = () => {
     setIsPaused(false);
     
     const newArray = [];
-    for (let i = 0; i < arraySize; i++) {
-        newArray.push(Math.floor(Math.random() * 90) + 10);
+    for (let i = 1; i <= arraySize; i++) {
+        newArray.push(i);
+    }
+    // Shuffle the array (Fisher-Yates)
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     setArray(newArray);
     
@@ -142,10 +147,11 @@ const SortingVisualizer = () => {
           sortingRef
       };
 
+      const selectedAlgo = ALGORITHMS.find(a => a.id === algorithm);
       let finished = false;
-      if (algorithm === 'bubble') finished = await bubbleSort(helpers);
-      else if (algorithm === 'selection') finished = await selectionSort(helpers);
-      else if (algorithm === 'insertion') finished = await insertionSort(helpers);
+      if (selectedAlgo && selectedAlgo.fn) {
+          finished = await selectedAlgo.fn(helpers);
+      }
 
       clearInterval(timerRef.current);
       if (finished && sortingRef.current) {

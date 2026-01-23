@@ -1,16 +1,44 @@
-# React + Vite
+# 🌊 SortEasy Pro: Elite Sorting Visualizer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**SortEasy Pro** is a premium, high-performance sorting algorithm visualizer designed for educators and YouTube content creators. Experience sorting algorithms in a stunning "Deep Sea Emerald" theme with professional-grade UI/UX.
 
-Currently, two official plugins are available:
+## ✨ Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **8+ Core Algorithms**:
+  - `Bubble`, `Selection`, `Insertion` (Reverse Bubbling)
+  - `Quick`, `Merge`, `Heap`, `Shell`, `Cocktail`
+- **YouTube Cinema Mode**: Automatically switches to an ultra-large single view when one algorithm is selected—optimized for 4K video recording.
+- **Deep Sea Emerald Theme**: A custom "Eye-Comfort" dark mode designed to reduce glare during long sessions.
+- **Independent Card Architecture**: Each algorithm has its own state, timer, and description, allowing simultaneous comparison.
+- **Audio Feedback**: Context-aware sound synthesis for every swap and comparison.
+- **1-Based Positioning**: Educational-first coordinate system matches spoken explanations.
 
-## React Compiler
+## 🚀 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** + **Vite**
+- **Tailwind CSS** (Custom Glassmorphism)
+- **Lucide React** (Elite Icons)
+- **Web Audio API** (Sound Synthesis)
 
-## Expanding the ESLint configuration
+## 🛠 Installation & Running
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/eric/sort-easy.git
+   ```
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+3. **Run development server**
+   ```bash
+   pnpm dev
+   ```
+
+## 📸 For Content Creators
+
+To enter **Cinema Mode**, simply uncheck all algorithms in the dashboard except one. The UI will automatically expand to fill the screen with high-contrast text and a large visualization canvas.
+
+---
+
+_Created with ❤️ for the Sorting Engineering community._
