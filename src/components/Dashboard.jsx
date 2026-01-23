@@ -66,8 +66,8 @@ const Dashboard = ({
               triggerRun={triggerRun}
               triggerStop={triggerStop}
               triggerReset={triggerReset}
-              onComplete={(stats) => handleComplete(algo.id, stats)}
-              onRunning={(running) => handleRunning(algo.id, running)}
+              onComplete={handleComplete}
+              onRunning={handleRunning}
             />
           </div>
         ))}
