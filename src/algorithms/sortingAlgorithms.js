@@ -185,3 +185,95 @@ export const selectionSort = async ({
     }
     return true;
 };
+
+export const insertionSort = async ({
+    array,
+    setArray,
+    setCompareIndices,
+    setSwapIndices,
+    setGoodIndices,
+    setSortedIndices,
+    setDescription,
+    playSound,
+    wait,
+    sortingRef
+  }) => {
+    const arr = [...array];
+    const n = arr.length;
+    let newSortedIndices = []; 
+
+    setDescription("Starting Insertion Sort...");
+    await wait(1);
+    
+    // First element is implicitly "sorted"
+    newSortedIndices.push(0);
+    setSortedIndices([...newSortedIndices]);
+
+    for (let i = 1; i < n; i++) {
+        if (!sortingRef.current) break;
+        if (!(await wait(1))) break;
+
+        let key = arr[i];
+        let j = i - 1;
+        
+        setDescription(`Picking up ${key} to insert into the sorted part...`);
+        // Highlight Key (Target)
+        setGoodIndices([i]); 
+        setCompareIndices([]);
+        setSwapIndices([]);
+        
+        await wait(1);
+
+        while (j >= 0) {
+            if (!sortingRef.current) break;
+            if (!(await wait(0))) break;
+            
+            // Compare
+            setCompareIndices([j]); // Comparing with this sorted element
+            setGoodIndices([j + 1]); // The 'hole' or current key position
+            setDescription(`Comparing ${key} with ${arr[j]}...`);
+            playSound(300 + arr[j] * 5, 'sine');
+            
+            if (!(await wait(0.8))) break;
+
+            if (arr[j] > key) {
+                // SHIFT
+                setDescription(`${arr[j]} > ${key}. Shifting ${arr[j]} to the right.`);
+                arr[j + 1] = arr[j]; // Shift
+                setArray([...arr]);
+                
+                // Visual for shifting
+                setSwapIndices([j, j + 1]); // Red for the shift action
+                setCompareIndices([]);
+                playSound(150, 'sawtooth');
+                
+                if (!(await wait(0.8))) break;
+                
+                j = j - 1;
+            } else {
+                // Found the spot
+                setDescription(`${arr[j]} <= ${key}. Found the spot!`);
+                break; 
+            }
+        }
+        
+        if (!sortingRef.current) break;
+        
+        // Insert Key
+        arr[j + 1] = key;
+        setArray([...arr]);
+        setSwapIndices([]);
+        setCompareIndices([]);
+        setGoodIndices([j + 1]); // Show where it landed
+        setDescription(`Inserted ${key} at index ${j + 1}.`);
+        playSound(600, 'square');
+        
+        if (!(await wait(1))) break;
+        
+        // Update Sorted Indices (0 to i are now sorted)
+        newSortedIndices = [];
+        for(let k=0; k <= i; k++) newSortedIndices.push(k);
+        setSortedIndices([...newSortedIndices]);
+    }
+    return true;
+};
