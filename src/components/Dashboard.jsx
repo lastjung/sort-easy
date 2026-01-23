@@ -24,6 +24,7 @@ const Dashboard = ({
   }, [activeAlgorithms.size, onRunningChange]);
 
   const handleComplete = useCallback((id, stats) => {
+    if (!id) return;
     setResults(prev => ({ ...prev, [id]: stats }));
     setActiveAlgorithms(prev => {
       const next = new Set(prev);

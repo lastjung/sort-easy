@@ -116,7 +116,7 @@ const SortCard = ({
   };
 
   const handleStart = useCallback(async () => {
-    if (isSorting || sortingRef.current) return;
+    if (sortingRef.current) return;
 
     const mySessionId = ++sessionIdRef.current;
     
@@ -136,7 +136,7 @@ const SortCard = ({
     };
 
     const helpers = {
-      array: [...array],
+      array: [...array], // Use the current snapshot when starting
       setArray,
       setCompareIndices,
       setSwapIndices,
@@ -159,7 +159,8 @@ const SortCard = ({
       if (finished && stillActive) {
         setSortedIndices([...Array(arraySize).keys()]);
         setDescription("COMPLETED! ✨");
-        if (onComplete) onComplete({ time: elapsedTime });
+        // FIX: Pass item.id to match Dashboard expectation
+        if (onComplete) onComplete(item.id, { time: elapsedTime }); 
       }
     } catch (err) {
       if (err.message !== 'STOP') console.error(err);
@@ -168,7 +169,8 @@ const SortCard = ({
         stopSorting();
       }
     }
-  }, [array, isSorting, arraySize, elapsedTime, onComplete, item, stopSorting, wait, volume, soundEnabled]);
+    // Removed unstable deps: array, isSorting, elapsedTime
+  }, [arraySize, onComplete, item, stopSorting, wait, volume, soundEnabled]);
 
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000);
