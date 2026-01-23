@@ -25,8 +25,8 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         return (
           <div
             key={idx}
-            className={`w-full rounded-t-lg transition-all flex items-end justify-center pb-3 text-white font-black shadow-sm bg-gradient-to-t ${colorClass} ${
-              isNormal ? 'opacity-60 duration-500' : 'opacity-100 duration-0 shadow-[0_0_10px_rgba(255,255,255,0.1)]'
+            className={`w-full rounded-t-lg transition-all duration-150 flex items-end justify-center pb-3 text-white font-black shadow-sm bg-gradient-to-t ${colorClass} ${
+              isNormal ? 'opacity-30' : 'opacity-100'
             }`}
             style={{ height: `${(value / maxVal) * 92 + 3}%` }}
           >

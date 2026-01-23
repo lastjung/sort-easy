@@ -97,9 +97,9 @@ const SortCard = ({
   }, [triggerRun]);
 
   const wait = async (factor = 1) => {
-    // Intuitive Speed: Higher slider value = Faster sorting (matching sort-compare)
+    // Stability & Speed balance
     const delay = 1001 - speedRef.current;
-    const ms = Math.max(5, delay * factor);
+    const ms = Math.max(20, delay * factor); 
     await new Promise(resolve => setTimeout(resolve, ms));
     return sortingRef.current;
   };
@@ -112,13 +112,16 @@ const SortCard = ({
     if (isSorting || sortingRef.current) return;
 
     const mySessionId = ++sessionIdRef.current;
-    setIsSorting(true);
+    
+    // Explicitly set BOTH state and ref BEFORE starting anything
     sortingRef.current = true;
+    setIsSorting(true);
     if (onRunningRef.current) onRunningRef.current(true); 
     
     setElapsedTime(0);
     startTimeRef.current = Date.now();
     
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setElapsedTime(Date.now() - startTimeRef.current);
     }, 50);
@@ -146,7 +149,9 @@ const SortCard = ({
 
     try {
       const finished = await item.fn(helpers);
-      if (finished && mySessionId === sessionIdRef.current) {
+      const stillActive = mySessionId === sessionIdRef.current;
+      
+      if (finished && stillActive) {
         setSortedIndices([...Array(arraySize).keys()]);
         setDescription("COMPLETED! ✨");
         if (onComplete) onComplete({ time: elapsedTime });
@@ -154,6 +159,7 @@ const SortCard = ({
     } catch (err) {
       if (err.message !== 'STOP') console.error(err);
     } finally {
+      // Only clean up if this session is still the active one
       if (mySessionId === sessionIdRef.current) {
         stopSorting();
       }
