@@ -17,9 +17,9 @@ const SortHeader = ({ algorithm, setAlgorithm, isSorting, resetArray }) => {
         </h1>
         <p className="text-slate-500 font-medium text-lg mt-2 flex items-center gap-2">
             <Sparkles size={16} className="text-amber-400" />
-            {algorithm === 'bubble' ? "Bubbling largest elements to the top" : 
-             algorithm === 'selection' ? "Finding the minimum and placing it" :
-             "Building the sorted array step-by-step"}
+            {algorithm === 'bubble' ? "Spot the largest values bubbling to the top!" : 
+             algorithm === 'selection' ? "Hunting for the smallest number to put first!" :
+             "find small number by reverse bubbling sort."}
         </p>
       </div>
 
