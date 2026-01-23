@@ -54,17 +54,19 @@ const SortCard = ({
   const speedRef = useRef(speed);
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
+  const onRunningRef = useRef(onRunning);
 
-  // Sync speed ref
+  // Sync refs
   useEffect(() => { speedRef.current = speed; }, [speed]);
+  useEffect(() => { onRunningRef.current = onRunning; }, [onRunning]);
 
   const stopSorting = useCallback(() => {
     sessionIdRef.current++; // Instant session kill
     sortingRef.current = false;
     setIsSorting(false);
     if (timerRef.current) clearInterval(timerRef.current);
-    if (onRunning) onRunning(false);
-  }, [onRunning]);
+    if (onRunningRef.current) onRunningRef.current(false);
+  }, []);
 
   const localReset = useCallback(() => {
     stopSorting();
@@ -89,14 +91,15 @@ const SortCard = ({
 
   // Handle outside run
   useEffect(() => {
-    if (triggerRun > 0 && !isSorting) {
+    if (triggerRun > 0 && !sortingRef.current) {
       handleStart();
     }
-  }, [triggerRun, isSorting]);
+  }, [triggerRun]);
 
   const wait = async (factor = 1) => {
-    // Prevent "shaking/falling" by ensuring a minimum frame time (min 20ms)
-    const ms = Math.max(20, speedRef.current * factor);
+    // Intuitive Speed: Higher slider value = Faster sorting (matching sort-compare)
+    const delay = 1001 - speedRef.current;
+    const ms = Math.max(5, delay * factor);
     await new Promise(resolve => setTimeout(resolve, ms));
     return sortingRef.current;
   };
@@ -111,7 +114,7 @@ const SortCard = ({
     const mySessionId = ++sessionIdRef.current;
     setIsSorting(true);
     sortingRef.current = true;
-    if (onRunning) onRunning(true); // Signal to Dashboard/App IMMEDIATELY
+    if (onRunningRef.current) onRunningRef.current(true); 
     
     setElapsedTime(0);
     startTimeRef.current = Date.now();

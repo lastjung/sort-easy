@@ -19,20 +19,26 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         ? 'flex-1 gap-[4px] p-8 bg-slate-900/60 rounded-[40px]' 
         : 'h-80 md:h-[450px] gap-[2px] p-4 bg-slate-900/40 rounded-2xl'
     } border border-white/5 shadow-inner`}>
-      {array.map((value, idx) => (
-        <div
-          key={idx}
-          className={`w-full rounded-t-lg transition-all duration-200 ease-in-out flex items-end justify-center pb-3 text-white font-black shadow-sm bg-gradient-to-t ${getBarColorClass(idx)}`}
-          style={{ height: `${(value / maxVal) * 92 + 3}%` }}
-        >
-          {/* Only show text if bars are not too thin */}
-          {arraySize <= (isCinema ? 40 : 25) && (
-            <span className={`drop-shadow-lg mb-1 hidden sm:block opacity-95 ${isCinema ? 'text-sm' : 'text-[10px] md:text-xs'}`}>
-              {idx + 1}
-            </span>
-          )}
-        </div>
-      ))}
+      {array.map((value, idx) => {
+        const colorClass = getBarColorClass(idx);
+        const isNormal = colorClass === COLORS.UNSORTED;
+        return (
+          <div
+            key={idx}
+            className={`w-full rounded-t-lg transition-all flex items-end justify-center pb-3 text-white font-black shadow-sm bg-gradient-to-t ${colorClass} ${
+              isNormal ? 'opacity-60 duration-500' : 'opacity-100 duration-0 shadow-[0_0_10px_rgba(255,255,255,0.1)]'
+            }`}
+            style={{ height: `${(value / maxVal) * 92 + 3}%` }}
+          >
+            {/* Only show text if bars are not too thin */}
+            {arraySize <= (isCinema ? 40 : 25) && (
+              <span className={`drop-shadow-lg mb-1 hidden sm:block opacity-95 ${isCinema ? 'text-sm' : 'text-[10px] md:text-xs'}`}>
+                {idx + 1}
+              </span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
