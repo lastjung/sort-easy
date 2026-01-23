@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Timer, Sparkles, Play, RotateCcw } from 'lucide-react';
+import { Timer, Sparkles, Play, RotateCcw, Square } from 'lucide-react';
 import SortChart from './SortChart';
 import { COLORS } from '../constants/colors';
 
@@ -200,12 +200,11 @@ const SortCard = ({
                     <RotateCcw size={isCinema ? 20 : 14} />
                 </button>
                 <button
-                    onClick={handleStart}
-                    disabled={isSorting}
-                    className={`p-1 transition-colors ${isSorting ? 'text-emerald-500' : 'text-slate-500 hover:text-white'}`}
-                    title="Run"
+                    onClick={isSorting ? stopSorting : handleStart}
+                    className={`p-1 transition-all active:scale-75 ${isSorting ? 'text-rose-500 hover:text-rose-400' : 'text-slate-500 hover:text-white'}`}
+                    title={isSorting ? "Stop" : "Run"}
                 >
-                    <Play size={isCinema ? 22 : 16} fill={isSorting ? "currentColor" : "none"} />
+                    {isSorting ? <Square size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill="none" />}
                 </button>
               </div>
               <Timer size={isCinema ? 24 : 18} className="text-emerald-400" />
