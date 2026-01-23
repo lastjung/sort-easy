@@ -25,9 +25,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         return (
           <div
             key={idx}
-            className={`w-full rounded-t-lg transition-all duration-150 flex items-end justify-center pb-3 text-white font-black shadow-sm bg-gradient-to-t ${colorClass} ${
-              isNormal ? 'opacity-30' : 'opacity-100'
-            }`}
+            className={`w-full rounded-t-lg transition-all duration-150 flex items-end justify-center pb-3 text-white font-black ${colorClass}`}
             style={{ height: `${(value / maxVal) * 92 + 3}%` }}
           >
             {/* Only show text if bars are not too thin */}
