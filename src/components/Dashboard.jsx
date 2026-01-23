@@ -24,8 +24,8 @@ const Dashboard = ({
   const isCinema = visibleAlgos.length === 1;
 
   return (
-    <div className={`w-full mx-auto px-6 py-10 transition-all duration-500 ${isCinema ? 'max-w-[1200px]' : 'max-w-[1600px]'}`}>
-      <div className={`grid gap-10 ${
+    <div className={`w-full mx-auto px-6 py-4 transition-all duration-500 ${isCinema ? 'max-w-[1800px] h-[calc(100vh-180px)] overflow-hidden' : 'max-w-[1600px]'}`}>
+      <div className={`grid gap-6 h-full ${
         isCinema 
           ? 'grid-cols-1' 
           : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'

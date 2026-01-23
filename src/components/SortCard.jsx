@@ -136,18 +136,21 @@ const SortCard = ({
   };
 
   return (
-    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10' : ''}`}>
+    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
       
       {/* Card Header */}
       <div className={`${isCinema ? 'p-10' : 'p-6'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
-        <div>
-          <div className="flex items-center gap-4 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-4 mb-2 flex-wrap">
             <span className={isCinema ? 'text-5xl' : 'text-3xl'}>{item.icon}</span>
-            <h3 className={`${isCinema ? 'text-5xl' : 'text-2xl'} font-black text-white tracking-tighter`}>{item.title}</h3>
+            <h3 className={`${isCinema ? 'text-5xl' : 'text-2xl'} font-black text-white tracking-tighter truncate`}>{item.title}</h3>
+            <span className={`${isCinema ? 'text-xl' : 'text-xs'} font-black text-slate-500 uppercase tracking-[0.2em] self-end mb-1 ml-2`}>{item.complexity}</span>
           </div>
-          <p className={`${isCinema ? 'text-sm' : 'text-xs'} font-black text-slate-500 uppercase tracking-[0.3em]`}>{item.complexity}</p>
+          <p className={`${isCinema ? 'text-2xl' : 'text-base'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
+            {description}
+          </p>
         </div>
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-col items-end gap-3 ml-4">
            <div className={`flex items-center gap-2 px-5 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
               <Timer size={isCinema ? 24 : 18} className="text-emerald-400" />
               <span className={`${isCinema ? 'text-2xl' : 'text-lg'} font-mono font-black text-slate-200`}>{formatTime(elapsedTime)}</span>
@@ -162,7 +165,7 @@ const SortCard = ({
       </div>
 
       {/* Visualization Canvas */}
-      <div className={`${isCinema ? 'p-10' : 'p-4'} bg-black/10 flex-1 flex flex-col justify-end min-h-[300px]`}>
+      <div className={`${isCinema ? 'p-10 flex-1' : 'p-4'} bg-black/10 flex flex-col justify-end`}>
         <SortChart 
           array={array}
           isCinema={isCinema}
@@ -172,14 +175,6 @@ const SortCard = ({
           goodIndices={goodIndices}
           compareIndices={compareIndices}
         />
-      </div>
-
-      {/* Info Bar (Positioned at bottom for cinema focus) */}
-      <div className={`${isCinema ? 'px-12 py-8 bg-emerald-600/90' : 'px-6 py-4 bg-emerald-950/40'} min-h-[60px] flex items-center shadow-inner relative z-10 border-t border-white/5`}>
-        <div className="absolute left-0 top-0 w-full h-full bg-[radial-gradient(circle_at_20%_50%,rgba(255,255,255,0.05),transparent)]" />
-        <p className={`${isCinema ? 'text-2xl' : 'text-base'} font-black text-white line-clamp-2 leading-tight italic tracking-tight`}>
-          "{description}"
-        </p>
       </div>
 
       {/* Card Footer: Local Controls */}
