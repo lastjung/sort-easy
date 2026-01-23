@@ -41,6 +41,7 @@ const SortCard = ({
   onRunning // To notify parent about execution state
 }) => {
   const [array, setArray] = useState([...initialArray]);
+  const arrayRef = useRef([...initialArray]); // To avoid stale closures in handleStart
   const [isSorting, setIsSorting] = useState(false);
   const [compareIndices, setCompareIndices] = useState([]);
   const [swapIndices, setSwapIndices] = useState([]);
@@ -54,21 +55,31 @@ const SortCard = ({
   const speedRef = useRef(speed);
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
-  const baseTimeRef = useRef(0); // Tracks time before pause
+  const baseTimeRef = useRef(0); 
   const onRunningRef = useRef(onRunning);
+  const onCompleteRef = useRef(onComplete);
 
   // Sync refs
-  useEffect(() => { speedRef.current = speed; }, [speed]);
-  useEffect(() => { onRunningRef.current = onRunning; }, [onRunning]);
+  useEffect(() => { 
+    arrayRef.current = array;
+  }, [array]);
+
+  useEffect(() => { 
+    speedRef.current = speed; 
+  }, [speed]);
+
+  useEffect(() => { 
+    onRunningRef.current = onRunning; 
+    onCompleteRef.current = onComplete;
+  }, [onRunning, onComplete]);
 
   const stopSorting = useCallback(() => {
     if (!sortingRef.current) return;
     
-    sessionIdRef.current++; // Instant session kill
     sortingRef.current = false;
     setIsSorting(false);
+    sessionIdRef.current++; // Instant session kill
     
-    // Save accumulated time
     if (timerRef.current) clearInterval(timerRef.current);
     baseTimeRef.current += Date.now() - startTimeRef.current;
     
@@ -77,14 +88,16 @@ const SortCard = ({
 
   const localReset = useCallback(() => {
     stopSorting();
-    setArray([...initialArray]);
+    const freshArray = [...initialArray];
+    setArray(freshArray);
+    arrayRef.current = freshArray;
     setCompareIndices([]);
     setSwapIndices([]);
     setGoodIndices([]);
     setSortedIndices([]);
     setDescription(item.slogan);
     setElapsedTime(0);
-    baseTimeRef.current = 0; // Reset accumulated time
+    baseTimeRef.current = 0;
   }, [initialArray, item.slogan, stopSorting]);
 
   // Handle outside reset
@@ -97,35 +110,26 @@ const SortCard = ({
     if (triggerStop > 0) stopSorting();
   }, [triggerStop, stopSorting]);
 
-  // Handle outside run
-  useEffect(() => {
-    if (triggerRun > 0 && !sortingRef.current) {
-      handleStart();
-    }
-  }, [triggerRun, handleStart]);
-
-  const wait = async (factor = 1) => {
+  const wait = useCallback(async (factor = 1) => {
     const delay = 1001 - speedRef.current;
     const ms = Math.max(20, delay * factor); 
     await new Promise(resolve => setTimeout(resolve, ms));
     return sortingRef.current;
-  };
+  }, []);
 
-  const playSound = (freq, type) => {
+  const playSound = useCallback((freq, type) => {
     playTone(freq, type, 0.1, volume, soundEnabled);
-  };
+  }, [volume, soundEnabled]);
 
   const handleStart = useCallback(async () => {
     if (sortingRef.current) return;
 
     const mySessionId = ++sessionIdRef.current;
-    
     sortingRef.current = true;
     setIsSorting(true);
     if (onRunningRef.current) onRunningRef.current(true); 
     
     startTimeRef.current = Date.now();
-    
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
@@ -136,8 +140,11 @@ const SortCard = ({
     };
 
     const helpers = {
-      array: [...array], // Use the current snapshot when starting
-      setArray,
+      array: [...arrayRef.current],
+      setArray: (newArr) => {
+         checkSession();
+         setArray(newArr);
+      },
       setCompareIndices,
       setSwapIndices,
       setGoodIndices,
@@ -154,13 +161,10 @@ const SortCard = ({
 
     try {
       const finished = await item.fn(helpers);
-      const stillActive = mySessionId === sessionIdRef.current;
-      
-      if (finished && stillActive) {
+      if (finished && mySessionId === sessionIdRef.current) {
         setSortedIndices([...Array(arraySize).keys()]);
         setDescription("COMPLETED! ✨");
-        // FIX: Pass item.id to match Dashboard expectation
-        if (onComplete) onComplete(item.id, { time: elapsedTime }); 
+        if (onCompleteRef.current) onCompleteRef.current(item.id, { time: baseTimeRef.current + (Date.now() - startTimeRef.current) }); 
       }
     } catch (err) {
       if (err.message !== 'STOP') console.error(err);
@@ -169,8 +173,14 @@ const SortCard = ({
         stopSorting();
       }
     }
-    // Removed unstable deps: array, isSorting, elapsedTime
-  }, [arraySize, onComplete, item, stopSorting, wait, volume, soundEnabled]);
+  }, [arraySize, item, wait, playSound]);
+
+  // Handle outside run
+  useEffect(() => {
+    if (triggerRun > 0 && !sortingRef.current) {
+      handleStart();
+    }
+  }, [triggerRun, handleStart]);
 
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000);
