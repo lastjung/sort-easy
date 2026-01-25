@@ -1,5 +1,5 @@
 
-export const quickSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef }) => {
+export const quickSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
     const arr = [...array];
     const n = arr.length;
     let sortedIndices = [];
@@ -14,6 +14,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
         for (let j = low; j < high; j++) {
             if (!sortingRef.current) return -1;
             setCompareIndices([j, high]);
+            countCompare();
             setDescription(`Comparing position ${j + 1} with pivot at ${high + 1}.`);
             playSound(300 + arr[j] * 5, 'sine');
             if (!(await wait(1))) break;
@@ -23,6 +24,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 setSwapIndices([i, j]);
                 setDescription(`Value at ${j + 1} is smaller than pivot. Swapping with ${i + 1}.`);
                 playSound(150, 'sawtooth');
+                countSwap();
                 [arr[i], arr[j]] = [arr[j], arr[i]];
                 setArray([...arr]);
                 if (!(await wait(1))) break;
@@ -33,6 +35,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
         if (!sortingRef.current) return -1;
         setSwapIndices([i + 1, high]);
         setDescription(`Moving pivot from position ${high + 1} to ${i + 2}.`);
+        countSwap();
         [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
         setArray([...arr]);
         if (!(await wait(1.5))) return -1;
@@ -53,6 +56,9 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
     };
 
     await qSort(0, n - 1);
+    
+    if (!sortingRef.current) return false;
+
     setSortedIndices([...Array(n).keys()]);
     setDescription("Quick Sort Completed!");
     return true;

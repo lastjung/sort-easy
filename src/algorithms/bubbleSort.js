@@ -1,11 +1,11 @@
 
-export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef }) => {
+export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
     const arr = [...array];
     const n = arr.length;
+    setSortedIndices([]); 
     let newSortedIndices = []; 
   
     setDescription("Starting Bubble Sort...");
-    setSortedIndices([]);
     setGoodIndices([]);
     if (!(await wait(1))) return;
   
@@ -21,6 +21,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             // 1. Compare (Yellow)
             setCompareIndices([j, j + 1]);
             setSwapIndices([]);
+            countCompare();
             setDescription(`Comparing position ${j + 1} and ${j + 2}... (Yellow)`);
             playSound(200 + arr[j] * 5, 'sine');
             if (!(await wait(1))) break;
@@ -32,6 +33,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 setDescription(`Position ${j + 1} is larger. Swapping! (Red)`);
                 playSound(100 + arr[j] * 5, 'sawtooth');
                 
+                countSwap();
                 let temp = arr[j];
                 arr[j] = arr[j + 1];
                 arr[j + 1] = temp;
@@ -66,6 +68,8 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             break;
         }
     }
+    if (!sortingRef.current) return false;
+
     setSortedIndices([...Array(n).keys()]);
     setDescription("Bubble Sort Completed!");
     return true;

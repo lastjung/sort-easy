@@ -1,7 +1,8 @@
 
-export const selectionSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef }) => {
+export const selectionSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
     const arr = [...array];
     const n = arr.length;
+    setSortedIndices([]); 
     let newSortedIndices = []; 
   
     setDescription("Starting Selection Sort...");
@@ -23,6 +24,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
   
             // 2. Scanning (Yellow)
             setCompareIndices([j]); 
+            countCompare();
             playSound(300 + arr[j] * 5, 'sine'); 
             if (!(await wait(0.5))) break;
   
@@ -45,6 +47,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
             setDescription(`Swapping position ${i + 1} with minimum from position ${minIndex + 1} (Red).`);
             setSwapIndices([i, minIndex]); 
             playSound(150, 'sawtooth'); 
+            countSwap();
             [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
             setArray([...arr]);
             if (!(await wait(1.5))) break;
@@ -74,6 +77,8 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         
         playSound(600, 'square');
     }
+    if (!sortingRef.current) return false;
+
     setSortedIndices([...Array(n).keys()]);
     setDescription("Selection Sort Completed!");
     return true;

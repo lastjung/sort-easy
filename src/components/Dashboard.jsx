@@ -1,7 +1,8 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ALGORITHMS } from '../algorithms';
 import SortCard from './SortCard';
+import Scoreboard from './Scoreboard';
 
 const Dashboard = ({ 
   data, 
@@ -17,26 +18,80 @@ const Dashboard = ({
 }) => {
   const [results, setResults] = useState({});
   const [activeAlgorithms, setActiveAlgorithms] = useState(new Set());
+  const [pausedAlgorithms, setPausedAlgorithms] = useState(new Set());
+  const [showScoreboard, setShowScoreboard] = useState(false);
+  const [scoreboardResults, setScoreboardResults] = useState([]);
+  const runningSetRef = useRef(new Set());
+
+  // Clear everything on global reset
+  useEffect(() => {
+    if (triggerReset > 0) {
+      setActiveAlgorithms(new Set());
+      setPausedAlgorithms(new Set());
+      setResults({});
+      setShowScoreboard(false);
+      runningSetRef.current = new Set();
+    }
+  }, [triggerReset]);
+
+  // Track which algorithms are launched
+  useEffect(() => {
+    if (triggerRun > 0) {
+      setShowScoreboard(false);
+      runningSetRef.current = new Set(selectedIds);
+    }
+  }, [triggerRun, selectedIds]);
 
   // Notify parent of active algorithm count
   useEffect(() => {
-    if (onRunningChange) onRunningChange(activeAlgorithms.size);
-  }, [activeAlgorithms.size, onRunningChange]);
+    if (onRunningChange) {
+      onRunningChange({
+        running: activeAlgorithms.size,
+        paused: pausedAlgorithms.size,
+      });
+    }
+  }, [activeAlgorithms.size, pausedAlgorithms.size, onRunningChange]);
 
   const handleComplete = useCallback((id, stats) => {
     if (!id) return;
-    setResults(prev => ({ ...prev, [id]: stats }));
+    
+    setResults(prev => {
+      const next = { ...prev, [id]: { ...stats, title: ALGORITHMS.find(a => a.id === id)?.title || id } };
+      
+      // Auto-open scoreboard when all selected tasks are done
+      runningSetRef.current.delete(id);
+      if (runningSetRef.current.size === 0 && Object.keys(next).length > 0) {
+        setScoreboardResults(Object.values(next));
+        setShowScoreboard(true);
+      }
+      return next;
+    });
+
     setActiveAlgorithms(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setPausedAlgorithms(prev => {
       const next = new Set(prev);
       next.delete(id);
       return next;
     });
   }, []);
 
-  const handleRunning = useCallback((id, running) => {
+  const handleRunning = useCallback((id, state) => {
+    const isRunning = typeof state === 'boolean' ? state : state.sorting && !state.paused;
+    const isPaused = typeof state === 'boolean' ? false : state.sorting && state.paused;
+
     setActiveAlgorithms(prev => {
       const next = new Set(prev);
-      if (running) next.add(id);
+      if (isRunning) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+    setPausedAlgorithms(prev => {
+      const next = new Set(prev);
+      if (isPaused) next.add(id);
       else next.delete(id);
       return next;
     });
@@ -72,6 +127,13 @@ const Dashboard = ({
           </div>
         ))}
       </div>
+
+      {showScoreboard && (
+        <Scoreboard 
+          results={scoreboardResults} 
+          onClose={() => setShowScoreboard(false)} 
+        />
+      )}
     </div>
   );
 };

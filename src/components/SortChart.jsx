@@ -14,7 +14,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
   const maxVal = Math.max(...array, 1);
 
   return (
-    <div className={`relative w-full flex items-end justify-center transition-all duration-500 overflow-hidden ${
+    <div className={`relative w-full flex items-end justify-center transition-[padding,gap,height] duration-500 overflow-hidden ${
       isCinema 
         ? 'flex-1 gap-[4px] p-8 bg-slate-900/60 rounded-[40px]' 
         : 'h-80 md:h-[450px] gap-[2px] p-4 bg-slate-900/40 rounded-2xl'
@@ -25,7 +25,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         return (
           <div
             key={idx}
-            className={`w-full rounded-t-sm transition-all duration-75 flex items-end justify-center pb-3 text-white font-black ${colorClass}`}
+            className={`w-full rounded-t-sm transition-[height,background-color] duration-75 flex items-end justify-center pb-3 text-white font-black ${colorClass}`}
             style={{ height: `${(value / maxVal) * 92 + 3}%` }}
           >
             {/* Only show text if bars are not too thin */}

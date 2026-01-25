@@ -45,8 +45,8 @@ const ControlPanel = ({
                 <div className="flex items-center gap-3 flex-1 min-w-[140px]">
                     <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Speed</span>
                     <input 
-                        type="range" min="1" max="100" defaultValue="50"
-                        onChange={(e) => setSpeed(1010 - Number(e.target.value) * 10)}
+                        type="range" min="1" max="100" value={speed}
+                        onChange={(e) => setSpeed(Number(e.target.value))}
                         className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-emerald-500"
                     />
                 </div>

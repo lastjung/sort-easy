@@ -1,7 +1,7 @@
-
-export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef }) => {
+export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
     const arr = [...array];
     const n = arr.length;
+    setSortedIndices([]);
 
     const merge = async (l, m, r) => {
         let n1 = m - l + 1;
@@ -17,7 +17,8 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
         while (i < n1 && j < n2) {
             if (!sortingRef.current) return;
             setCompareIndices([l + i, m + 1 + j]);
-            setDescription(`Comparing left (${l + i + 1}) and right (${m + j + 2}) sides.`);
+            countCompare();
+            setDescription(`Comparing left (${l + i + 1}) side with right side.`);
             if (!(await wait(1))) break;
 
             if (L[i] <= R[j]) {
@@ -25,6 +26,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             } else {
                 arr[k] = R[j]; j++;
             }
+            countSwap();
             setArray([...arr]);
             setSwapIndices([k]);
             playSound(400, 'square');
@@ -35,6 +37,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
         while (i < n1) {
             if (!sortingRef.current) return;
             arr[k] = L[i];
+            countSwap();
             setArray([...arr]);
             setSwapIndices([k]); i++; k++;
             if (!(await wait(0.5))) break;
@@ -42,6 +45,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
         while (j < n2) {
             if (!sortingRef.current) return;
             arr[k] = R[j];
+            countSwap();
             setArray([...arr]);
             setSwapIndices([k]); j++; k++;
             if (!(await wait(0.5))) break;
@@ -59,6 +63,9 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
     };
 
     await mSort(0, n - 1);
+    
+    if (!sortingRef.current) return false;
+
     setSortedIndices([...Array(n).keys()]);
     setDescription("Merge Sort Completed!");
     return true;

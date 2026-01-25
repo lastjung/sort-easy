@@ -1,7 +1,8 @@
 
-export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef }) => {
+export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
     const arr = [...array];
     const n = arr.length;
+    setSortedIndices([]);
     let sortedIndices = [];
 
     const heapify = async (n, i) => {
@@ -11,16 +12,19 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
 
         if (left < n) {
             setCompareIndices([largest, left]);
+            countCompare();
             if (arr[left] > arr[largest]) largest = left;
         }
         if (right < n) {
             setCompareIndices([largest, right]);
+            countCompare();
             if (arr[right] > arr[largest]) largest = right;
         }
 
         if (largest !== i) {
             setSwapIndices([i, largest]);
             setDescription(`Swapping parent at position ${i + 1} with child at ${largest + 1}.`);
+            countSwap();
             [arr[i], arr[largest]] = [arr[largest], arr[i]];
             setArray([...arr]);
             if (!(await wait(1))) return;
@@ -39,6 +43,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         if (!sortingRef.current) break;
         setSwapIndices([0, i]);
         setDescription(`Moving largest value to sorted position ${i + 1}.`);
+        countSwap();
         [arr[0], arr[i]] = [arr[i], arr[0]];
         setArray([...arr]);
         if (!(await wait(1.2))) break;
@@ -48,6 +53,9 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         setSwapIndices([]);
         await heapify(i, 0);
     }
+    
+    if (!sortingRef.current) return false;
+
     setSortedIndices([...Array(n).keys()]);
     setDescription("Heap Sort Completed!");
     return true;

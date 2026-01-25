@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Timer, Sparkles, Play, RotateCcw, Pause } from 'lucide-react';
+import { Timer, Sparkles, Play, RotateCcw, Pause, Activity, ArrowLeftRight } from 'lucide-react';
 import SortChart from './SortChart';
 import { COLORS } from '../constants/colors';
 
@@ -43,14 +43,20 @@ const SortCard = ({
   const [array, setArray] = useState([...initialArray]);
   const arrayRef = useRef([...initialArray]); // To avoid stale closures in handleStart
   const [isSorting, setIsSorting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [compareIndices, setCompareIndices] = useState([]);
   const [swapIndices, setSwapIndices] = useState([]);
   const [goodIndices, setGoodIndices] = useState([]);
   const [sortedIndices, setSortedIndices] = useState([]);
-  const [description, setDescription] = useState(item.slogan);
+  const [description, setDescription] = useState(""); 
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [comparisons, setComparisons] = useState(0);
+  const [swaps, setSwaps] = useState(0);
 
   const sortingRef = useRef(false);
+  const pausedRef = useRef(false); // Ref for immediate access in wait()
+  // sessionIdRef: Prevents multiple sorting instances from overlapping.
+  // Each start increments this, and the active loop checks it to know if it should abort.
   const sessionIdRef = useRef(0);
   const speedRef = useRef(speed);
   const timerRef = useRef(null);
@@ -69,10 +75,14 @@ const SortCard = ({
   }, [speed]);
 
   useEffect(() => { 
-    onRunningRef.current = onRunning; 
-    onCompleteRef.current = onComplete;
-  }, [onRunning, onComplete]);
+    pausedRef.current = isPaused;
+  }, [isPaused]);
 
+  useEffect(() => { 
+    onRunningRef.current = onRunning; 
+  }, [onRunning]);
+
+  // --- 1. Functions & Callbacks ---
   const stopSorting = useCallback(() => {
     if (!sortingRef.current) return;
     
@@ -82,38 +92,53 @@ const SortCard = ({
     
     if (timerRef.current) clearInterval(timerRef.current);
     baseTimeRef.current += Date.now() - startTimeRef.current;
-    
-    if (onRunningRef.current) onRunningRef.current(false);
-  }, []);
+  }, [item.id]);
 
   const localReset = useCallback(() => {
-    stopSorting();
-    const freshArray = [...initialArray];
-    setArray(freshArray);
-    arrayRef.current = freshArray;
+    // 1. Kill animation session immediately
+    sortingRef.current = false;
+    pausedRef.current = false;
+    sessionIdRef.current++; 
+    if (timerRef.current) clearInterval(timerRef.current);
+    
+    // 2. Reset internal visual states
+    setIsSorting(false);
+    setIsPaused(false);
     setCompareIndices([]);
     setSwapIndices([]);
     setGoodIndices([]);
     setSortedIndices([]);
-    setDescription(item.slogan);
     setElapsedTime(0);
     baseTimeRef.current = 0;
-  }, [initialArray, item.slogan, stopSorting]);
+    
+    const freshArray = [...initialArray];
+    setArray(freshArray);
+    arrayRef.current = freshArray;
+    setDescription("");
+    setComparisons(0);
+    setSwaps(0);
+  }, [initialArray, item.id]);
 
-  // Handle outside reset
-  useEffect(() => {
-    localReset();
-  }, [initialArray, triggerReset, localReset]);
-
-  // Handle outside stop
-  useEffect(() => {
-    if (triggerStop > 0) stopSorting();
-  }, [triggerStop, stopSorting]);
-
+  // Responsive wait loop: Checks for pause/stop signals every 10ms.
+  // Using real-time duration (Date.now()) to prevent cumulative setTimeout drift.
   const wait = useCallback(async (factor = 1) => {
-    const delay = 1001 - speedRef.current;
-    const ms = Math.max(20, delay * factor); 
-    await new Promise(resolve => setTimeout(resolve, ms));
+    const totalMs = (101 - speedRef.current) * factor * 10;
+    let startTime = Date.now();
+
+    while (Date.now() - startTime < totalMs) {
+      if (!sortingRef.current) return false;
+      
+      if (pausedRef.current) {
+        const pauseStart = Date.now();
+        while (pausedRef.current && sortingRef.current) {
+          await new Promise(r => setTimeout(r, 50));
+        }
+        // Offset the startTime by how long we were paused
+        startTime += (Date.now() - pauseStart);
+      }
+
+      await new Promise(r => setTimeout(r, 10));
+    }
     return sortingRef.current;
   }, []);
 
@@ -121,16 +146,43 @@ const SortCard = ({
     playTone(freq, type, 0.1, volume, soundEnabled);
   }, [volume, soundEnabled]);
 
-  const handleStart = useCallback(async () => {
-    if (sortingRef.current) return;
+  const togglePause = useCallback(() => {
+    if (!isSorting) return;
+    
+    if (isPaused) {
+      // Resume
+      startTimeRef.current = Date.now();
+      timerRef.current = setInterval(() => {
+        setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
+      }, 50);
+      setIsPaused(false);
+      pausedRef.current = false;
+    } else {
+      // Pause
+      if (timerRef.current) clearInterval(timerRef.current);
+      baseTimeRef.current += Date.now() - startTimeRef.current;
+      setIsPaused(true);
+      pausedRef.current = true;
+    }
+  }, [isSorting, isPaused]);
 
+  const handleStart = useCallback(async () => {
     const mySessionId = ++sessionIdRef.current;
     sortingRef.current = true;
     setIsSorting(true);
-    if (onRunningRef.current) onRunningRef.current(true); 
+    setIsPaused(false);
+    pausedRef.current = false;
     
+    setSortedIndices([]);
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
+    setComparisons(0);
+    setSwaps(0);
+    setElapsedTime(0);
+    baseTimeRef.current = 0;
     startTimeRef.current = Date.now();
-    if (timerRef.current) clearInterval(timerRef.current);
+    setDescription("Starting...");
     timerRef.current = setInterval(() => {
       setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
     }, 50);
@@ -145,11 +197,34 @@ const SortCard = ({
          checkSession();
          setArray(newArr);
       },
-      setCompareIndices,
-      setSwapIndices,
-      setGoodIndices,
-      setSortedIndices,
-      setDescription,
+      setCompareIndices: (indices) => {
+         checkSession();
+         setCompareIndices(indices);
+      },
+      setSwapIndices: (indices) => {
+         checkSession();
+         setSwapIndices(indices);
+      },
+      setGoodIndices: (indices) => {
+         checkSession();
+         setGoodIndices(indices);
+      },
+      setSortedIndices: (indices) => {
+         checkSession();
+         setSortedIndices(indices);
+      },
+      setDescription: (desc) => {
+         checkSession();
+         setDescription(desc);
+      },
+      countCompare: () => {
+         checkSession();
+         setComparisons(prev => prev + 1);
+      },
+      countSwap: () => {
+         checkSession();
+         setSwaps(prev => prev + 1);
+      },
       playSound,
       wait: async (f) => {
         checkSession();
@@ -164,19 +239,72 @@ const SortCard = ({
       if (finished && mySessionId === sessionIdRef.current) {
         setSortedIndices([...Array(arraySize).keys()]);
         setDescription("COMPLETED! ✨");
-        if (onCompleteRef.current) onCompleteRef.current(item.id, { time: baseTimeRef.current + (Date.now() - startTimeRef.current) }); 
+        if (onCompleteRef.current) {
+          onCompleteRef.current(item.id, { 
+            time: baseTimeRef.current + (Date.now() - (isPaused ? 0 : startTimeRef.current)),
+            comparisons,
+            swaps 
+          }); 
+        }
       }
     } catch (err) {
       if (err.message !== 'STOP') console.error(err);
     } finally {
-      if (mySessionId === sessionIdRef.current) stopSorting();
+      if (mySessionId === sessionIdRef.current) {
+          setIsSorting(false);
+          sortingRef.current = false;
+          if (timerRef.current) clearInterval(timerRef.current);
+      }
     }
-  }, [arraySize, item, wait, playSound]);
+  }, [arraySize, item, wait, playSound, isSorting, isPaused, togglePause]);
 
-  // Handle outside signals
+  // --- 2. Side Effects (Triggers & Sync) ---
+  // Signals from parent (App/Dashboard) to control sorting state globally.
+  // Using lastTrigger refs to ensure and idempotent execution on increment only.
+  const lastRunTrigger = React.useRef(0);
+  const lastStopTrigger = React.useRef(0);
+
   useEffect(() => {
-    if (triggerRun > 0 && !sortingRef.current) handleStart();
-  }, [triggerRun, handleStart]);
+    if (triggerRun > lastRunTrigger.current) {
+      lastRunTrigger.current = triggerRun;
+      if (!sortingRef.current) {
+        handleStart();
+      } else if (pausedRef.current) {
+        togglePause();
+      }
+    }
+  }, [triggerRun, handleStart, togglePause]);
+
+  useEffect(() => {
+    if (triggerStop > lastStopTrigger.current) {
+      lastStopTrigger.current = triggerStop;
+      if (sortingRef.current && !pausedRef.current) {
+        togglePause();
+      }
+    }
+  }, [triggerStop, togglePause]);
+
+  useEffect(() => {
+    localReset();
+  }, [initialArray, triggerReset, localReset]);
+
+  useEffect(() => { 
+    if (onRunningRef.current) {
+      onRunningRef.current(item.id, { sorting: isSorting, paused: isPaused });
+    }
+  }, [item.id, isSorting, isPaused]);
+
+  useEffect(() => { 
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    return () => {
+      if (onRunningRef.current) {
+        onRunningRef.current(item.id, { sorting: false, paused: false });
+      }
+    };
+  }, [item.id]);
 
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000);
@@ -185,7 +313,7 @@ const SortCard = ({
   };
 
   return (
-    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
+    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-[transform,box-shadow,ring] duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
       <div className={`${isCinema ? 'p-10' : 'p-6'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-4 mb-1 flex-wrap">
@@ -194,22 +322,24 @@ const SortCard = ({
             <span className={`${isCinema ? 'text-xl' : 'text-xs'} font-black text-slate-500 uppercase tracking-[0.2em]`}>{item.complexity}</span>
             <span className="mx-2 text-slate-700 hidden lg:inline">|</span>
             <p className={`${isCinema ? 'text-2xl' : 'text-base'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
-              {description}
+              {item.slogan}
             </p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-3 ml-4">
-           <div className={`flex items-center gap-2 px-5 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
-              <div className="flex items-center gap-1 mr-2 pr-2 border-r border-white/10">
+           <div className={`flex items-center gap-2 px-3 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
+              <div className="flex items-center gap-2">
                 <button onClick={localReset} className="p-1 text-slate-500 hover:text-white transition-colors" title="Reset">
                     <RotateCcw size={isCinema ? 20 : 14} />
                 </button>
-                <button onClick={isSorting ? stopSorting : handleStart} className={`p-1 transition-all active:scale-75 ${isSorting ? 'text-amber-500 hover:text-amber-400' : 'text-slate-500 hover:text-white'}`} title={isSorting ? "Pause" : "Run"}>
-                    {isSorting ? <Pause size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill="none" />}
+                <button 
+                  onClick={isSorting ? togglePause : handleStart} 
+                  className={`p-1 transition-[transform,color] active:scale-75 ${isSorting ? (isPaused ? 'text-slate-500 hover:text-white' : 'text-amber-500 hover:text-amber-400') : 'text-slate-500 hover:text-white'}`} 
+                  title={isSorting ? (isPaused ? "Resume" : "Pause") : "Run"}
+                >
+                    {isSorting && !isPaused ? <Pause size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill={isSorting ? "currentColor" : "none"} />}
                 </button>
               </div>
-              <Timer size={isCinema ? 24 : 18} className="text-emerald-400" />
-              <span className={`${isCinema ? 'text-2xl' : 'text-lg'} font-mono font-black text-slate-200`}>{formatTime(elapsedTime)}</span>
            </div>
            {isSorting && (
              <div className="flex items-center gap-2">
@@ -230,6 +360,41 @@ const SortCard = ({
           goodIndices={goodIndices}
           compareIndices={compareIndices}
         />
+        
+        {/* Bottom Description & Stats Bar */}
+        <div className="mt-6 flex flex-col gap-4">
+          <div className="min-h-[1.5em] flex items-center justify-center">
+             <p className={`${isCinema ? 'text-2xl' : 'text-sm'} font-bold text-emerald-400/80 italic text-center animate-in fade-in duration-300`}>
+                {description || "Ready to sort..."}
+             </p>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 py-4 bg-black/20 rounded-2xl border border-white/5">
+            <div className="flex flex-col items-center border-r border-white/5">
+              <div className="flex items-center gap-2 mb-1">
+                <Timer size={isCinema ? 20 : 14} className="text-emerald-400" />
+                <span className={`${isCinema ? 'text-lg' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest`}>Time</span>
+              </div>
+              <span className={`${isCinema ? 'text-2xl' : 'text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{formatTime(elapsedTime)}</span>
+            </div>
+
+            <div className="flex flex-col items-center border-r border-white/5">
+              <div className="flex items-center gap-2 mb-1">
+                <Activity size={isCinema ? 20 : 14} className="text-rose-400" />
+                <span className={`${isCinema ? 'text-lg' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest`}>Comparisons</span>
+              </div>
+              <span className={`${isCinema ? 'text-2xl' : 'text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{comparisons.toLocaleString()}</span>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-1">
+                <ArrowLeftRight size={isCinema ? 20 : 14} className="text-amber-400" />
+                <span className={`${isCinema ? 'text-lg' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest`}>Swaps</span>
+              </div>
+              <span className={`${isCinema ? 'text-2xl' : 'text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{swaps.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

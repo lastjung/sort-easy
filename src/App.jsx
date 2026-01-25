@@ -6,17 +6,17 @@ import FloatingActionDock from './components/FloatingActionDock';
 import { ALGORITHMS } from './algorithms';
 
 function App() {
-  const [arraySize, setArraySize] = useState(25);
-  const [speed, setSpeed] = useState(500);
+  const [arraySize, setArraySize] = useState(16);
+  const [speed, setSpeed] = useState(50);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [volume, setVolume] = useState(0.1);
-  const [selectedIds, setSelectedIds] = useState(new Set(['bubble', 'selection', 'insertion']));
+  const [selectedIds, setSelectedIds] = useState(new Set(['bubble']));
   
   const [data, setData] = useState([]);
-  const [triggerRun, setTriggerRun] = useState(0);
-  const [triggerStop, setTriggerStop] = useState(0);
-  const [triggerReset, setTriggerReset] = useState(0);
-  const [activeCount, setActiveCount] = useState(0);
+  const [triggerRun, setTriggerRun] = useState(0);   // Global Play/Resume signal (increments to trigger)
+  const [triggerStop, setTriggerStop] = useState(0);  // Global Pause signal (increments to trigger)
+  const [triggerReset, setTriggerReset] = useState(0); // Global Reset signal (increments to trigger)
+  const [runState, setRunState] = useState({ running: 0, paused: 0 });
 
   // Initial data generation
   const generateData = useCallback(() => {
@@ -28,7 +28,7 @@ function App() {
         [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     setData(newArray);
-    setActiveCount(0);
+    setRunState({ running: 0, paused: 0 });
   }, [arraySize]);
 
   useEffect(() => {
@@ -44,6 +44,8 @@ function App() {
   };
 
   const handleReset = () => {
+    // Hard reset of global state
+    setRunState({ running: 0, paused: 0 }); 
     setTriggerStop(prev => prev + 1);
     setTriggerReset(prev => prev + 1);
     generateData();
@@ -57,6 +59,13 @@ function App() {
         return next;
     });
   };
+
+  const handleRunningChange = useCallback((state) => {
+    setRunState(prev => {
+      if (prev.running === state.running && prev.paused === state.paused) return prev;
+      return state;
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30">
@@ -76,7 +85,7 @@ function App() {
         toggleSelect={toggleSelect}
         onRun={handleRun}
         onReset={handleReset}
-        isAnyRunning={activeCount > 0} 
+        isAnyRunning={runState.running > 0 || runState.paused > 0} 
       />
 
       <main className="relative">
@@ -90,14 +99,15 @@ function App() {
           triggerStop={triggerStop}
           triggerReset={triggerReset}
           selectedIds={selectedIds}
-          onRunningChange={(count) => setActiveCount(count)}
+          onRunningChange={handleRunningChange}
         />
 
         <FloatingActionDock 
           onRun={handleRun}
           onStop={handleStop}
           onReset={handleReset}
-          isAnyRunning={activeCount > 0} 
+          isAnyRunning={runState.running > 0} 
+          isAnyPaused={runState.paused > 0}
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
           visibleCount={selectedIds.size}

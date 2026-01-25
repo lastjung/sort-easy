@@ -1,7 +1,8 @@
 
-export const insertionSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef }) => {
+export const insertionSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
     const arr = [...array];
     const n = arr.length;
+    setSortedIndices([]); 
     setGoodIndices([1]);
     for (let i = 1; i < n; i++) {
         if (!sortingRef.current) break;
@@ -13,6 +14,7 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
         while (j >= 0) {
             if (!sortingRef.current) break;
             setCompareIndices([j, j + 1]);
+            countCompare();
             setDescription(`Comparing position ${j + 1} and ${j + 2}... (Yellow)`);
             playSound(300 + arr[j] * 5, 'sine');
             if (!(await wait(1.5))) break;
@@ -21,6 +23,7 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
                 setCompareIndices([]); setSwapIndices([j, j + 1]);
                 setDescription(`Swapping position ${j + 1} and ${j + 2} (Red).`);
                 playSound(150, 'sawtooth');
+                countSwap();
                 [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
                 setArray([...arr]);
                 if (!(await wait(1.5))) break;
@@ -50,6 +53,8 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
         }
         playSound(600, 'square');
     }
+    if (!sortingRef.current) return false;
+
     setSortedIndices([...Array(n).keys()]);
     setGoodIndices([]);
     setDescription("Insertion Sort Completed!");
