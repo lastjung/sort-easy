@@ -1,4 +1,4 @@
-export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
+export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
     setSortedIndices([]);
@@ -9,16 +9,16 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let L = arr.slice(l, m + 1);
         let R = arr.slice(m + 1, r + 1);
 
-        setDescription(`Merging range from position ${l + 1} to ${r + 1}.`);
+        setDescription(msg.DIVIDE);
         setGoodIndices([...Array(r - l + 1).keys()].map(x => x + l)); 
-        if (!(await wait(1))) return;
+        if (!(await wait(1.5))) return; // Setup 1.5
 
         let i = 0, j = 0, k = l;
         while (i < n1 && j < n2) {
             if (!sortingRef.current) return;
             setCompareIndices([l + i, m + 1 + j]);
             countCompare();
-            setDescription(`Comparing Two Bars`);
+            setDescription(msg.COMPARE);
             if (!(await wait(1))) break;
 
             if (L[i] <= R[j]) {
@@ -28,6 +28,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             }
             countSwap();
             setArray([...arr]);
+            setDescription(msg.MERGE);
             setSwapIndices([k]);
             playSound(400, 'square');
             if (!(await wait(1))) break;
@@ -62,11 +63,12 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
         }
     };
 
+    setDescription(msg.START);
     await mSort(0, n - 1);
     
     if (!sortingRef.current) return false;
 
     setSortedIndices([...Array(n).keys()]);
-    setDescription("Merge Sort Completed!");
+    setDescription(msg.FINISHED);
     return true;
 };

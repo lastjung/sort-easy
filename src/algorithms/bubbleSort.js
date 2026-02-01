@@ -1,11 +1,11 @@
 
-export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
+export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
     setSortedIndices([]); 
     let newSortedIndices = []; 
   
-    setDescription("Starting Bubble Sort...");
+    setDescription(msg.START);
     setGoodIndices([]);
     if (!(await wait(1))) return;
   
@@ -22,7 +22,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setCompareIndices([j, j + 1]);
             setSwapIndices([]);
             countCompare();
-            setDescription(`Comparing Two Bars`);
+            setDescription(msg.COMPARE);
             playSound(200 + arr[j] * 5, 'sine');
             if (!(await wait(1))) break;
   
@@ -30,7 +30,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 // 2. Swap (Red)
                 setCompareIndices([]); 
                 setSwapIndices([j, j + 1]); 
-                setDescription(`Swap Bars`);
+                setDescription(msg.SWAP);
                 playSound(100 + arr[j] * 5, 'sawtooth');
                 
                 countSwap();
@@ -43,24 +43,20 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 if (!(await wait(1))) break;
                 setSwapIndices([]);
             } else {
-                setDescription(`Position ${j + 1} is smaller or equal. Skip.`);
-                if (!(await wait(1))) break;
+                if (!(await wait(0.5))) break;
             }
         }
         
         if (!sortingRef.current) break;
         
-        // --- Baton Touch ---
-        setGoodIndices([lastIdx]);
-        setDescription(`Largest Founded`);
         if (!(await wait(1))) break;
-
         // Confirm Sorted (Green)
         newSortedIndices.push(lastIdx);
         setSortedIndices([...newSortedIndices]);
         setGoodIndices([]);
         
         playSound(600, 'square');
+        if (!(await wait(0.5))) break; // Outro wait 0.5
         if (!swapped) {
             const remaining = [];
             for(let k=0; k < lastIdx; k++) remaining.push(k);
@@ -71,6 +67,6 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
     if (!sortingRef.current) return false;
 
     setSortedIndices([...Array(n).keys()]);
-    setDescription("Bubble Sort Completed!");
+    setDescription(msg.FINISHED);
     return true;
 };

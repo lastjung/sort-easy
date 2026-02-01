@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Timer, Sparkles, Play, RotateCcw, Pause, Activity, ArrowLeftRight } from 'lucide-react';
 import SortChart from './SortChart';
 import { COLORS } from '../constants/colors';
+import { ALGO_MESSAGES, MSG_TYPES } from '../constants/messages';
 
 // --- Shared Sound Utility (Singleton Pattern) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -48,7 +49,7 @@ const SortCard = ({
   const [swapIndices, setSwapIndices] = useState([]);
   const [goodIndices, setGoodIndices] = useState([]);
   const [sortedIndices, setSortedIndices] = useState([]);
-  const [description, setDescription] = useState(""); 
+  const [description, setDescription] = useState({ text: "", type: MSG_TYPES.INFO }); 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [comparisons, setComparisons] = useState(0);
   const [swaps, setSwaps] = useState(0);
@@ -114,7 +115,7 @@ const SortCard = ({
     const freshArray = [...initialArray];
     setArray(freshArray);
     arrayRef.current = freshArray;
-    setDescription("");
+    setDescription({ text: "", type: MSG_TYPES.INFO });
     setComparisons(0);
     setSwaps(0);
   }, [initialArray, item.id]);
@@ -190,7 +191,7 @@ const SortCard = ({
     setElapsedTime(0);
     baseTimeRef.current = 0;
     startTimeRef.current = Date.now();
-    setDescription("Starting...");
+    setDescription({ text: "Starting...", type: MSG_TYPES.INFO });
     timerRef.current = setInterval(() => {
       setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
     }, 50);
@@ -238,6 +239,7 @@ const SortCard = ({
         checkSession();
         return await wait(f);
       },
+      msg: ALGO_MESSAGES[item.id] || {},
       sortingRef,
       checkSession
     };
@@ -249,7 +251,7 @@ const SortCard = ({
         setSwapIndices([]);
         setGoodIndices([]);
         setSortedIndices([...Array(arraySize).keys()]);
-        setDescription("COMPLETED! ✨");
+        setDescription(ALGO_MESSAGES[item.id]?.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
         if (onCompleteRef.current) {
           onCompleteRef.current(item.id, { 
             time: baseTimeRef.current + (Date.now() - (isPaused ? 0 : startTimeRef.current)),
@@ -325,43 +327,35 @@ const SortCard = ({
 
   return (
     <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-[transform,box-shadow,ring] duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
-      <div className={`${isCinema ? 'p-6' : 'p-4'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-3 mb-0.5 flex-wrap">
-            <span className={isCinema ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
-            <h3 className={`${isCinema ? 'text-3xl' : 'text-lg'} font-black text-white tracking-tighter truncate`}>{item.title}</h3>
-            <span className={`${isCinema ? 'text-sm' : 'text-[8px]'} font-black text-slate-500 uppercase tracking-[0.2em]`}>{item.complexity}</span>
-            <span className="mx-2 text-slate-700 hidden lg:inline">|</span>
-            <p className={`${isCinema ? 'text-lg' : 'text-xs'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
-              {item.slogan}
-            </p>
+      <div className={`${isCinema ? 'p-6' : 'p-3 md:p-4'} bg-white/5 border-b border-white/5 flex flex-col gap-1.5 order-first`}>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={isCinema ? 'text-3xl' : 'text-lg md:text-xl'}>{item.icon}</span>
+            <h3 className={`${isCinema ? 'text-3xl' : 'text-base md:text-lg'} font-black text-white tracking-tighter truncate leading-none`}>{item.title}</h3>
+            <span className={`${isCinema ? 'text-sm' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest opacity-70`}>{item.complexity}</span>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className={`flex items-center gap-1.5 px-2 py-1 bg-black/40 rounded-xl border border-white/10 shadow-sm`}>
+              <button onClick={localReset} className="p-0.5 text-slate-500 hover:text-white transition-colors" title="Reset">
+                  <RotateCcw size={isCinema ? 20 : 16} />
+              </button>
+              <button 
+                onClick={isSorting ? togglePause : handleStart} 
+                className={`p-0.5 transition-[transform,color] active:scale-75 ${isSorting ? (isPaused ? 'text-slate-500 hover:text-white' : 'text-amber-500 hover:text-amber-400') : 'text-slate-500 hover:text-white'}`} 
+                title={isSorting ? (isPaused ? "Resume" : "Pause") : "Run"}
+              >
+                  {isSorting && !isPaused ? <Pause size={isCinema ? 20 : 16} fill="currentColor" /> : <Play size={isCinema ? 20 : 16} fill={isSorting ? "currentColor" : "none"} />}
+              </button>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-3 ml-4">
-           <div className={`flex items-center gap-2 px-3 py-2 bg-black/20 rounded-2xl border border-white/5 shadow-sm ${isCinema ? 'scale-125 origin-right' : ''}`}>
-              <div className="flex items-center gap-2">
-                <button onClick={localReset} className="p-1 text-slate-500 hover:text-white transition-colors" title="Reset">
-                    <RotateCcw size={isCinema ? 20 : 14} />
-                </button>
-                <button 
-                  onClick={isSorting ? togglePause : handleStart} 
-                  className={`p-1 transition-[transform,color] active:scale-75 ${isSorting ? (isPaused ? 'text-slate-500 hover:text-white' : 'text-amber-500 hover:text-amber-400') : 'text-slate-500 hover:text-white'}`} 
-                  title={isSorting ? (isPaused ? "Resume" : "Pause") : "Run"}
-                >
-                    {isSorting && !isPaused ? <Pause size={isCinema ? 22 : 16} fill="currentColor" /> : <Play size={isCinema ? 22 : 16} fill={isSorting ? "currentColor" : "none"} />}
-                </button>
-              </div>
-           </div>
-           {isSorting && (
-             <div className="flex items-center gap-2">
-               <span className="text-[10px] font-black text-emerald-400 animate-pulse uppercase">Live Sorting</span>
-               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-             </div>
-           )}
-        </div>
+        
+        <p className={`${isCinema ? 'text-lg' : 'text-sm md:text-base'} font-black text-orange-400 italic tracking-tight line-clamp-2 leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`}>
+          {item.slogan}
+        </p>
       </div>
 
-      <div className={`${isCinema ? 'p-6 flex-1' : 'p-3'} bg-black/10 flex flex-col justify-end`}>
+      <div className={`${isCinema ? 'p-4 flex-1' : 'px-0 pt-2 pb-0'} bg-black/10 flex flex-col justify-end`}>
         <SortChart 
           array={array}
           isCinema={isCinema}
@@ -373,44 +367,46 @@ const SortCard = ({
         />
         
         {/* Bottom Description & Stats Bar */}
-        <div className="mt-6 flex flex-col gap-4">
-          <div className="min-h-[1.5em] flex items-center justify-center">
-             <p className={`${isCinema ? 'text-lg' : 'text-[12px]'} font-bold italic text-center animate-in fade-in duration-300 ${
-                description.includes("Comparing") 
-                  ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
-                  : description.includes("Swap")
-                  ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]'
-                  : (description.includes("Largest") || description.includes("Founded"))
-                  ? 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(192,38,211,0.6)]'
-                  : 'text-emerald-400/80'
+        <div className="mt-4 flex flex-col gap-2">
+          <div className="min-h-[2.5em] flex items-center justify-center px-4">
+             <p className={`${isCinema ? 'text-2xl' : 'text-sm md:text-lg'} font-black italic text-center animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+                description.type === MSG_TYPES.COMPARE
+                  ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.4)]'
+                  : description.type === MSG_TYPES.SWAP
+                  ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.4)]'
+                  : description.type === MSG_TYPES.TARGET
+                  ? 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.4)]'
+                  : description.type === MSG_TYPES.SUCCESS
+                  ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]'
+                  : 'text-slate-200'
              }`}>
-                {description || "Ready to sort..."}
+                {description.text || "Ready to sort..."}
              </p>
           </div>
           
-          <div className="grid grid-cols-3 gap-4 py-4 bg-black/20 rounded-2xl border border-white/5">
+          <div className="grid grid-cols-3 gap-0 py-1.5 md:py-3 bg-black/20 md:rounded-2xl border-y md:border border-white/5">
             <div className="flex flex-col items-center border-r border-white/5">
-              <div className="flex items-center gap-2 mb-1">
-                <Timer size={isCinema ? 20 : 14} className="text-emerald-400" />
-                <span className={`${isCinema ? 'text-lg' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest`}>Time</span>
+              <div className="flex items-center gap-1 mb-0.5 md:mb-1">
+                <Timer size={isCinema ? 20 : 12} className="text-emerald-400" />
+                <span className={`${isCinema ? 'text-lg' : 'text-[9px] md:text-sm'} font-black text-slate-500 uppercase tracking-widest`}>Time</span>
               </div>
-              <span className={`${isCinema ? 'text-2xl' : 'text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{formatTime(elapsedTime)}</span>
+              <span className={`${isCinema ? 'text-2xl' : 'text-base md:text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{formatTime(elapsedTime)}</span>
             </div>
 
             <div className="flex flex-col items-center border-r border-white/5">
-              <div className="flex items-center gap-2 mb-1">
-                <Activity size={isCinema ? 20 : 14} className="text-rose-400" />
-                <span className={`${isCinema ? 'text-lg' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest`}>Comparisons</span>
+              <div className="flex items-center gap-1 mb-0.5 md:mb-1">
+                <Activity size={isCinema ? 20 : 12} className="text-amber-400" />
+                <span className={`${isCinema ? 'text-lg' : 'text-[9px] md:text-sm'} font-black text-slate-500 uppercase tracking-widest`}>Comp</span>
               </div>
-              <span className={`${isCinema ? 'text-2xl' : 'text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{comparisons.toLocaleString()}</span>
+              <span className={`${isCinema ? 'text-2xl' : 'text-base md:text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{comparisons.toLocaleString()}</span>
             </div>
             
             <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1">
-                <ArrowLeftRight size={isCinema ? 20 : 14} className="text-amber-400" />
-                <span className={`${isCinema ? 'text-lg' : 'text-[10px]'} font-black text-slate-500 uppercase tracking-widest`}>Swaps</span>
+              <div className="flex items-center gap-1 mb-0.5 md:mb-1">
+                <ArrowLeftRight size={isCinema ? 20 : 12} className="text-rose-400" />
+                <span className={`${isCinema ? 'text-lg' : 'text-[9px] md:text-sm'} font-black text-slate-500 uppercase tracking-widest`}>Swap</span>
               </div>
-              <span className={`${isCinema ? 'text-2xl' : 'text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{swaps.toLocaleString()}</span>
+              <span className={`${isCinema ? 'text-2xl' : 'text-base md:text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{swaps.toLocaleString()}</span>
             </div>
           </div>
         </div>

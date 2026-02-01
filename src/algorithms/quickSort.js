@@ -1,5 +1,5 @@
 
-export const quickSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap }) => {
+export const quickSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
     let sortedIndices = [];
@@ -7,7 +7,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
     const partition = async (low, high) => {
         let pivot = arr[high];
         setGoodIndices([high]); // Pivot as Purple
-        setDescription(`Largest Founded`);
+        setDescription(msg.PIVOT);
         if (!(await wait(1.5))) return -1;
         
         let i = low - 1;
@@ -15,14 +15,14 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
             if (!sortingRef.current) return -1;
             setCompareIndices([j, high]);
             countCompare();
-            setDescription(`Comparing Two Bars`);
+            setDescription(msg.COMPARE);
             playSound(300 + arr[j] * 5, 'sine');
             if (!(await wait(1))) break;
 
             if (arr[j] < pivot) {
                 i++;
                 setSwapIndices([i, j]);
-                setDescription(`Swap Bars`);
+                setDescription(msg.SWAP);
                 playSound(150, 'sawtooth');
                 countSwap();
                 [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -34,15 +34,16 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         if (!sortingRef.current) return -1;
         setSwapIndices([i + 1, high]);
-        setDescription(`Swap Bars`);
+        setDescription(msg.SWAP);
         countSwap();
         [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
         setArray([...arr]);
-        if (!(await wait(1.5))) return -1;
+        if (!(await wait(1))) return -1; // Action 1.0
         setSwapIndices([]);
         
         sortedIndices.push(i + 1);
         setSortedIndices([...sortedIndices]);
+        if (!(await wait(0.5))) return -1; // Outro 0.5
         return i + 1;
     };
 
@@ -55,11 +56,12 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
         }
     };
 
+    setDescription(msg.START);
     await qSort(0, n - 1);
     
     if (!sortingRef.current) return false;
 
     setSortedIndices([...Array(n).keys()]);
-    setDescription("Quick Sort Completed!");
+    setDescription(msg.FINISHED);
     return true;
 };
