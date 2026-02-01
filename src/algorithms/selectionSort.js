@@ -21,21 +21,22 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         for (let j = i + 1; j < n; j++) {
             if (!sortingRef.current) break;
   
-            // 2. Scanning (Yellow)
+            // 2. Scanning (Yellow for j, Red for current minIndex)
             setCompareIndices([j]); 
+            setSwapIndices([minIndex]); // Keep current min highlighted in RED
+            
             setDescription(msg.SCAN);
             countCompare();
             playSound(300 + arr[j] * 5, 'sine'); 
             if (!(await wait(1))) break; // Scan 1.0
   
             if (arr[j] < arr[minIndex]) {
-                // New minimum found (Red color highlight, but type is SWAP for visual feedback)
+                // New minimum found
                 minIndex = j;
+                setSwapIndices([minIndex]); // Update RED highlight to new min
                 setDescription(msg.NEW_MIN); 
-                setSwapIndices([minIndex]); 
                 playSound(800, 'triangle'); 
                 if (!(await wait(1))) break;
-                setSwapIndices([]);
             }
         }
         
@@ -43,16 +44,20 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         setCompareIndices([]);
   
         // 3. Action (Red)
+        // 3. Action (Red <-> Purple Swap)
         if (minIndex !== i) {
             setDescription(msg.SWAP);
-            setSwapIndices([i, minIndex]); 
+            setGoodIndices([i]);          // Target: Purple
+            setSwapIndices([minIndex]);   // Min: Red
             playSound(150, 'sawtooth'); 
             countSwap();
             [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
             setArray([...arr]);
             if (!(await wait(1))) break; // Action 1.0
             setSwapIndices([]);
+            setGoodIndices([]);
         } else {
+             setSwapIndices([]); // Clear red if no swap needed
              if (!(await wait(0.5))) break; // Outro 0.5
         }
   

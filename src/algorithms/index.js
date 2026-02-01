@@ -36,7 +36,7 @@ export const ALGORITHMS = [
         complexity: 'O(n²)', 
         desc: 'Repeatedly finds the minimum element and puts it at the beginning.',
         icon: '🎯',
-        slogan: "Hunting for the smallest number to put first!"
+        slogan: "Scanning for the smallest to capture!"
     },
     { 
         id: 'insertion', 

@@ -426,13 +426,15 @@ const SortCard = ({
   };
 
   const getDescriptionClass = () => {
-    if (isPaused) return 'text-amber-500/60 grayscale-[0.5]';
+    // if (isPaused) return 'text-amber-500/60 grayscale-[0.5]'; 
+    // User requested no exception handling for pause state.
+
     
     switch (description?.type) {
-      case MSG_TYPES.COMPARE: return 'text-amber-300 drop-shadow-[0_0_12px_rgba(252,211,77,0.5)]';
-      case MSG_TYPES.SWAP: return 'text-rose-400 drop-shadow-[0_0_12px_rgba(251,113,133,0.5)]';
-      case MSG_TYPES.TARGET: return 'text-fuchsia-400 drop-shadow-[0_0_12px_rgba(232,121,249,0.5)]';
-      case MSG_TYPES.SUCCESS: return 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]';
+      case MSG_TYPES.COMPARE: return 'bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(253,224,71,0.5)]';
+      case MSG_TYPES.SWAP: return 'bg-gradient-to-r from-rose-500 to-rose-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(244,63,94,0.6)] font-black';
+      case MSG_TYPES.TARGET: return 'bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]';
+      case MSG_TYPES.SUCCESS: return 'bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]';
       default: return 'text-slate-100';
     }
   };

@@ -18,6 +18,8 @@ const FloatingActionDock = ({
   setSpeed,
   selectedIds,
   toggleSelect,
+  onSelectAll,
+  onDeselectAll,
   isAnyActive,
   isTubeMode,
   setIsTubeMode
@@ -25,6 +27,7 @@ const FloatingActionDock = ({
   const [showConfig, setShowConfig] = useState(false);
   const isIdle = !isAnyRunning && !isAnyPaused;
   const mainLabel = isAnyRunning ? 'Pause All' : isAnyPaused ? 'Resume All' : (isAnyActive ? 'Re-run All' : 'Run All');
+  const isAllSelected = selectedIds.size === ALGORITHMS.length;
 
   return (
     <div className="fixed bottom-10 left-0 right-0 mx-auto w-fit z-[100] flex flex-col items-center gap-4">
@@ -67,7 +70,17 @@ const FloatingActionDock = ({
             <div className="h-px bg-white/10 w-full" />
 
             {/* Algorithm Selectors */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between px-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selection</span>
+                    <button
+                      onClick={() => isAllSelected ? onDeselectAll() : onSelectAll()}
+                      className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-wider"
+                    >
+                      {isAllSelected ? 'None' : 'All'}
+                    </button>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
                 {ALGORITHMS.map(algo => (
                     <button
                         key={algo.id}
@@ -82,6 +95,7 @@ const FloatingActionDock = ({
                         {algo.title}
                     </button>
                 ))}
+            </div>
             </div>
         </div>
       </div>

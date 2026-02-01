@@ -10,8 +10,12 @@ const Sidebar = ({
   setSpeed,
   selectedIds,
   toggleSelect,
+  onSelectAll,
+  onDeselectAll,
   isAnyActive
 }) => {
+  const isAllSelected = selectedIds.size === ALGORITHMS.length;
+
   return (
     <aside className="fixed right-8 top-1/2 -translate-y-1/2 z-[40] hidden lg:flex flex-col gap-4 w-52 animate-in slide-in-from-right-10 duration-700 ease-out">
       
@@ -57,9 +61,17 @@ const Sidebar = ({
 
         {/* Section: Algorithms */}
         <div className="space-y-4">
-            <div className="flex items-center gap-2 opacity-50">
-                <Layers size={12} className="text-indigo-400" />
-                <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">Selection</span>
+            <div className="flex items-center justify-between opacity-50">
+                <div className="flex items-center gap-2">
+                    <Layers size={12} className="text-indigo-400" />
+                    <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">Selection</span>
+                </div>
+                <button
+                  onClick={() => isAllSelected ? onDeselectAll() : onSelectAll()}
+                  className="text-[9px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-wider"
+                >
+                  {isAllSelected ? 'None' : 'All'}
+                </button>
             </div>
             
             <div className="flex flex-col gap-1">

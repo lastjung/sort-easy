@@ -66,6 +66,14 @@ function App() {
     });
   };
 
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(ALGORITHMS.map(a => a.id)));
+  }, []);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
   const handleRunningChange = useCallback((state) => {
     setRunState(prev => {
       if (prev.running === state.running && prev.paused === state.paused) return prev;
@@ -99,6 +107,8 @@ function App() {
           setSpeed={setSpeed}
           selectedIds={selectedIds}
           toggleSelect={toggleSelect}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
           isAnyActive={runState.running > 0 || runState.paused > 0}
         />
 
@@ -135,6 +145,8 @@ function App() {
           setSpeed={setSpeed}
           selectedIds={selectedIds}
           toggleSelect={toggleSelect}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
           isAnyActive={runState.running > 0 || runState.paused > 0}
         />
       </main>
