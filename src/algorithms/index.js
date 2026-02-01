@@ -54,7 +54,7 @@ export const ALGORITHMS = [
         complexity: 'O(n log n)', 
         desc: 'Divides array into partitions and sorts them recursively.',
         icon: '⚡',
-        slogan: "Divide and conquer with lightning speed!"
+        slogan: "Find the Pivot's spot to Divide & Conquer!"
     },
     { 
         id: 'merge', 
@@ -63,7 +63,7 @@ export const ALGORITHMS = [
         complexity: 'O(n log n)', 
         desc: 'Recursively divides array in half and merges sorted parts.',
         icon: '🧩',
-        slogan: "Merge divided parts into a perfect whole!"
+        slogan: "Merge small parts into a sorted big part!"
     },
     { 
         id: 'heap', 
