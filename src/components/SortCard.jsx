@@ -51,7 +51,8 @@ const SortCard = ({
   const [swapIndices, setSwapIndices] = useState([]);
   const [goodIndices, setGoodIndices] = useState([]);
   const [sortedIndices, setSortedIndices] = useState([]);
-  const [groupIndices, setGroupIndices] = useState({}); // New: For Merge Sort partitions
+  const [groupIndices, setGroupIndices] = useState({}); 
+  const [pivotOrders, setPivotOrders] = useState({}); // New: Order of found pivots (e.g. {idx: 1, idx2: 2})
   const [description, setDescription] = useState({ text: "", type: MSG_TYPES.INFO }); 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [comparisons, setComparisons] = useState(0);
@@ -124,31 +125,40 @@ const SortCard = ({
   }, [item.id]);
 
   const localReset = useCallback(() => {
-    // 1. Kill animation session immediately
+    // 1. Kill animation session immediately (Force STOP)
     sortingRef.current = false;
     pausedRef.current = false;
     sessionIdRef.current++; 
-    if (timerRef.current) clearInterval(timerRef.current);
     
-    // 2. Reset internal visual states
+    if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+    }
+    
+    // 2. Reset all internal visual & logic states
     setIsSorting(false);
     setIsPaused(false);
     setCompareIndices([]);
     setSwapIndices([]);
     setGoodIndices([]);
     setSortedIndices([]);
-    setGroupIndices({}); // Reset colors on 리셋
+    setGroupIndices({}); 
+    setPivotOrders({});
     setElapsedTime(0);
-    baseTimeRef.current = 0;
-    
-    const freshArray = [...initialArray];
-    setArray(freshArray);
-    arrayRef.current = freshArray;
-    setDescription({ text: "", type: MSG_TYPES.INFO });
     setComparisons(0);
     setSwaps(0);
     comparisonsRef.current = 0;
     swapsRef.current = 0;
+    stepsRef.current = 0;
+    baseTimeRef.current = 0;
+    
+    // 3. Reset data array to the starting set (Force new reference)
+    const freshArray = [...initialArray];
+    setArray(freshArray);
+    arrayRef.current = freshArray;
+    setDescription({ text: "", type: MSG_TYPES.INFO });
+    
+    // Safety delay to ensure React state batching completes
   }, [initialArray, item.id]);
 
   // Responsive wait loop: Checks for pause/stop signals frequently.
@@ -157,30 +167,29 @@ const SortCard = ({
     // Formula: (101-speed)^1.5 * factor * 0.4.
     let currentSpeed = speedRef.current;
     
-    // --- Tube Mode (Dynamic Acceleration + Safe Zone) Logic ---
+    // --- Tube Mode (Time-based Acceleration) Logic ---
+    let tubeFactor = 1.0; 
     if (isTubeModeRef.current) {
-        // Calculate progress: combine real sorted bars + virtual progress from steps
-        // estimatedTotalSteps for 16 bars is roughly 100-200.
-        const currentArraySize = arraySizeRef.current;
-        const realProgress = sortedCountRef.current / currentArraySize;
-        const virtualProgress = Math.min(0.9, stepsRef.current / (currentArraySize * currentArraySize * 0.5));
-        const progress = Math.max(realProgress, virtualProgress);
+        const totalElapsed = baseTimeRef.current + (Date.now() - startTimeRef.current);
         
-        let tubeFactor = 0.7; // Start slow
-        
-        if (progress >= 0.15) {
-            // Accelerate from 0.7x to 1.8x
-            tubeFactor = 0.7 + ((progress - 0.15) / 0.85) * (1.8 - 0.7);
+        // Initial Phase (0-3s): 0.7x (slightly slower for observation)
+        if (totalElapsed <= 3000) {
+            tubeFactor = 0.7;
+        } else {
+            // Acceleration Phase (After 3s): 
+            // 0.7x start + increase by 0.1x every 1 second
+            tubeFactor = 0.7 + ((totalElapsed - 3000) / 1000) * 0.1;
         }
         
-        tubeFactor = Math.min(1.8, tubeFactor);
+        // Max limit: 3.0x speedup compared to base. 
+        // This is fast enough but keeps it visible.
+        tubeFactor = Math.min(3.0, tubeFactor);
         setTubeMultiplier(Number(tubeFactor.toFixed(1)));
-        currentSpeed = Math.min(100, currentSpeed * tubeFactor);
-    } else {
-        if (tubeMultiplier !== 1.0) setTubeMultiplier(1.0);
     }
     
-    const totalMs = Math.pow(101 - currentSpeed, 1.5) * factor * 0.4;
+    // Applying the tubeFactor directly to the delay (Time) instead of the Speed index.
+    // This prevents the 'teleportation' effect near speed 100.
+    const totalMs = (Math.pow(101 - currentSpeed, 1.5) * factor * 0.4) / tubeFactor;
     let startTime = Date.now();
 
     while (Date.now() - startTime < totalMs) {
@@ -244,7 +253,8 @@ const SortCard = ({
     setSwapIndices([]);
     setSwapIndices([]);
     setGoodIndices([]);
-    setGroupIndices({}); // Reset groups
+    setGroupIndices({}); 
+    setPivotOrders({}); // 명시적으로 피벗 순서 데이터 초기화
     setComparisons(0);
     setSwaps(0);
     comparisonsRef.current = 0;
@@ -296,6 +306,10 @@ const SortCard = ({
          checkSession();
          setGroupIndices(indicesMap);
       },
+      setPivotOrders: (ordersMap) => {
+         checkSession();
+         setPivotOrders(ordersMap);
+      },
       setDescription: (desc) => {
          checkSession();
          if (desc) setDescription(desc);
@@ -334,7 +348,8 @@ const SortCard = ({
         setCompareIndices([]);
         setSwapIndices([]);
         setGoodIndices([]);
-        setGroupIndices({}); // Clear groups
+        setGroupIndices({});
+      setPivotOrders({}); // Clear groups
         
         // Success Sweep Effect: Gradually fill sortedIndices for a 'scanning' feel
         const allIndices = [...Array(arraySizeRef.current).keys()];
@@ -494,6 +509,7 @@ const SortCard = ({
           goodIndices={goodIndices}
           compareIndices={compareIndices}
           groupIndices={groupIndices}
+          pivotOrders={pivotOrders}
         />
         
         {/* Bottom Description & Stats Bar */}

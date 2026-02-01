@@ -2,6 +2,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
     const arr = [...array];
     const n = arr.length;
     let currentGroupColors = {}; 
+    let sortedIndices = []; // 루프 중 완료된 인덱스를 추적하기 위해 선언
     const { COLORS } = await import('../constants/colors');
     const palette = COLORS.GROUP_PALETTE;
 
@@ -33,28 +34,30 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 } else {
                     nextQueue.push({ l, r });
                 }
+                
+                // Tube Mode 가속을 위해 '진행 중'임을 알리는 가상 카운트
+                countCompare(); 
             }
 
             currentGroupColors = {...levelColors};
             setGroupIndices({...currentGroupColors});
             setDescription({ ...msg.DIVIDE, text: `Dividing: ${currentQueue.length} Groups` });
-            if (!(await wait(1.2))) return false;
+            if (!(await wait(1.0))) return false;
 
             if (!canSplitFurther) break;
             currentQueue = nextQueue;
             
-            // 3개 팀이 생기더라도 다음 루프에서 무조건 1+2로 쪼개집니다.
             const isAllSmall = currentQueue.every(q => (q.r - q.l + 1) <= 2);
             if (isAllSmall) {
-                // 한 번 더 업데이트해서 1~2개로 쪼개진 최종 상태를 보여줌
                 const finalColors = {};
                 for (let i = 0; i < currentQueue.length; i++) {
                     const { l, r } = currentQueue[i];
                     for (let j = l; j <= r; j++) finalColors[j] = palette[i % palette.length];
+                    countSwap(); // 가속 신호
                 }
                 currentGroupColors = {...finalColors};
                 setGroupIndices({...currentGroupColors});
-                if (!(await wait(1.2))) return false;
+                if (!(await wait(1.0))) return false;
                 break;
             }
         }
@@ -132,6 +135,13 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             await mSort(l, m);
             await mSort(m + 1, r);
             await merge(l, m, r);
+            
+            // 병합이 완료된 이 구역은 이제 '현재 레벨에서 정렬됨' 상태입니다.
+            // 이를 sortedIndices에 추가하여 Tube Mode 가속을 유도합니다.
+            for (let x = l; x <= r; x++) {
+                if (!sortedIndices.includes(x)) sortedIndices.push(x);
+            }
+            setSortedIndices([...sortedIndices]);
         }
     };
 
