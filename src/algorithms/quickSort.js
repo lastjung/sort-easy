@@ -13,7 +13,9 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let i = low - 1;
         for (let j = low; j < high; j++) {
             if (!sortingRef.current) return -1;
-            setCompareIndices([j, high]);
+            setCompareIndices([j]); // Only color scanning bar Yellow
+            // Pivot (high) remains Purple via GoodIndices
+            
             countCompare();
             setDescription(msg.COMPARE);
             playSound(300 + arr[j] * 5, 'sine');
@@ -51,6 +53,11 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
         if (low <= high) {
             let pi = await partition(low, high);
             if (pi === -1) return;
+
+            // Pause before dividing
+            setDescription(msg.DIVIDE);
+            if (!(await wait(1))) return;
+
             await qSort(low, pi - 1);
             await qSort(pi + 1, high);
         }

@@ -33,6 +33,7 @@ export const ALGO_MESSAGES = {
   quick: {
     START: { text: "Starting Quick Sort...", type: MSG_TYPES.INFO },
     PIVOT: { text: "Pivot Bar Selected", type: MSG_TYPES.TARGET },
+    DIVIDE: { text: "Dividing Left & Right", type: MSG_TYPES.TARGET },
     COMPARE: { text: "Comparing with Pivot", type: MSG_TYPES.COMPARE },
     SWAP: { text: "Swapping Smaller Bar", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Quick Sort Completed!", type: MSG_TYPES.SUCCESS }
