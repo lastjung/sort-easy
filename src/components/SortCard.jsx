@@ -51,6 +51,7 @@ const SortCard = ({
   const [swapIndices, setSwapIndices] = useState([]);
   const [goodIndices, setGoodIndices] = useState([]);
   const [sortedIndices, setSortedIndices] = useState([]);
+  const [groupIndices, setGroupIndices] = useState({}); // New: For Merge Sort partitions
   const [description, setDescription] = useState({ text: "", type: MSG_TYPES.INFO }); 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [comparisons, setComparisons] = useState(0);
@@ -136,6 +137,7 @@ const SortCard = ({
     setSwapIndices([]);
     setGoodIndices([]);
     setSortedIndices([]);
+    setGroupIndices({}); // Reset colors on 리셋
     setElapsedTime(0);
     baseTimeRef.current = 0;
     
@@ -240,7 +242,9 @@ const SortCard = ({
     setSortedIndices([]);
     setCompareIndices([]);
     setSwapIndices([]);
+    setSwapIndices([]);
     setGoodIndices([]);
+    setGroupIndices({}); // Reset groups
     setComparisons(0);
     setSwaps(0);
     comparisonsRef.current = 0;
@@ -288,6 +292,10 @@ const SortCard = ({
          checkSession();
          setSortedIndices(indices);
       },
+      setGroupIndices: (indicesMap) => {
+         checkSession();
+         setGroupIndices(indicesMap);
+      },
       setDescription: (desc) => {
          checkSession();
          if (desc) setDescription(desc);
@@ -326,6 +334,7 @@ const SortCard = ({
         setCompareIndices([]);
         setSwapIndices([]);
         setGoodIndices([]);
+        setGroupIndices({}); // Clear groups
         
         // Success Sweep Effect: Gradually fill sortedIndices for a 'scanning' feel
         const allIndices = [...Array(arraySizeRef.current).keys()];
@@ -484,6 +493,7 @@ const SortCard = ({
           swapIndices={swapIndices}
           goodIndices={goodIndices}
           compareIndices={compareIndices}
+          groupIndices={groupIndices}
         />
         
         {/* Bottom Description & Stats Bar */}

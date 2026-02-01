@@ -18,7 +18,24 @@ export const COLORS = {
     
     // UI Accents
     ACCENT: 'blue-500',
-    ACCENT_HOVER: 'blue-400'
+    ACCENT_HOVER: 'blue-400',
+    // --- Multi-colors for Merge Sort Groups ---
+    GROUP_PALETTE: [
+        'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.5)]',
+        'bg-pink-400 shadow-[0_0_15px_rgba(244,114,182,0.5)]',
+        'bg-lime-500 shadow-[0_0_15px_rgba(132,204,22,0.5)]',
+        'bg-orange-600 shadow-[0_0_15px_rgba(234,88,12,0.5)]',
+        'bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]',
+        'bg-neutral-500 shadow-[0_0_15px_rgba(115,115,115,0.5)]',
+        'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]',
+        'bg-slate-400 shadow-[0_0_15px_rgba(148,163,184,0.5)]',
+        'bg-rose-400 shadow-[0_0_15px_rgba(251,113,133,0.5)]',
+        'bg-teal-300 shadow-[0_0_15px_rgba(94,234,212,0.5)]',
+        'bg-stone-500 shadow-[0_0_15px_rgba(120,113,108,0.5)]',
+        'bg-orange-400 shadow-[0_0_15px_rgba(251,146,60,0.5)]',
+        'bg-emerald-600 shadow-[0_0_15px_rgba(5,150,105,0.5)]',
+        'bg-sky-600 shadow-[0_0_15px_rgba(2,132,199,0.5)]',
+    ]
 };
 
 export const LEGEND_ITEMS = [
