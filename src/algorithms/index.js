@@ -90,6 +90,6 @@ export const ALGORITHMS = [
         complexity: 'O(n²)', 
         desc: 'Bidirectional bubble sort, shaking elements both ways.',
         icon: '🍹',
-        slogan: "Shaking elements both ways for balance!"
+        slogan: "Find the endpoints with bidirectional bubbling!"
     }
 ];

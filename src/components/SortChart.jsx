@@ -4,11 +4,13 @@ import { COLORS } from '../constants/colors';
 const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, isCinema }) => {
   
   const getBarColorClass = (idx) => {
-    if (swapIndices.includes(idx)) return COLORS.SWAP;      // Priority 1: Red (Active Swap)
-    if (compareIndices.includes(idx)) return COLORS.COMPARE; // Priority 2: Yellow (Active Compare)
-    if (goodIndices.includes(idx)) return COLORS.TARGET;    // Priority 3: Purple (Target Element)
-    if (sortedIndices.includes(idx)) return COLORS.SORTED;  // Priority 4: Green (Final State)
-    return COLORS.UNSORTED;                                 // Priority 5: Blue (Initial State)
+    if (swapIndices.includes(idx)) return COLORS.SWAP;      
+    if (compareIndices.includes(idx)) return COLORS.COMPARE; 
+    if (goodIndices.includes(idx)) return COLORS.TARGET;    
+    if (sortedIndices.includes(idx)) {
+        return COLORS.SORTED;
+    }
+    return COLORS.UNSORTED;                                 
   };
 
   const maxVal = Math.max(...array, 1);

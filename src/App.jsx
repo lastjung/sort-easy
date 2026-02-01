@@ -11,7 +11,7 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [volume, setVolume] = useState(0.1);
   const [selectedIds, setSelectedIds] = useState(new Set(['bubble']));
-  const [isTurbo, setIsTurbo] = useState(false);
+  const [isTubeMode, setIsTubeMode] = useState(false);
   
   const [data, setData] = useState([]);
   const [triggerRun, setTriggerRun] = useState(0);   // Global Start signal
@@ -106,7 +106,7 @@ function App() {
           data={data}
           arraySize={arraySize}
           speed={speed}
-          isTurbo={isTurbo}
+          isTubeMode={isTubeMode}
           soundEnabled={soundEnabled}
           volume={volume}
           triggerRun={triggerRun}
@@ -125,8 +125,8 @@ function App() {
           isAnyPaused={runState.paused > 0}
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
-          isTurbo={isTurbo}
-          setIsTurbo={setIsTurbo}
+          isTubeMode={isTubeMode}
+          setIsTubeMode={setIsTubeMode}
           visibleCount={selectedIds.size}
           // Props for Drawer (Mobile Mode)
           arraySize={arraySize}

@@ -16,7 +16,7 @@ const Dashboard = ({
   triggerReset,
   selectedIds, // Set of IDs to show
   onRunningChange,
-  isTurbo
+  isTubeMode
 }) => {
   const [results, setResults] = useState({});
   const [activeAlgorithms, setActiveAlgorithms] = useState(new Set());
@@ -104,12 +104,13 @@ const Dashboard = ({
   const isCinema = visibleAlgos.length === 1;
 
   return (
-    <div className={`w-full mx-auto px-6 py-4 transition-all duration-500 ${isCinema ? 'max-w-[1800px] h-[calc(100vh-180px)] overflow-hidden' : 'max-w-[1600px]'}`}>
-      <div className={`grid gap-6 h-full ${
-        isCinema 
-          ? 'grid-cols-1' 
-          : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'
-      }`}>
+    <div className={`w-full mx-auto px-6 py-4 transition-all duration-500 ${isCinema ? 'max-w-[1800px] h-[calc(100vh-180px)] overflow-visible' : 'max-w-[1600px]'}`}>
+        {/* Dashboard Padding / Space Sync (Ensures slogan doesn't clip) */}
+        <div className={`grid gap-6 h-full transition-all duration-700 ${
+          isCinema 
+            ? 'grid-cols-1 pt-12 pb-24' 
+            : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'
+        }`}>
         {visibleAlgos.map((algo) => (
           <div key={algo.id} className={isCinema ? 'transform scale-100' : ''}>
             <SortCard
@@ -126,7 +127,7 @@ const Dashboard = ({
               triggerReset={triggerReset}
               onComplete={handleComplete}
               onRunning={handleRunning}
-              isTurbo={isTurbo}
+              isTubeMode={isTubeMode}
             />
           </div>
         ))}

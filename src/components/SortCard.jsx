@@ -41,7 +41,7 @@ const SortCard = ({
   triggerReset, // To reset from outside
   onComplete,
   onRunning, // To notify parent about execution state
-  isTurbo
+  isTubeMode
 }) => {
   const [array, setArray] = useState([...initialArray]);
   const arrayRef = useRef([...initialArray]); // To avoid stale closures in handleStart
@@ -62,9 +62,9 @@ const SortCard = ({
   // Each start increments this, and the active loop checks it to know if it should abort.
   const sessionIdRef = useRef(0);
   const speedRef = useRef(speed);
-  const isTurboRef = useRef(isTurbo);
+  const isTubeModeRef = useRef(isTubeMode);
   const sortedCountRef = useRef(0);
-  const [turboMultiplier, setTurboMultiplier] = useState(0.7);
+  const [tubeMultiplier, setTubeMultiplier] = useState(0.7);
   const stepsRef = useRef(0); // For virtual progress
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
@@ -82,8 +82,8 @@ const SortCard = ({
   }, [speed]);
 
   useEffect(() => { 
-    isTurboRef.current = isTurbo; 
-  }, [isTurbo]);
+    isTubeModeRef.current = isTubeMode; 
+  }, [isTubeMode]);
 
   useEffect(() => {
     sortedCountRef.current = sortedIndices.length;
@@ -140,26 +140,26 @@ const SortCard = ({
     // Formula: (101-speed)^1.5 * factor * 0.4.
     let currentSpeed = speedRef.current;
     
-    // --- Tube Speed Dynamic Logic ---
-    if (isTurboRef.current) {
+    // --- Tube Mode (Dynamic Acceleration + Safe Zone) Logic ---
+    if (isTubeModeRef.current) {
         // Calculate progress: combine real sorted bars + virtual progress from steps
         // estimatedTotalSteps for 16 bars is roughly 100-200.
         const realProgress = sortedCountRef.current / arraySize;
         const virtualProgress = Math.min(0.9, stepsRef.current / (arraySize * arraySize * 0.5));
         const progress = Math.max(realProgress, virtualProgress);
         
-        let turboFactor = 0.7; // Start slow
+        let tubeFactor = 0.7; // Start slow
         
         if (progress >= 0.15) {
             // Accelerate from 0.7x to 1.8x
-            turboFactor = 0.7 + ((progress - 0.15) / 0.85) * (1.8 - 0.7);
+            tubeFactor = 0.7 + ((progress - 0.15) / 0.85) * (1.8 - 0.7);
         }
         
-        turboFactor = Math.min(1.8, turboFactor);
-        setTurboMultiplier(Number(turboFactor.toFixed(1)));
-        currentSpeed = Math.min(100, currentSpeed * turboFactor);
+        tubeFactor = Math.min(1.8, tubeFactor);
+        setTubeMultiplier(Number(tubeFactor.toFixed(1)));
+        currentSpeed = Math.min(100, currentSpeed * tubeFactor);
     } else {
-        if (turboMultiplier !== 1.0) setTurboMultiplier(1.0);
+        if (tubeMultiplier !== 1.0) setTubeMultiplier(1.0);
     }
     
     const totalMs = Math.pow(101 - currentSpeed, 1.5) * factor * 0.4;
@@ -223,7 +223,7 @@ const SortCard = ({
     setComparisons(0);
     setSwaps(0);
     setElapsedTime(0);
-    setTurboMultiplier(0.7);
+    setTubeMultiplier(0.7);
     stepsRef.current = 0;
     baseTimeRef.current = 0;
     startTimeRef.current = Date.now();
@@ -294,7 +294,19 @@ const SortCard = ({
         setCompareIndices([]);
         setSwapIndices([]);
         setGoodIndices([]);
-        setSortedIndices([...Array(arraySize).keys()]);
+        
+        // Success Sweep Effect: Gradually fill sortedIndices for a 'scanning' feel
+        const allIndices = [...Array(arraySize).keys()];
+        for (let i = 0; i <= arraySize; i++) {
+            if (mySessionId !== sessionIdRef.current) break;
+            setSortedIndices(allIndices.slice(0, i));
+            if (i < arraySize) {
+                // Play a high-pitched success tone during sweep
+                playSound(880 + (i * 20), 'sine');
+                await new Promise(r => setTimeout(r, 30));
+            }
+        }
+
         setDescription(msg.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
         if (onCompleteRef.current) {
           onCompleteRef.current(item.id, { 
@@ -376,8 +388,22 @@ const SortCard = ({
     return `${s}.${remainMs.toString().padStart(2, '0')}s`;
   };
 
+  const getDescriptionClass = () => {
+    if (isPaused) return 'text-amber-500/60 grayscale-[0.5]';
+    
+    switch (description.type) {
+      case MSG_TYPES.COMPARE: return 'text-amber-300 drop-shadow-[0_0_12px_rgba(252,211,77,0.5)]';
+      case MSG_TYPES.SWAP: return 'text-rose-400 drop-shadow-[0_0_12px_rgba(251,113,133,0.5)]';
+      case MSG_TYPES.TARGET: return 'text-fuchsia-400 drop-shadow-[0_0_12px_rgba(232,121,249,0.5)]';
+      case MSG_TYPES.SUCCESS: return 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]';
+      default: return 'text-slate-100';
+    }
+  };
+
   return (
-    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-[transform,box-shadow,ring] duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
+    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-700 group ${
+      isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''
+    } ${isCinema && isTubeMode ? 'translate-y-[-80px] scale-[0.98]' : ''}`}>
       <div className={`${isCinema ? 'p-6' : 'p-3 md:p-4'} bg-white/5 border-b border-white/5 flex flex-col gap-1.5 order-first`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 min-w-0">
@@ -429,41 +455,30 @@ const SortCard = ({
                  <span className="bg-amber-500/20 text-amber-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 tracking-widest uppercase animate-pulse">Hold</span>
                </div>
              )}
-             <p className={`${isCinema ? 'text-3xl' : 'text-base md:text-2xl'} font-black italic text-center animate-in fade-in slide-in-from-bottom-2 duration-300 ${
-                isPaused ? 'text-amber-500/60 grayscale-[0.5]' :
-                description.type === MSG_TYPES.COMPARE
-                  ? 'text-amber-300 drop-shadow-[0_0_12px_rgba(252,211,77,0.5)]'
-                  : description.type === MSG_TYPES.SWAP
-                  ? 'text-rose-400 drop-shadow-[0_0_12px_rgba(251,113,133,0.5)]'
-                  : description.type === MSG_TYPES.TARGET
-                  ? 'text-fuchsia-400 drop-shadow-[0_0_12px_rgba(232,121,249,0.5)]'
-                  : description.type === MSG_TYPES.SUCCESS
-                  ? 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]'
-                  : 'text-slate-100'
-             }`}>
+             <p className={`${isCinema ? 'text-2xl' : 'text-base md:text-2xl'} font-black italic text-center animate-in fade-in slide-in-from-bottom-2 duration-300 ${getDescriptionClass()}`}>
                 {description.text || "Ready to sort..."}
              </p>
           </div>
           
-          <div className="flex items-center justify-center gap-3 md:gap-6 py-1.5 border-t border-white/5 opacity-80">
-            <div className="flex items-center gap-1">
-              <Timer size={isCinema ? 16 : 10} className="text-emerald-400/70" />
-              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{formatTime(elapsedTime)}</span>
+          <div className={`flex items-center justify-center ${isCinema ? 'gap-8 md:gap-12 py-3' : 'gap-3 md:gap-6 py-1.5'} border-t border-white/5 opacity-80`}>
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <Timer size={isCinema ? 20 : 10} className="text-emerald-400/70" />
+              <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{formatTime(elapsedTime)}</span>
             </div>
-            <div className="w-px h-2.5 bg-white/10" />
-            <div className="flex items-center gap-1">
-              <Activity size={isCinema ? 16 : 10} className="text-amber-400/70" />
-              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{comparisons.toLocaleString()}</span>
+            <div className={`w-px ${isCinema ? 'h-6' : 'h-2.5'} bg-white/10`} />
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <Activity size={isCinema ? 20 : 10} className="text-amber-400/70" />
+              <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{comparisons.toLocaleString()}</span>
             </div>
-            <div className="w-px h-2.5 bg-white/10" />
-            <div className="flex items-center gap-1">
-              <ArrowLeftRight size={isCinema ? 16 : 10} className="text-rose-400/70" />
-              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{swaps.toLocaleString()}</span>
+            <div className={`w-px ${isCinema ? 'h-6' : 'h-2.5'} bg-white/10`} />
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <ArrowLeftRight size={isCinema ? 20 : 10} className="text-rose-400/70" />
+              <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{swaps.toLocaleString()}</span>
             </div>
-            <div className="w-px h-2.5 bg-white/10" />
-            <div className="flex items-center gap-1">
-              <Zap size={isCinema ? 16 : 10} className="text-amber-500/70" />
-              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{(speed * turboMultiplier).toFixed(0)}</span>
+            <div className={`w-px ${isCinema ? 'h-6' : 'h-2.5'} bg-white/10`} />
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <Zap size={isCinema ? 20 : 10} className="text-amber-500/70" />
+              <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{(speed * tubeMultiplier).toFixed(0)}</span>
             </div>
           </div>
         </div>

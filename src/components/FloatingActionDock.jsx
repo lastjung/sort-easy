@@ -19,8 +19,8 @@ const FloatingActionDock = ({
   selectedIds,
   toggleSelect,
   isAnyActive,
-  isTurbo,
-  setIsTurbo
+  isTubeMode,
+  setIsTubeMode
 }) => {
   const [showConfig, setShowConfig] = useState(false);
   const isIdle = !isAnyRunning && !isAnyPaused;
@@ -115,16 +115,13 @@ const FloatingActionDock = ({
 
         <div className="w-px h-6 bg-white/10 mx-0.5" />
 
-        {/* Tube Speed Toggle */}
+        {/* Tube Mode Toggle */}
         <button 
-          onClick={() => setIsTurbo(!isTurbo)}
-          className={`p-1.5 rounded-full transition-all duration-300 ${
-            isTurbo ? 'bg-amber-500/10 text-amber-400' : 'bg-white/5 text-slate-400'
-          } shadow-sm will-change-transform active:scale-90 relative overflow-hidden group/turbo`}
-          title="Tube Speed (Dynamic Acceleration)"
+          onClick={() => setIsTubeMode(!isTubeMode)}
+          className={`p-2 rounded-full transition-all duration-300 ${isTubeMode ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+          title={isTubeMode ? "Disable Tube Mode" : "Enable Tube Mode (Speed Up + Shorts UI Space)"}
         >
-          <Zap size={16} fill={isTurbo ? "currentColor" : "none"} className={isTurbo ? "animate-pulse" : ""} />
-          {isTurbo && <div className="absolute inset-0 bg-amber-500/20 blur-md" />}
+          <Zap size={20} fill={isTubeMode ? "currentColor" : "none"} className={isTubeMode ? "opacity-90" : ""} />
         </button>
 
         <div className="w-px h-6 bg-white/10 mx-0.5" />
