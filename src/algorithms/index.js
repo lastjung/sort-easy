@@ -45,7 +45,7 @@ export const ALGORITHMS = [
         complexity: 'O(n²)', 
         desc: 'Builds the sorted array one item at a time by inserting elements.',
         icon: '📥',
-        slogan: "Find small number by reverse bubbling sort."
+        slogan: "Find the smallest by reverse bubbling!"
     },
     { 
         id: 'quick', 
