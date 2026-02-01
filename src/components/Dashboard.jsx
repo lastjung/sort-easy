@@ -62,7 +62,7 @@ const Dashboard = ({
       runningSetRef.current.delete(id);
       if (runningSetRef.current.size === 0 && Object.keys(next).length > 0) {
         setScoreboardResults(Object.values(next));
-        setShowScoreboard(true);
+        // setShowScoreboard(true); // Disabled as requested
       }
       return next;
     });

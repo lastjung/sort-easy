@@ -16,7 +16,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         let minIndex = i;
         // 1. Target (Purple)
         setGoodIndices([i]); 
-        setDescription(`Finding the smallest value for position ${i + 1} (Purple).`);
+        setDescription(`Largest Founded`);
         if (!(await wait(1.5))) break;
   
         for (let j = i + 1; j < n; j++) {
@@ -24,6 +24,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
   
             // 2. Scanning (Yellow)
             setCompareIndices([j]); 
+            setDescription(`Comparing Two Bars`);
             countCompare();
             playSound(300 + arr[j] * 5, 'sine'); 
             if (!(await wait(0.5))) break;
@@ -31,7 +32,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
             if (arr[j] < arr[minIndex]) {
                 // New minimum found (Red)
                 minIndex = j;
-                setDescription(`New minimum found at position ${j + 1}! (Red)`); 
+                setDescription(`Swap Bars`); 
                 setSwapIndices([minIndex]); 
                 playSound(800, 'triangle'); 
                 if (!(await wait(1))) break;
@@ -44,7 +45,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
   
         // 3. Action (Red)
         if (minIndex !== i) {
-            setDescription(`Swapping position ${i + 1} with minimum from position ${minIndex + 1} (Red).`);
+            setDescription(`Swap Bars`);
             setSwapIndices([i, minIndex]); 
             playSound(150, 'sawtooth'); 
             countSwap();

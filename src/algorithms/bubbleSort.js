@@ -22,7 +22,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setCompareIndices([j, j + 1]);
             setSwapIndices([]);
             countCompare();
-            setDescription(`Comparing position ${j + 1} and ${j + 2}... (Yellow)`);
+            setDescription(`Comparing Two Bars`);
             playSound(200 + arr[j] * 5, 'sine');
             if (!(await wait(1))) break;
   
@@ -30,7 +30,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 // 2. Swap (Red)
                 setCompareIndices([]); 
                 setSwapIndices([j, j + 1]); 
-                setDescription(`Position ${j + 1} is larger. Swapping! (Red)`);
+                setDescription(`Swap Bars`);
                 playSound(100 + arr[j] * 5, 'sawtooth');
                 
                 countSwap();
@@ -52,7 +52,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         
         // --- Baton Touch ---
         setGoodIndices([lastIdx]);
-        setDescription(`The largest value reached position ${lastIdx + 1} (Purple).`);
+        setDescription(`Largest Founded`);
         if (!(await wait(1))) break;
 
         // Confirm Sorted (Green)

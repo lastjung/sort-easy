@@ -14,7 +14,7 @@ export const shellSort = async ({ array, setArray, setCompareIndices, setSwapInd
             while (j >= gap && arr[j - gap] > temp) {
                 setCompareIndices([j, j - gap]);
                 countCompare();
-                setDescription(`Comparing positions ${j - gap + 1} and ${j + 1} with gap ${gap}.`);
+                setDescription(`Comparing Two Bars`);
                 if (!(await wait(1))) break;
                 arr[j] = arr[j - gap];
                 countSwap();

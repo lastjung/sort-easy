@@ -12,18 +12,20 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
 
         if (left < n) {
             setCompareIndices([largest, left]);
+            setDescription(`Comparing Two Bars`);
             countCompare();
             if (arr[left] > arr[largest]) largest = left;
         }
         if (right < n) {
             setCompareIndices([largest, right]);
+            setDescription(`Comparing Two Bars`);
             countCompare();
             if (arr[right] > arr[largest]) largest = right;
         }
 
         if (largest !== i) {
             setSwapIndices([i, largest]);
-            setDescription(`Swapping parent at position ${i + 1} with child at ${largest + 1}.`);
+            setDescription(`Swap Bars`);
             countSwap();
             [arr[i], arr[largest]] = [arr[largest], arr[i]];
             setArray([...arr]);
@@ -42,7 +44,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     for (let i = n - 1; i > 0; i--) {
         if (!sortingRef.current) break;
         setSwapIndices([0, i]);
-        setDescription(`Moving largest value to sorted position ${i + 1}.`);
+        setDescription(`Swap Bars`);
         countSwap();
         [arr[0], arr[i]] = [arr[i], arr[0]];
         setArray([...arr]);

@@ -10,11 +10,13 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         for (let i = start; i < end; ++i) {
             if (!sortingRef.current) break;
             setCompareIndices([i, i + 1]);
+            setDescription(`Comparing Two Bars`);
             countCompare(); // Increment comparison count
             if (arr[i] > arr[i + 1]) {
                 [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
                 setArray([...arr]); setSwapIndices([i, i + 1]);
                 countSwap(); // Increment swap count
+                setDescription(`Swap Bars`);
                 swapped = true; if (!(await wait(1))) break;
             } else if (!(await wait(0.5))) break;
         }
@@ -27,11 +29,13 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         for (let i = end - 1; i >= start; --i) {
             if (!sortingRef.current) break;
             setCompareIndices([i, i + 1]);
+            setDescription(`Comparing Two Bars`);
             countCompare(); // Increment comparison count
             if (arr[i] > arr[i + 1]) {
                 [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
                 setArray([...arr]); setSwapIndices([i, i + 1]);
                 countSwap(); // Increment swap count
+                setDescription(`Swap Bars`);
                 swapped = true; if (!(await wait(1))) break;
             } else if (!(await wait(0.5))) break;
         }

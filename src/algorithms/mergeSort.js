@@ -18,7 +18,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             if (!sortingRef.current) return;
             setCompareIndices([l + i, m + 1 + j]);
             countCompare();
-            setDescription(`Comparing left (${l + i + 1}) side with right side.`);
+            setDescription(`Comparing Two Bars`);
             if (!(await wait(1))) break;
 
             if (L[i] <= R[j]) {

@@ -7,7 +7,7 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
     for (let i = 1; i < n; i++) {
         if (!sortingRef.current) break;
         setGoodIndices([i]); 
-        setDescription(`Setting position ${i + 1} as the sorting target (Purple).`);
+        setDescription(`Largest Founded`);
         if (!(await wait(1.2))) break; 
         
         let j = i - 1;
@@ -15,13 +15,13 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
             if (!sortingRef.current) break;
             setCompareIndices([j, j + 1]);
             countCompare();
-            setDescription(`Comparing position ${j + 1} and ${j + 2}... (Yellow)`);
+            setDescription(`Comparing Two Bars`);
             playSound(300 + arr[j] * 5, 'sine');
             if (!(await wait(1.5))) break;
             
             if (arr[j] > arr[j + 1]) {
                 setCompareIndices([]); setSwapIndices([j, j + 1]);
-                setDescription(`Swapping position ${j + 1} and ${j + 2} (Red).`);
+                setDescription(`Swap Bars`);
                 playSound(150, 'sawtooth');
                 countSwap();
                 [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];

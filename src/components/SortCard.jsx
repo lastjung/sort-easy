@@ -237,6 +237,9 @@ const SortCard = ({
     try {
       const finished = await item.fn(helpers);
       if (finished && mySessionId === sessionIdRef.current) {
+        setCompareIndices([]);
+        setSwapIndices([]);
+        setGoodIndices([]);
         setSortedIndices([...Array(arraySize).keys()]);
         setDescription("COMPLETED! ✨");
         if (onCompleteRef.current) {
@@ -364,7 +367,15 @@ const SortCard = ({
         {/* Bottom Description & Stats Bar */}
         <div className="mt-6 flex flex-col gap-4">
           <div className="min-h-[1.5em] flex items-center justify-center">
-             <p className={`${isCinema ? 'text-2xl' : 'text-sm'} font-bold text-emerald-400/80 italic text-center animate-in fade-in duration-300`}>
+             <p className={`${isCinema ? 'text-2xl' : 'text-sm'} font-bold italic text-center animate-in fade-in duration-300 ${
+                description.includes("Comparing") 
+                  ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
+                  : description.includes("Swap")
+                  ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]'
+                  : (description.includes("Largest") || description.includes("Founded"))
+                  ? 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(192,38,211,0.6)]'
+                  : 'text-emerald-400/80'
+             }`}>
                 {description || "Ready to sort..."}
              </p>
           </div>

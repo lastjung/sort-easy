@@ -7,7 +7,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
     const partition = async (low, high) => {
         let pivot = arr[high];
         setGoodIndices([high]); // Pivot as Purple
-        setDescription(`Selecting pivot: Position ${high + 1} (Purple).`);
+        setDescription(`Largest Founded`);
         if (!(await wait(1.5))) return -1;
         
         let i = low - 1;
@@ -15,14 +15,14 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
             if (!sortingRef.current) return -1;
             setCompareIndices([j, high]);
             countCompare();
-            setDescription(`Comparing position ${j + 1} with pivot at ${high + 1}.`);
+            setDescription(`Comparing Two Bars`);
             playSound(300 + arr[j] * 5, 'sine');
             if (!(await wait(1))) break;
 
             if (arr[j] < pivot) {
                 i++;
                 setSwapIndices([i, j]);
-                setDescription(`Value at ${j + 1} is smaller than pivot. Swapping with ${i + 1}.`);
+                setDescription(`Swap Bars`);
                 playSound(150, 'sawtooth');
                 countSwap();
                 [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -34,7 +34,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         if (!sortingRef.current) return -1;
         setSwapIndices([i + 1, high]);
-        setDescription(`Moving pivot from position ${high + 1} to ${i + 2}.`);
+        setDescription(`Swap Bars`);
         countSwap();
         [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
         setArray([...arr]);
