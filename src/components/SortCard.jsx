@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Timer, Sparkles, Play, RotateCcw, Pause, Activity, ArrowLeftRight } from 'lucide-react';
+import { Timer, Sparkles, Play, RotateCcw, Pause, Activity, ArrowLeftRight, Zap } from 'lucide-react';
 import SortChart from './SortChart';
 import { COLORS } from '../constants/colors';
 import { ALGO_MESSAGES, MSG_TYPES } from '../constants/messages';
@@ -36,10 +36,12 @@ const SortCard = ({
   soundEnabled, 
   volume,
   triggerRun, // To start from outside
+  triggerResume, // To resume from outside
   triggerStop, // To stop from outside
   triggerReset, // To reset from outside
   onComplete,
-  onRunning // To notify parent about execution state
+  onRunning, // To notify parent about execution state
+  isTurbo
 }) => {
   const [array, setArray] = useState([...initialArray]);
   const arrayRef = useRef([...initialArray]); // To avoid stale closures in handleStart
@@ -60,6 +62,10 @@ const SortCard = ({
   // Each start increments this, and the active loop checks it to know if it should abort.
   const sessionIdRef = useRef(0);
   const speedRef = useRef(speed);
+  const isTurboRef = useRef(isTurbo);
+  const sortedCountRef = useRef(0);
+  const [turboMultiplier, setTurboMultiplier] = useState(0.7);
+  const stepsRef = useRef(0); // For virtual progress
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
   const baseTimeRef = useRef(0); 
@@ -74,6 +80,14 @@ const SortCard = ({
   useEffect(() => { 
     speedRef.current = speed; 
   }, [speed]);
+
+  useEffect(() => { 
+    isTurboRef.current = isTurbo; 
+  }, [isTurbo]);
+
+  useEffect(() => {
+    sortedCountRef.current = sortedIndices.length;
+  }, [sortedIndices]);
 
   useEffect(() => { 
     pausedRef.current = isPaused;
@@ -124,11 +138,31 @@ const SortCard = ({
   // Using a power-based curve to make high-speed settings feel significantly faster.
   const wait = useCallback(async (factor = 1) => {
     // Formula: (101-speed)^1.5 * factor * 0.4.
-    // Speed 100: ~0.4ms (Instant)
-    // Speed 90: ~14.6ms
-    // Speed 50: ~145ms
-    // Speed 1: ~400ms
-    const totalMs = Math.pow(101 - speedRef.current, 1.5) * factor * 0.4;
+    let currentSpeed = speedRef.current;
+    
+    // --- Tube Speed Dynamic Logic ---
+    if (isTurboRef.current) {
+        // Calculate progress: combine real sorted bars + virtual progress from steps
+        // estimatedTotalSteps for 16 bars is roughly 100-200.
+        const realProgress = sortedCountRef.current / arraySize;
+        const virtualProgress = Math.min(0.9, stepsRef.current / (arraySize * arraySize * 0.5));
+        const progress = Math.max(realProgress, virtualProgress);
+        
+        let turboFactor = 0.7; // Start slow
+        
+        if (progress >= 0.15) {
+            // Accelerate from 0.7x to 1.8x
+            turboFactor = 0.7 + ((progress - 0.15) / 0.85) * (1.8 - 0.7);
+        }
+        
+        turboFactor = Math.min(1.8, turboFactor);
+        setTurboMultiplier(Number(turboFactor.toFixed(1)));
+        currentSpeed = Math.min(100, currentSpeed * turboFactor);
+    } else {
+        if (turboMultiplier !== 1.0) setTurboMultiplier(1.0);
+    }
+    
+    const totalMs = Math.pow(101 - currentSpeed, 1.5) * factor * 0.4;
     let startTime = Date.now();
 
     while (Date.now() - startTime < totalMs) {
@@ -189,9 +223,17 @@ const SortCard = ({
     setComparisons(0);
     setSwaps(0);
     setElapsedTime(0);
+    setTurboMultiplier(0.7);
+    stepsRef.current = 0;
     baseTimeRef.current = 0;
     startTimeRef.current = Date.now();
-    setDescription({ text: "Starting...", type: MSG_TYPES.INFO });
+    setDescription({ text: "Initializing...", type: MSG_TYPES.INFO });
+    
+    // CRITICAL: Always reset to initial unscented data on a fresh start
+    const freshArray = [...initialArray];
+    setArray(freshArray);
+    arrayRef.current = freshArray;
+    
     timerRef.current = setInterval(() => {
       setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
     }, 50);
@@ -228,10 +270,12 @@ const SortCard = ({
       },
       countCompare: () => {
          checkSession();
+         stepsRef.current++;
          setComparisons(prev => prev + 1);
       },
       countSwap: () => {
          checkSession();
+         stepsRef.current++;
          setSwaps(prev => prev + 1);
       },
       playSound,
@@ -251,7 +295,7 @@ const SortCard = ({
         setSwapIndices([]);
         setGoodIndices([]);
         setSortedIndices([...Array(arraySize).keys()]);
-        setDescription(ALGO_MESSAGES[item.id]?.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
+        setDescription(msg.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
         if (onCompleteRef.current) {
           onCompleteRef.current(item.id, { 
             time: baseTimeRef.current + (Date.now() - (isPaused ? 0 : startTimeRef.current)),
@@ -274,19 +318,26 @@ const SortCard = ({
   // --- 2. Side Effects (Triggers & Sync) ---
   // Signals from parent (App/Dashboard) to control sorting state globally.
   // Using lastTrigger refs to ensure and idempotent execution on increment only.
-  const lastRunTrigger = React.useRef(0);
-  const lastStopTrigger = React.useRef(0);
+  const lastRunTrigger = React.useRef(triggerRun);
+  const lastResumeTrigger = React.useRef(triggerResume);
+  const lastStopTrigger = React.useRef(triggerStop);
 
   useEffect(() => {
     if (triggerRun > lastRunTrigger.current) {
       lastRunTrigger.current = triggerRun;
-      if (!sortingRef.current) {
-        handleStart();
-      } else if (pausedRef.current) {
+      // Fresh run should always restart from beginning, even if finished
+      handleStart();
+    }
+  }, [triggerRun, handleStart]);
+
+  useEffect(() => {
+    if (triggerResume > lastResumeTrigger.current) {
+      lastResumeTrigger.current = triggerResume;
+      if (pausedRef.current) {
         togglePause();
       }
     }
-  }, [triggerRun, handleStart, togglePause]);
+  }, [triggerResume, togglePause]);
 
   useEffect(() => {
     if (triggerStop > lastStopTrigger.current) {
@@ -341,16 +392,20 @@ const SortCard = ({
               </button>
               <button 
                 onClick={isSorting ? togglePause : handleStart} 
-                className={`p-0.5 transition-[transform,color] active:scale-75 ${isSorting ? (isPaused ? 'text-slate-500 hover:text-white' : 'text-amber-500 hover:text-amber-400') : 'text-slate-500 hover:text-white'}`} 
+                className={`p-0.5 transition-[transform,color] active:scale-75 ${
+                  isSorting 
+                    ? (isPaused ? 'text-amber-500 hover:text-amber-400' : 'text-orange-500 hover:text-orange-400') 
+                    : 'text-slate-500 hover:text-white'
+                }`} 
                 title={isSorting ? (isPaused ? "Resume" : "Pause") : "Run"}
               >
-                  {isSorting && !isPaused ? <Pause size={isCinema ? 20 : 16} fill="currentColor" /> : <Play size={isCinema ? 20 : 16} fill={isSorting ? "currentColor" : "none"} />}
+                  {isSorting && !isPaused ? <Pause size={isCinema ? 20 : 16} fill="currentColor" /> : <Play size={isCinema ? 20 : 16} fill={isPaused ? "currentColor" : (isSorting ? "currentColor" : "none")} />}
               </button>
             </div>
           </div>
         </div>
         
-        <p className={`${isCinema ? 'text-lg' : 'text-sm md:text-base'} font-black text-orange-400 italic tracking-tight line-clamp-2 leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`}>
+        <p className={`${isCinema ? 'text-xl' : 'text-base md:text-xl'} font-black text-orange-400 italic tracking-tight line-clamp-2 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`}>
           {item.slogan}
         </p>
       </div>
@@ -367,46 +422,48 @@ const SortCard = ({
         />
         
         {/* Bottom Description & Stats Bar */}
-        <div className="mt-4 flex flex-col gap-2">
-          <div className="min-h-[2.5em] flex items-center justify-center px-4">
-             <p className={`${isCinema ? 'text-2xl' : 'text-sm md:text-lg'} font-black italic text-center animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+        <div className="mt-2 flex flex-col gap-1">
+          <div className="min-h-[3.5em] flex items-center justify-center px-6 relative">
+             {isPaused && (
+               <div className="absolute top-0 inset-x-0 flex justify-center -translate-y-2">
+                 <span className="bg-amber-500/20 text-amber-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 tracking-widest uppercase animate-pulse">Hold</span>
+               </div>
+             )}
+             <p className={`${isCinema ? 'text-3xl' : 'text-base md:text-2xl'} font-black italic text-center animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+                isPaused ? 'text-amber-500/60 grayscale-[0.5]' :
                 description.type === MSG_TYPES.COMPARE
-                  ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.4)]'
+                  ? 'text-amber-300 drop-shadow-[0_0_12px_rgba(252,211,77,0.5)]'
                   : description.type === MSG_TYPES.SWAP
-                  ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.4)]'
+                  ? 'text-rose-400 drop-shadow-[0_0_12px_rgba(251,113,133,0.5)]'
                   : description.type === MSG_TYPES.TARGET
-                  ? 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.4)]'
+                  ? 'text-fuchsia-400 drop-shadow-[0_0_12px_rgba(232,121,249,0.5)]'
                   : description.type === MSG_TYPES.SUCCESS
-                  ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]'
-                  : 'text-slate-200'
+                  ? 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)]'
+                  : 'text-slate-100'
              }`}>
                 {description.text || "Ready to sort..."}
              </p>
           </div>
           
-          <div className="grid grid-cols-3 gap-0 py-1.5 md:py-3 bg-black/20 md:rounded-2xl border-y md:border border-white/5">
-            <div className="flex flex-col items-center border-r border-white/5">
-              <div className="flex items-center gap-1 mb-0.5 md:mb-1">
-                <Timer size={isCinema ? 20 : 12} className="text-emerald-400" />
-                <span className={`${isCinema ? 'text-lg' : 'text-[9px] md:text-sm'} font-black text-slate-500 uppercase tracking-widest`}>Time</span>
-              </div>
-              <span className={`${isCinema ? 'text-2xl' : 'text-base md:text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{formatTime(elapsedTime)}</span>
+          <div className="flex items-center justify-center gap-3 md:gap-6 py-1.5 border-t border-white/5 opacity-80">
+            <div className="flex items-center gap-1">
+              <Timer size={isCinema ? 16 : 10} className="text-emerald-400/70" />
+              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{formatTime(elapsedTime)}</span>
             </div>
-
-            <div className="flex flex-col items-center border-r border-white/5">
-              <div className="flex items-center gap-1 mb-0.5 md:mb-1">
-                <Activity size={isCinema ? 20 : 12} className="text-amber-400" />
-                <span className={`${isCinema ? 'text-lg' : 'text-[9px] md:text-sm'} font-black text-slate-500 uppercase tracking-widest`}>Comp</span>
-              </div>
-              <span className={`${isCinema ? 'text-2xl' : 'text-base md:text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{comparisons.toLocaleString()}</span>
+            <div className="w-px h-2.5 bg-white/10" />
+            <div className="flex items-center gap-1">
+              <Activity size={isCinema ? 16 : 10} className="text-amber-400/70" />
+              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{comparisons.toLocaleString()}</span>
             </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-1 mb-0.5 md:mb-1">
-                <ArrowLeftRight size={isCinema ? 20 : 12} className="text-rose-400" />
-                <span className={`${isCinema ? 'text-lg' : 'text-[9px] md:text-sm'} font-black text-slate-500 uppercase tracking-widest`}>Swap</span>
-              </div>
-              <span className={`${isCinema ? 'text-2xl' : 'text-base md:text-xl'} font-mono font-black text-slate-200 tracking-tighter`}>{swaps.toLocaleString()}</span>
+            <div className="w-px h-2.5 bg-white/10" />
+            <div className="flex items-center gap-1">
+              <ArrowLeftRight size={isCinema ? 16 : 10} className="text-rose-400/70" />
+              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{swaps.toLocaleString()}</span>
+            </div>
+            <div className="w-px h-2.5 bg-white/10" />
+            <div className="flex items-center gap-1">
+              <Zap size={isCinema ? 16 : 10} className="text-amber-500/70" />
+              <span className="text-[12px] md:text-xs font-mono font-normal text-slate-300 tracking-tighter">{(speed * turboMultiplier).toFixed(0)}</span>
             </div>
           </div>
         </div>

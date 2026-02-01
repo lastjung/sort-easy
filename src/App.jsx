@@ -11,10 +11,12 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [volume, setVolume] = useState(0.1);
   const [selectedIds, setSelectedIds] = useState(new Set(['bubble']));
+  const [isTurbo, setIsTurbo] = useState(false);
   
   const [data, setData] = useState([]);
-  const [triggerRun, setTriggerRun] = useState(0);   // Global Play/Resume signal (increments to trigger)
-  const [triggerStop, setTriggerStop] = useState(0);  // Global Pause signal (increments to trigger)
+  const [triggerRun, setTriggerRun] = useState(0);   // Global Start signal
+  const [triggerResume, setTriggerResume] = useState(0); // Global Resume signal
+  const [triggerStop, setTriggerStop] = useState(0);  // Global Pause signal
   const [triggerReset, setTriggerReset] = useState(0); // Global Reset signal (increments to trigger)
   const [runState, setRunState] = useState({ running: 0, paused: 0 });
 
@@ -36,7 +38,11 @@ function App() {
   }, [generateData]);
 
   const handleRun = () => {
-    setTriggerRun(prev => prev + 1);
+    if (runState.paused > 0) {
+        setTriggerResume(prev => prev + 1);
+    } else {
+        setTriggerRun(prev => prev + 1);
+    }
   };
 
   const handleStop = () => {
@@ -100,9 +106,11 @@ function App() {
           data={data}
           arraySize={arraySize}
           speed={speed}
+          isTurbo={isTurbo}
           soundEnabled={soundEnabled}
           volume={volume}
           triggerRun={triggerRun}
+          triggerResume={triggerResume}
           triggerStop={triggerStop}
           triggerReset={triggerReset}
           selectedIds={selectedIds}
@@ -117,6 +125,8 @@ function App() {
           isAnyPaused={runState.paused > 0}
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
+          isTurbo={isTurbo}
+          setIsTurbo={setIsTurbo}
           visibleCount={selectedIds.size}
           // Props for Drawer (Mobile Mode)
           arraySize={arraySize}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, RotateCcw, Volume2, VolumeX, Pause, Settings, CheckCircle, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, RotateCcw, Volume2, VolumeX, Pause, Settings, CheckCircle, Circle, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { ALGORITHMS } from '../algorithms';
 
 const FloatingActionDock = ({
@@ -18,11 +18,13 @@ const FloatingActionDock = ({
   setSpeed,
   selectedIds,
   toggleSelect,
-  isAnyActive
+  isAnyActive,
+  isTurbo,
+  setIsTurbo
 }) => {
   const [showConfig, setShowConfig] = useState(false);
   const isIdle = !isAnyRunning && !isAnyPaused;
-  const mainLabel = isAnyRunning ? 'Pause All' : isAnyPaused ? 'Resume All' : 'Run All';
+  const mainLabel = isAnyRunning ? 'Pause All' : isAnyPaused ? 'Resume All' : (isAnyActive ? 'Re-run All' : 'Run All');
 
   return (
     <div className="fixed bottom-10 left-0 right-0 mx-auto w-fit z-[100] flex flex-col items-center gap-4">
@@ -106,8 +108,23 @@ const FloatingActionDock = ({
           className={`p-1.5 rounded-full transition-all duration-300 ${
             soundEnabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-slate-400'
           } shadow-sm will-change-transform active:scale-90`}
+          title="Toggle Sound"
         >
           {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+        </button>
+
+        <div className="w-px h-6 bg-white/10 mx-0.5" />
+
+        {/* Tube Speed Toggle */}
+        <button 
+          onClick={() => setIsTurbo(!isTurbo)}
+          className={`p-1.5 rounded-full transition-all duration-300 ${
+            isTurbo ? 'bg-amber-500/10 text-amber-400' : 'bg-white/5 text-slate-400'
+          } shadow-sm will-change-transform active:scale-90 relative overflow-hidden group/turbo`}
+          title="Tube Speed (Dynamic Acceleration)"
+        >
+          <Zap size={16} fill={isTurbo ? "currentColor" : "none"} className={isTurbo ? "animate-pulse" : ""} />
+          {isTurbo && <div className="absolute inset-0 bg-amber-500/20 blur-md" />}
         </button>
 
         <div className="w-px h-6 bg-white/10 mx-0.5" />
@@ -135,6 +152,8 @@ const FloatingActionDock = ({
           className={`group/btn flex items-center gap-2 px-3 py-1.5 rounded-full text-white font-black transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xl relative overflow-hidden w-[130px] justify-center will-change-transform ${
             isAnyRunning 
               ? 'bg-gradient-to-r from-orange-500 to-rose-600 shadow-orange-500/40' 
+              : isAnyPaused
+              ? 'bg-gradient-to-r from-amber-400 to-yellow-600 shadow-amber-500/40'
               : 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/40 hover:-translate-y-0.5'
           }`}
         >

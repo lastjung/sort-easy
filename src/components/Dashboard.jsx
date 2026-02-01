@@ -11,10 +11,12 @@ const Dashboard = ({
   soundEnabled, 
   volume,
   triggerRun,
+  triggerResume,
   triggerStop,
   triggerReset,
   selectedIds, // Set of IDs to show
-  onRunningChange
+  onRunningChange,
+  isTurbo
 }) => {
   const [results, setResults] = useState({});
   const [activeAlgorithms, setActiveAlgorithms] = useState(new Set());
@@ -119,10 +121,12 @@ const Dashboard = ({
               soundEnabled={soundEnabled}
               volume={volume}
               triggerRun={triggerRun}
+              triggerResume={triggerResume}
               triggerStop={triggerStop}
               triggerReset={triggerReset}
               onComplete={handleComplete}
               onRunning={handleRunning}
+              isTurbo={isTurbo}
             />
           </div>
         ))}
