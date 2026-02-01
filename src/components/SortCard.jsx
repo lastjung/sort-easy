@@ -119,10 +119,15 @@ const SortCard = ({
     setSwaps(0);
   }, [initialArray, item.id]);
 
-  // Responsive wait loop: Checks for pause/stop signals every 10ms.
-  // Using real-time duration (Date.now()) to prevent cumulative setTimeout drift.
+  // Responsive wait loop: Checks for pause/stop signals frequently.
+  // Using a power-based curve to make high-speed settings feel significantly faster.
   const wait = useCallback(async (factor = 1) => {
-    const totalMs = (101 - speedRef.current) * factor * 10;
+    // Formula: (101-speed)^1.5 * factor * 0.4.
+    // Speed 100: ~0.4ms (Instant)
+    // Speed 90: ~14.6ms
+    // Speed 50: ~145ms
+    // Speed 1: ~400ms
+    const totalMs = Math.pow(101 - speedRef.current, 1.5) * factor * 0.4;
     let startTime = Date.now();
 
     while (Date.now() - startTime < totalMs) {
@@ -137,7 +142,10 @@ const SortCard = ({
         startTime += (Date.now() - pauseStart);
       }
 
-      await new Promise(r => setTimeout(r, 10));
+      // Check every 4ms for better granularity at high speeds
+      const remaining = totalMs - (Date.now() - startTime);
+      if (remaining <= 0) break;
+      await new Promise(r => setTimeout(r, Math.min(remaining, 4)));
     }
     return sortingRef.current;
   }, []);
@@ -317,14 +325,14 @@ const SortCard = ({
 
   return (
     <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-[transform,box-shadow,ring] duration-500 group ${isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''}`}>
-      <div className={`${isCinema ? 'p-10' : 'p-6'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
+      <div className={`${isCinema ? 'p-6' : 'p-4'} bg-white/5 border-b border-white/5 flex justify-between items-center order-first`}>
         <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-4 mb-1 flex-wrap">
-            <span className={isCinema ? 'text-5xl' : 'text-3xl'}>{item.icon}</span>
-            <h3 className={`${isCinema ? 'text-5xl' : 'text-2xl'} font-black text-white tracking-tighter truncate`}>{item.title}</h3>
-            <span className={`${isCinema ? 'text-xl' : 'text-xs'} font-black text-slate-500 uppercase tracking-[0.2em]`}>{item.complexity}</span>
+          <div className="flex items-baseline gap-3 mb-0.5 flex-wrap">
+            <span className={isCinema ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
+            <h3 className={`${isCinema ? 'text-3xl' : 'text-lg'} font-black text-white tracking-tighter truncate`}>{item.title}</h3>
+            <span className={`${isCinema ? 'text-sm' : 'text-[8px]'} font-black text-slate-500 uppercase tracking-[0.2em]`}>{item.complexity}</span>
             <span className="mx-2 text-slate-700 hidden lg:inline">|</span>
-            <p className={`${isCinema ? 'text-2xl' : 'text-base'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
+            <p className={`${isCinema ? 'text-lg' : 'text-xs'} font-bold text-emerald-400/90 italic tracking-tight line-clamp-1`}>
               {item.slogan}
             </p>
           </div>
@@ -353,7 +361,7 @@ const SortCard = ({
         </div>
       </div>
 
-      <div className={`${isCinema ? 'p-10 flex-1' : 'p-4'} bg-black/10 flex flex-col justify-end`}>
+      <div className={`${isCinema ? 'p-6 flex-1' : 'p-3'} bg-black/10 flex flex-col justify-end`}>
         <SortChart 
           array={array}
           isCinema={isCinema}
@@ -367,7 +375,7 @@ const SortCard = ({
         {/* Bottom Description & Stats Bar */}
         <div className="mt-6 flex flex-col gap-4">
           <div className="min-h-[1.5em] flex items-center justify-center">
-             <p className={`${isCinema ? 'text-2xl' : 'text-sm'} font-bold italic text-center animate-in fade-in duration-300 ${
+             <p className={`${isCinema ? 'text-lg' : 'text-[12px]'} font-bold italic text-center animate-in fade-in duration-300 ${
                 description.includes("Comparing") 
                   ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
                   : description.includes("Swap")

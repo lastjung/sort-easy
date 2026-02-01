@@ -1,8 +1,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import ControlPanel from './components/ControlPanel';
 import Dashboard from './components/Dashboard';
 import FloatingActionDock from './components/FloatingActionDock';
+import Sidebar from './components/Sidebar';
 import { ALGORITHMS } from './algorithms';
 
 function App() {
@@ -68,23 +68,34 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 font-sans">
       {/* Background Gradient */}
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(67,56,202,0.15),transparent)] pointer-events-none" />
       
-      {/* Simplified Modern Header */}
-      <header className="relative z-50 w-full pt-8 pb-4 px-6 text-center">
-        <div className="flex flex-col items-center gap-2">
-            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic">
+      {/* Brand Header - Left Aligned */}
+      <header className="relative z-50 w-full pt-6 pb-2 px-10">
+        <div className="flex flex-col items-start gap-0.5">
+            <h1 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase italic drop-shadow-2xl">
                 SORT<span className="text-emerald-400">EASY</span>
             </h1>
-            <p className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-[0.4em] opacity-80">
-                Advanced Sorting Environment • v2.0
+            <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] opacity-80">
+                Advanced Environment Config v2.0
             </p>
         </div>
       </header>
 
-      <main className="relative">
+      <main className="relative lg:pr-60 transition-all duration-700">
+        {/* Desktop Configuration Sidebar (Hidden on Mobile) */}
+        <Sidebar 
+          arraySize={arraySize}
+          setArraySize={setArraySize}
+          speed={speed}
+          setSpeed={setSpeed}
+          selectedIds={selectedIds}
+          toggleSelect={toggleSelect}
+          isAnyActive={runState.running > 0 || runState.paused > 0}
+        />
+
         <Dashboard 
           data={data}
           arraySize={arraySize}
@@ -107,7 +118,7 @@ function App() {
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
           visibleCount={selectedIds.size}
-          // New Props for Drawer
+          // Props for Drawer (Mobile Mode)
           arraySize={arraySize}
           setArraySize={setArraySize}
           speed={speed}
@@ -117,13 +128,6 @@ function App() {
           isAnyActive={runState.running > 0 || runState.paused > 0}
         />
       </main>
-
-      {/* Footer */}
-      <footer className="mt-12 py-12 border-t border-white/5 text-center relative z-10">
-        <p className="text-slate-500 text-xs font-black tracking-[0.2em] uppercase">
-          SortEasy Pro • Elite Sorting Visualizer
-        </p>
-      </footer>
     </div>
   );
 }
