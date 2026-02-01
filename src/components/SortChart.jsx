@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { COLORS } from '../constants/colors';
 
 const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, isCinema }) => {
   
+  const swapSet = useMemo(() => new Set(swapIndices), [swapIndices]);
+  const compareSet = useMemo(() => new Set(compareIndices), [compareIndices]);
+  const goodSet = useMemo(() => new Set(goodIndices), [goodIndices]);
+  const sortedSet = useMemo(() => new Set(sortedIndices), [sortedIndices]);
+
   const getBarColorClass = (idx) => {
-    if (swapIndices.includes(idx)) return COLORS.SWAP;      
-    if (compareIndices.includes(idx)) return COLORS.COMPARE; 
-    if (goodIndices.includes(idx)) return COLORS.TARGET;    
-    if (sortedIndices.includes(idx)) {
+    if (swapSet.has(idx)) return COLORS.SWAP;      
+    if (compareSet.has(idx)) return COLORS.COMPARE; 
+    if (goodSet.has(idx)) return COLORS.TARGET;    
+    if (sortedSet.has(idx)) {
         return COLORS.SORTED;
     }
     return COLORS.UNSORTED;                                 

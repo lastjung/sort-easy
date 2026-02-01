@@ -55,20 +55,21 @@ const SortCard = ({
   const [elapsedTime, setElapsedTime] = useState(0);
   const [comparisons, setComparisons] = useState(0);
   const [swaps, setSwaps] = useState(0);
+  const comparisonsRef = useRef(0);
+  const swapsRef = useRef(0);
+  const arraySizeRef = useRef(arraySize);
 
   const sortingRef = useRef(false);
-  const pausedRef = useRef(false); // Ref for immediate access in wait()
-  // sessionIdRef: Prevents multiple sorting instances from overlapping.
-  // Each start increments this, and the active loop checks it to know if it should abort.
+  const pausedRef = useRef(false);
   const sessionIdRef = useRef(0);
   const speedRef = useRef(speed);
   const isTubeModeRef = useRef(isTubeMode);
   const sortedCountRef = useRef(0);
   const [tubeMultiplier, setTubeMultiplier] = useState(0.7);
-  const stepsRef = useRef(0); // For virtual progress
+  const stepsRef = useRef(0);
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
-  const baseTimeRef = useRef(0); 
+  const baseTimeRef = useRef(0);
   const onRunningRef = useRef(onRunning);
   const onCompleteRef = useRef(onComplete);
 
@@ -84,6 +85,18 @@ const SortCard = ({
   useEffect(() => { 
     isTubeModeRef.current = isTubeMode; 
   }, [isTubeMode]);
+  
+  useEffect(() => {
+    arraySizeRef.current = arraySize;
+  }, [arraySize]);
+
+  useEffect(() => {
+    comparisonsRef.current = comparisons;
+  }, [comparisons]);
+
+  useEffect(() => {
+    swapsRef.current = swaps;
+  }, [swaps]);
 
   useEffect(() => {
     sortedCountRef.current = sortedIndices.length;
@@ -132,6 +145,8 @@ const SortCard = ({
     setDescription({ text: "", type: MSG_TYPES.INFO });
     setComparisons(0);
     setSwaps(0);
+    comparisonsRef.current = 0;
+    swapsRef.current = 0;
   }, [initialArray, item.id]);
 
   // Responsive wait loop: Checks for pause/stop signals frequently.
@@ -144,8 +159,9 @@ const SortCard = ({
     if (isTubeModeRef.current) {
         // Calculate progress: combine real sorted bars + virtual progress from steps
         // estimatedTotalSteps for 16 bars is roughly 100-200.
-        const realProgress = sortedCountRef.current / arraySize;
-        const virtualProgress = Math.min(0.9, stepsRef.current / (arraySize * arraySize * 0.5));
+        const currentArraySize = arraySizeRef.current;
+        const realProgress = sortedCountRef.current / currentArraySize;
+        const virtualProgress = Math.min(0.9, stepsRef.current / (currentArraySize * currentArraySize * 0.5));
         const progress = Math.max(realProgress, virtualProgress);
         
         let tubeFactor = 0.7; // Start slow
@@ -210,7 +226,12 @@ const SortCard = ({
   }, [isSorting, isPaused]);
 
   const handleStart = useCallback(async () => {
-    const mySessionId = ++sessionIdRef.current;
+    // 0. Safety measure: Cleanup any existing session first
+    if (timerRef.current) clearInterval(timerRef.current);
+    sessionIdRef.current++;
+    
+    const mySessionId = sessionIdRef.current; // New session ID
+    
     sortingRef.current = true;
     setIsSorting(true);
     setIsPaused(false);
@@ -222,6 +243,9 @@ const SortCard = ({
     setGoodIndices([]);
     setComparisons(0);
     setSwaps(0);
+    comparisonsRef.current = 0;
+    swapsRef.current = 0;
+    
     setElapsedTime(0);
     setTubeMultiplier(0.7);
     stepsRef.current = 0;
@@ -266,17 +290,25 @@ const SortCard = ({
       },
       setDescription: (desc) => {
          checkSession();
-         setDescription(desc);
+         if (desc) setDescription(desc);
       },
       countCompare: () => {
          checkSession();
          stepsRef.current++;
-         setComparisons(prev => prev + 1);
+         setComparisons(prev => {
+            const next = prev + 1;
+            comparisonsRef.current = next; // Sync Ref immediately
+            return next;
+         });
       },
       countSwap: () => {
          checkSession();
          stepsRef.current++;
-         setSwaps(prev => prev + 1);
+         setSwaps(prev => {
+            const next = prev + 1;
+            swapsRef.current = next; // Sync Ref immediately
+            return next;
+         });
       },
       playSound,
       wait: async (f) => {
@@ -296,11 +328,11 @@ const SortCard = ({
         setGoodIndices([]);
         
         // Success Sweep Effect: Gradually fill sortedIndices for a 'scanning' feel
-        const allIndices = [...Array(arraySize).keys()];
-        for (let i = 0; i <= arraySize; i++) {
+        const allIndices = [...Array(arraySizeRef.current).keys()];
+        for (let i = 0; i <= arraySizeRef.current; i++) {
             if (mySessionId !== sessionIdRef.current) break;
             setSortedIndices(allIndices.slice(0, i));
-            if (i < arraySize) {
+            if (i < arraySizeRef.current) {
                 // Play a high-pitched success tone during sweep
                 playSound(880 + (i * 20), 'sine');
                 await new Promise(r => setTimeout(r, 30));
@@ -310,9 +342,9 @@ const SortCard = ({
         setDescription(msg.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
         if (onCompleteRef.current) {
           onCompleteRef.current(item.id, { 
-            time: baseTimeRef.current + (Date.now() - (isPaused ? 0 : startTimeRef.current)),
-            comparisons,
-            swaps 
+            time: baseTimeRef.current + (Date.now() - (pausedRef.current ? 0 : startTimeRef.current)),
+            comparisons: comparisonsRef.current, // Use Ref for fresh value
+            swaps: swapsRef.current // Use Ref for fresh value
           }); 
         }
       }
@@ -376,6 +408,11 @@ const SortCard = ({
 
   useEffect(() => {
     return () => {
+      // Cleanup on unmount
+      sessionIdRef.current++; // Invalidate any running session
+      sortingRef.current = false;
+      if (timerRef.current) clearInterval(timerRef.current);
+      
       if (onRunningRef.current) {
         onRunningRef.current(item.id, { sorting: false, paused: false });
       }
@@ -391,7 +428,7 @@ const SortCard = ({
   const getDescriptionClass = () => {
     if (isPaused) return 'text-amber-500/60 grayscale-[0.5]';
     
-    switch (description.type) {
+    switch (description?.type) {
       case MSG_TYPES.COMPARE: return 'text-amber-300 drop-shadow-[0_0_12px_rgba(252,211,77,0.5)]';
       case MSG_TYPES.SWAP: return 'text-rose-400 drop-shadow-[0_0_12px_rgba(251,113,133,0.5)]';
       case MSG_TYPES.TARGET: return 'text-fuchsia-400 drop-shadow-[0_0_12px_rgba(232,121,249,0.5)]';
@@ -456,7 +493,7 @@ const SortCard = ({
                </div>
              )}
              <p className={`${isCinema ? 'text-2xl' : 'text-base md:text-2xl'} font-black italic text-center animate-in fade-in slide-in-from-bottom-2 duration-300 ${getDescriptionClass()}`}>
-                {description.text || "Ready to sort..."}
+                {description?.text || "Ready to sort..."}
              </p>
           </div>
           
@@ -478,7 +515,7 @@ const SortCard = ({
             <div className={`w-px ${isCinema ? 'h-6' : 'h-2.5'} bg-white/10`} />
             <div className="flex items-center gap-1.5 md:gap-2">
               <Zap size={isCinema ? 20 : 10} className="text-amber-500/70" />
-              <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{(speed * tubeMultiplier).toFixed(0)}</span>
+              <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{((speed || 0) * (tubeMultiplier || 1)).toFixed(0)}</span>
             </div>
           </div>
         </div>
