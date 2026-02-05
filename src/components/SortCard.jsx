@@ -466,7 +466,7 @@ const SortCard = ({
   return (
     <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-700 group ${
       isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''
-    } ${isCinema && isTubeMode ? 'translate-y-[-80px] scale-[0.98]' : ''}`}>
+    } ${isCinema && isTubeMode ? 'translate-y-[-40px] scale-[0.98]' : ''}`}>
       <div className={`${isCinema ? 'p-6' : 'p-3 md:p-4'} bg-white/5 border-b border-white/5 flex flex-col gap-1.5 order-first`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 min-w-0">

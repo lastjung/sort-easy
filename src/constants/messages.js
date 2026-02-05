@@ -25,8 +25,8 @@ export const ALGO_MESSAGES = {
   insertion: {
     START: { text: "Starting Insertion Sort...", type: MSG_TYPES.INFO },
     PICK: { text: "Picking Active Bar", type: MSG_TYPES.TARGET },
-    COMPARE: { text: "Comparing with Sorted Section", type: MSG_TYPES.COMPARE },
-    SHIFT: { text: "Shifting Larger Bar", type: MSG_TYPES.SWAP },
+    COMPARE: { text: "Reverse Bubbling...", type: MSG_TYPES.SUCCESS },
+    SHIFT: { text: "Reverse Bubbling...", type: MSG_TYPES.SUCCESS },
     INSERT: { text: "Inserting Active Bar", type: MSG_TYPES.SUCCESS },
     FINISHED: { text: "Insertion Sort Completed!", type: MSG_TYPES.SUCCESS }
   },

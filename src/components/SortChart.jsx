@@ -9,11 +9,15 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
   const sortedSet = useMemo(() => new Set(sortedIndices), [sortedIndices]);
 
   const getBarColorClass = (idx) => {
-    if (swapSet.has(idx)) return COLORS.SWAP;      
+    // 스왑 중: 피벗(goodSet)은 보라색 유지, 상대는 초록색
+    if (swapSet.has(idx)) {
+      if (goodSet.has(idx)) return COLORS.TARGET; // 피벗은 보라색 유지
+      return COLORS.SORTED; // 스왑 상대는 초록색
+    }
     if (compareSet.has(idx)) return COLORS.COMPARE; 
     if (goodSet.has(idx)) return COLORS.TARGET;    
-    if (groupIndices[idx]) return groupIndices[idx]; // Custom Group Color (Pivot Walls) takes priority
     if (sortedSet.has(idx)) return COLORS.SORTED;
+    if (groupIndices[idx] && groupIndices[idx].startsWith('bg-')) return groupIndices[idx];
     return COLORS.UNSORTED;                                 
   };
 
@@ -41,7 +45,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
             style={{ 
               height: `${(value / maxVal) * 92 + 3}%`,
               marginRight: hasGap ? (isCinema ? '24px' : '10px') : '0px',
-              transition: 'background-color 75ms linear, margin-right 700ms ease-out, height 700ms ease-out'
+              transition: 'background-color 75ms linear, margin-right 300ms ease-out, height 700ms ease-out'
             }}
           >
             {/* Pivot Order Badge */}
