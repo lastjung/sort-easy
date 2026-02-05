@@ -16,10 +16,10 @@ export const ALGO_MESSAGES = {
   },
   selection: {
     START: { text: "Starting Selection Sort...", type: MSG_TYPES.INFO },
-    SCAN: { text: "Scanning for Minimum", type: MSG_TYPES.COMPARE },
-    NEW_MIN: { text: "New Small Bar Found", type: MSG_TYPES.SWAP },
+    SCAN: { text: "Scanning for Minimum...", type: MSG_TYPES.SUCCESS },
+    NEW_MIN: { text: "New Minimum Found!", type: MSG_TYPES.SUCCESS },
     TARGET: { text: "Targeting Next Position", type: MSG_TYPES.TARGET },
-    SWAP: { text: "Swapping Target with Small Bar", type: MSG_TYPES.SWAP },
+    SWAP: { text: "Swapping to Front", type: MSG_TYPES.SUCCESS },
     FINISHED: { text: "Selection Sort Completed!", type: MSG_TYPES.SUCCESS }
   },
   insertion: {
