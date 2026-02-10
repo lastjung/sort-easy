@@ -363,7 +363,7 @@ const SortCard = ({
             }
         }
 
-        setDescription(msg.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
+        setDescription(helpers.msg.FINISHED || { text: "COMPLETED! ✨", type: MSG_TYPES.SUCCESS });
         if (onCompleteRef.current) {
           onCompleteRef.current(item.id, { 
             time: baseTimeRef.current + (Date.now() - (pausedRef.current ? 0 : startTimeRef.current)),
@@ -510,6 +510,7 @@ const SortCard = ({
           compareIndices={compareIndices}
           groupIndices={groupIndices}
           pivotOrders={pivotOrders}
+          title={item.title}
         />
         
         {/* Bottom Description & Stats Bar */}

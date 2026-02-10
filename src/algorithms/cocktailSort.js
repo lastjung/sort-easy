@@ -14,6 +14,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
             setCompareIndices([i, i + 1]);
             setDescription(msg.COMPARE);
             countCompare(); 
+            playSound(200 + arr[i] * 5, 'sine');
             if (!(await wait(1))) break; // Compare 1.0
             
             if (arr[i] > arr[i + 1]) {
@@ -21,6 +22,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
                 setArray([...arr]); setSwapIndices([i, i + 1]);
                 countSwap(); 
                 setDescription(msg.SWAP);
+                playSound(100 + arr[i] * 5, 'sawtooth');
                 swapped = true; 
                 if (!(await wait(1))) break; // Action 1.0
                 setSwapIndices([]);
@@ -30,6 +32,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         swapped = false;
         sortedIndices.push(end);
         setSortedIndices([...sortedIndices]);
+        playSound(600, 'square');
         end--;
         if (!(await wait(0.5))) break; // Outro 0.5
 
@@ -41,6 +44,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
             setCompareIndices([i, i + 1]);
             setDescription(msg.COMPARE);
             countCompare(); 
+            playSound(200 + arr[i] * 5, 'sine');
             if (!(await wait(1))) break; // Compare 1.0
             
             if (arr[i] > arr[i + 1]) {
@@ -48,6 +52,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
                 setArray([...arr]); setSwapIndices([i, i + 1]);
                 countSwap(); 
                 setDescription(msg.SWAP);
+                playSound(100 + arr[i] * 5, 'sawtooth');
                 swapped = true; 
                 if (!(await wait(1))) break; // Action 1.0
                 setSwapIndices([]);
@@ -55,6 +60,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         }
         sortedIndices.push(start);
         setSortedIndices([...sortedIndices]);
+        playSound(600, 'square');
         start++;
         if (!(await wait(0.5))) break; // Outro 0.5
     }

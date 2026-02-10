@@ -10,10 +10,21 @@ function App() {
   const [speed, setSpeed] = useState(50);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [volume, setVolume] = useState(0.1);
-  const [selectedIds, setSelectedIds] = useState(new Set(['bubble']));
+  const [selectedIds, setSelectedIds] = useState(new Set(['heap']));
   const [isTubeMode, setIsTubeMode] = useState(false);
   
-  const [data, setData] = useState([]);
+  const makeArray = useCallback((size) => {
+    const newArray = [];
+    for (let i = 1; i <= size; i++) newArray.push(i);
+    // Shuffle
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  }, []);
+
+  const [data, setData] = useState(() => makeArray(16));
   const [triggerRun, setTriggerRun] = useState(0);   // Global Start signal
   const [triggerResume, setTriggerResume] = useState(0); // Global Resume signal
   const [triggerStop, setTriggerStop] = useState(0);  // Global Pause signal
@@ -22,16 +33,9 @@ function App() {
 
   // Initial data generation
   const generateData = useCallback(() => {
-    const newArray = [];
-    for (let i = 1; i <= arraySize; i++) newArray.push(i);
-    // Shuffle
-    for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    setData(newArray);
+    setData(makeArray(arraySize));
     setRunState({ running: 0, paused: 0 });
-  }, [arraySize]);
+  }, [arraySize, makeArray]);
 
   useEffect(() => {
     generateData();
@@ -98,7 +102,7 @@ function App() {
         </div>
       </header>
 
-      <main className="relative lg:pr-60 transition-all duration-700">
+      <main className="relative lg:pr-80 transition-all duration-700">
         {/* Desktop Configuration Sidebar (Hidden on Mobile) */}
         <Sidebar 
           arraySize={arraySize}

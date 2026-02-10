@@ -15,11 +15,13 @@ export const shellSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 setCompareIndices([j, j - gap]);
                 countCompare();
                 setDescription(msg.COMPARE);
+                playSound(200 + arr[j - gap] * 5, 'sine');
                 if (!(await wait(1))) break; // Compare 1.0
                 arr[j] = arr[j - gap];
                 countSwap();
                 setArray([...arr]);
                 setDescription(msg.SWAP);
+                playSound(100 + arr[j] * 5, 'sawtooth');
                 setSwapIndices([j, j - gap]);
                 if (!(await wait(1))) break; // Action 1.0
                 j -= gap;
@@ -28,6 +30,7 @@ export const shellSort = async ({ array, setArray, setCompareIndices, setSwapInd
             countSwap();
             setArray([...arr]);
             setSwapIndices([j]);
+            playSound(600, 'square');
             if (!(await wait(1))) break; // Action 1.0
             if (!(await wait(0.5))) break; // Outro 0.5
         }
