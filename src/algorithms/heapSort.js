@@ -6,7 +6,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     let sortedIndices = [];
 
     // --- NEW: Mapping Walkthrough Intro (Back and Forth) ---
-    setDescription({ type: 'INFO', text: "Tree-to-bar mapping walkthrough" });
+    setDescription({ type: 'INFO', text: "Mapping walkthrough..." });
     
     // Forward: 0 -> n-1
     for (let i = 0; i < n; i++) {
@@ -29,7 +29,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
 
         if (left < n) {
             setCompareIndices([parent, left]);
-            setDescription({ type: 'COMPARE', text: `Compare parent (level ${getFloor(parent)}: ${arr[parent]}) with left child (level ${getFloor(left)}: ${arr[left]})` });
+            setDescription({ type: 'COMPARE', text: "Comparing Parent and Child" });
             countCompare();
             playSound(200 + arr[left] * 5, 'sine');
             if (!(await wait(1))) return;
@@ -40,7 +40,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         }
         if (right < n) {
             setCompareIndices([parent, right]);
-            setDescription({ type: 'COMPARE', text: `Compare parent (level ${getFloor(parent)}: ${arr[parent]}) with right child (level ${getFloor(right)}: ${arr[right]})` });
+            setDescription({ type: 'COMPARE', text: "Comparing Parent and Child" });
             countCompare();
             playSound(200 + arr[right] * 5, 'sine');
             if (!(await wait(1))) return;
@@ -51,7 +51,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
 
         if (largest !== i) {
             setSwapIndices([i, largest]);
-            setDescription({ type: 'SWAP', text: `Swap nodes at level ${getFloor(i)} and level ${getFloor(largest)}` });
+            setDescription({ type: 'SWAP', text: "Swapping Nodes" });
             countSwap();
             playSound(100 + arr[largest] * 5, 'sawtooth');
             [arr[i], arr[largest]] = [arr[largest], arr[i]];
@@ -63,7 +63,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     };
 
     // --- Phase 1: Build Max Heap ---
-    setDescription({ type: 'INFO', text: "Phase 1: Build a max-heap (parents are larger than children)." });
+    setDescription({ type: 'TARGET', text: "Building Max Heap..." });
     if (!(await wait(2))) return false;
 
     // Build heap bottom-up, but left-to-right within each level for clearer visualization.
@@ -76,24 +76,24 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             for (let i = levelStart; i <= levelEnd; i++) {
                 if (i > lastParent) break;
                 if (!sortingRef.current) break;
-                setDescription({ type: 'INFO', text: `[Build Heap] Fix parent and children at position ${i + 1}.` });
+                setDescription({ type: 'INFO', text: `Fixing position ${i + 1}...` });
                 await heapify(n, i);
             }
             if (!sortingRef.current) break;
         }
     }
     
-    setDescription({ type: 'INFO', text: "Heap built! The largest value is at the top (position 1)." });
+    setDescription({ type: 'INFO', text: "Max Heap Built! ✨" });
     if (!(await wait(2.5))) return false;
 
     // --- Phase 2: Actual Sorting ---
-    setDescription({ type: 'INFO', text: "Phase 2: Move the top value to the end, one by one." });
+    setDescription({ type: 'TARGET', text: "Sorting: Extracting Max..." });
     if (!(await wait(2))) return false;
 
     for (let i = n - 1; i > 0; i--) {
         if (!sortingRef.current) break;
         
-        setDescription({ type: 'INFO', text: `Top value (${arr[0]}) is the max, move it to the end (position ${i + 1}).` });
+        setDescription({ type: 'SWAP', text: `Extracting Max to Position ${i + 1}` });
         if (!(await wait(1.5))) break;
 
         setSwapIndices([0, i]);
@@ -108,7 +108,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         playSound(600, 'square');
         setSwapIndices([]);
         
-        setDescription({ type: 'INFO', text: `Re-heapify after the swap to restore the max at the top.` });
+        setDescription({ type: 'INFO', text: `Restoring heap...` });
         if (!(await wait(1.5))) break;
         await heapify(i, 0);
     }
@@ -116,6 +116,6 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     if (!sortingRef.current) return false;
 
     setSortedIndices([...Array(n).keys()]);
-    setDescription({ type: 'SUCCESS', text: "Sorting complete! Perfect order achieved." });
+    setDescription({ type: 'SUCCESS', text: "Sorting Complete! ✨" });
     return true;
 };
