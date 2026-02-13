@@ -39,6 +39,8 @@ const SortCard = ({
   triggerResume, // To resume from outside
   triggerStop, // To stop from outside
   triggerReset, // To reset from outside
+  triggerStepBack, // To step backward from outside
+  triggerStepForward, // To step forward from outside
   onComplete,
   onRunning, // To notify parent about execution state
   isTubeMode
@@ -74,6 +76,49 @@ const SortCard = ({
   const baseTimeRef = useRef(0);
   const onRunningRef = useRef(onRunning);
   const onCompleteRef = useRef(onComplete);
+  const historyRef = useRef([]);
+  const historyIndexRef = useRef(-1);
+  const captureHistoryRef = useRef(false);
+  const isApplyingSnapshotRef = useRef(false);
+  const currentSnapshotRef = useRef(null);
+  const MAX_HISTORY_STEPS = 3;
+  const compareIndicesRef = useRef([]);
+  const swapIndicesRef = useRef([]);
+  const goodIndicesRef = useRef([]);
+  const sortedIndicesStateRef = useRef([]);
+  const groupIndicesRef = useRef({});
+  const pivotOrdersRef = useRef({});
+  const descriptionRef = useRef({ text: "", type: MSG_TYPES.INFO });
+  const elapsedTimeRef = useRef(0);
+
+  const cloneSnapshot = useCallback((snapshot) => ({
+    array: [...(snapshot.array || [])],
+    compareIndices: [...(snapshot.compareIndices || [])],
+    swapIndices: [...(snapshot.swapIndices || [])],
+    goodIndices: [...(snapshot.goodIndices || [])],
+    sortedIndices: [...(snapshot.sortedIndices || [])],
+    groupIndices: { ...(snapshot.groupIndices || {}) },
+    pivotOrders: { ...(snapshot.pivotOrders || {}) },
+    description: typeof snapshot.description === 'object' && snapshot.description !== null
+      ? { ...snapshot.description }
+      : { text: String(snapshot.description || ''), type: MSG_TYPES.INFO },
+    comparisons: snapshot.comparisons || 0,
+    swaps: snapshot.swaps || 0,
+    elapsedTime: snapshot.elapsedTime || 0
+  }), []);
+
+  const pushHistorySnapshot = useCallback((snapshotPatch = null) => {
+    if (!captureHistoryRef.current || !currentSnapshotRef.current || isApplyingSnapshotRef.current) return;
+    if (snapshotPatch) {
+      currentSnapshotRef.current = { ...currentSnapshotRef.current, ...snapshotPatch };
+    }
+    const cloned = cloneSnapshot(currentSnapshotRef.current);
+    historyRef.current.push(cloned);
+    if (historyRef.current.length > MAX_HISTORY_STEPS) {
+      historyRef.current = historyRef.current.slice(-MAX_HISTORY_STEPS);
+    }
+    historyIndexRef.current = historyRef.current.length - 1;
+  }, [cloneSnapshot]);
 
   // Sync refs
   useEffect(() => { 
@@ -103,6 +148,30 @@ const SortCard = ({
   useEffect(() => {
     sortedCountRef.current = sortedIndices.length;
   }, [sortedIndices]);
+  useEffect(() => {
+    compareIndicesRef.current = compareIndices;
+  }, [compareIndices]);
+  useEffect(() => {
+    swapIndicesRef.current = swapIndices;
+  }, [swapIndices]);
+  useEffect(() => {
+    goodIndicesRef.current = goodIndices;
+  }, [goodIndices]);
+  useEffect(() => {
+    sortedIndicesStateRef.current = sortedIndices;
+  }, [sortedIndices]);
+  useEffect(() => {
+    groupIndicesRef.current = groupIndices;
+  }, [groupIndices]);
+  useEffect(() => {
+    pivotOrdersRef.current = pivotOrders;
+  }, [pivotOrders]);
+  useEffect(() => {
+    descriptionRef.current = description;
+  }, [description]);
+  useEffect(() => {
+    elapsedTimeRef.current = elapsedTime;
+  }, [elapsedTime]);
 
   useEffect(() => { 
     pausedRef.current = isPaused;
@@ -117,12 +186,50 @@ const SortCard = ({
     if (!sortingRef.current) return;
     
     sortingRef.current = false;
+    pausedRef.current = false;
     setIsSorting(false);
+    setIsPaused(false);
     sessionIdRef.current++; // Instant session kill
     
     if (timerRef.current) clearInterval(timerRef.current);
-    baseTimeRef.current += Date.now() - startTimeRef.current;
-  }, [item.id]);
+  }, []);
+
+  const applySnapshot = useCallback((snapshot) => {
+    if (!snapshot) return;
+    const cloned = cloneSnapshot(snapshot);
+    currentSnapshotRef.current = cloned;
+    setArray(cloned.array);
+    arrayRef.current = cloned.array;
+    setCompareIndices(cloned.compareIndices);
+    setSwapIndices(cloned.swapIndices);
+    setGoodIndices(cloned.goodIndices);
+    setSortedIndices(cloned.sortedIndices);
+    setGroupIndices(cloned.groupIndices);
+    setPivotOrders(cloned.pivotOrders);
+    setDescription(cloned.description);
+    setComparisons(cloned.comparisons);
+    setSwaps(cloned.swaps);
+    setElapsedTime(cloned.elapsedTime);
+    comparisonsRef.current = cloned.comparisons;
+    swapsRef.current = cloned.swaps;
+  }, [cloneSnapshot]);
+
+  const stepHistory = useCallback((direction) => {
+    const history = historyRef.current;
+    if (history.length === 0) return;
+
+    if (sortingRef.current) stopSorting();
+
+    const nextIndex = Math.max(0, Math.min(historyIndexRef.current + direction, history.length - 1));
+    if (nextIndex === historyIndexRef.current) return;
+
+    isApplyingSnapshotRef.current = true;
+    applySnapshot(history[nextIndex]);
+    historyIndexRef.current = nextIndex;
+    setTimeout(() => {
+      isApplyingSnapshotRef.current = false;
+    }, 0);
+  }, [applySnapshot, stopSorting]);
 
   const localReset = useCallback(() => {
     // 1. Kill animation session immediately (Force STOP)
@@ -157,6 +264,10 @@ const SortCard = ({
     setArray(freshArray);
     arrayRef.current = freshArray;
     setDescription({ text: "", type: MSG_TYPES.INFO });
+    captureHistoryRef.current = false;
+    historyRef.current = [];
+    historyIndexRef.current = -1;
+    currentSnapshotRef.current = null;
     
     // Safety delay to ensure React state batching completes
   }, [initialArray, item.id]);
@@ -247,6 +358,9 @@ const SortCard = ({
     setIsSorting(true);
     setIsPaused(false);
     pausedRef.current = false;
+    captureHistoryRef.current = true;
+    historyRef.current = [];
+    historyIndexRef.current = -1;
     
     setSortedIndices([]);
     setCompareIndices([]);
@@ -265,12 +379,27 @@ const SortCard = ({
     stepsRef.current = 0;
     baseTimeRef.current = 0;
     startTimeRef.current = Date.now();
-    setDescription({ text: "Initializing...", type: MSG_TYPES.INFO });
+    const startDescription = { text: "Initializing...", type: MSG_TYPES.INFO };
+    setDescription(startDescription);
     
     // CRITICAL: Always reset to initial unscented data on a fresh start
     const freshArray = [...initialArray];
     setArray(freshArray);
     arrayRef.current = freshArray;
+    currentSnapshotRef.current = {
+      array: [...freshArray],
+      compareIndices: [],
+      swapIndices: [],
+      goodIndices: [],
+      sortedIndices: [],
+      groupIndices: {},
+      pivotOrders: {},
+      description: startDescription,
+      comparisons: 0,
+      swaps: 0,
+      elapsedTime: 0
+    };
+    pushHistorySnapshot();
     
     timerRef.current = setInterval(() => {
       setElapsedTime(baseTimeRef.current + (Date.now() - startTimeRef.current));
@@ -285,51 +414,65 @@ const SortCard = ({
       setArray: (newArr) => {
          checkSession();
          setArray(newArr);
+         const clonedArray = [...newArr];
+         arrayRef.current = clonedArray;
+         pushHistorySnapshot({ array: clonedArray });
       },
       setCompareIndices: (indices) => {
          checkSession();
          setCompareIndices(indices);
+         pushHistorySnapshot({ compareIndices: [...indices] });
       },
       setSwapIndices: (indices) => {
          checkSession();
          setSwapIndices(indices);
+         pushHistorySnapshot({ swapIndices: [...indices] });
       },
       setGoodIndices: (indices) => {
          checkSession();
          setGoodIndices(indices);
+         pushHistorySnapshot({ goodIndices: [...indices] });
       },
       setSortedIndices: (indices) => {
          checkSession();
          setSortedIndices(indices);
+         pushHistorySnapshot({ sortedIndices: [...indices] });
       },
       setGroupIndices: (indicesMap) => {
          checkSession();
          setGroupIndices(indicesMap);
+         pushHistorySnapshot({ groupIndices: { ...indicesMap } });
       },
       setPivotOrders: (ordersMap) => {
          checkSession();
          setPivotOrders(ordersMap);
+         pushHistorySnapshot({ pivotOrders: { ...ordersMap } });
       },
       setDescription: (desc) => {
          checkSession();
          if (desc) setDescription(desc);
+         if (desc) pushHistorySnapshot({
+           description: typeof desc === 'object' ? { ...desc } : { text: String(desc), type: MSG_TYPES.INFO }
+         });
       },
       countCompare: () => {
          checkSession();
          stepsRef.current++;
+         const next = comparisonsRef.current + 1;
+         comparisonsRef.current = next;
+         pushHistorySnapshot({ comparisons: next });
          setComparisons(prev => {
-            const next = prev + 1;
-            comparisonsRef.current = next; // Sync Ref immediately
-            return next;
+            return prev + 1;
          });
       },
       countSwap: () => {
          checkSession();
          stepsRef.current++;
+         const next = swapsRef.current + 1;
+         swapsRef.current = next;
+         pushHistorySnapshot({ swaps: next });
          setSwaps(prev => {
-            const next = prev + 1;
-            swapsRef.current = next; // Sync Ref immediately
-            return next;
+            return prev + 1;
          });
       },
       playSound,
@@ -381,7 +524,7 @@ const SortCard = ({
           if (timerRef.current) clearInterval(timerRef.current);
       }
     }
-  }, [arraySize, item, wait, playSound, isSorting, isPaused, togglePause]);
+  }, [arraySize, item, wait, playSound, isSorting, isPaused, togglePause, initialArray, pushHistorySnapshot]);
 
   // --- 2. Side Effects (Triggers & Sync) ---
   // Signals from parent (App/Dashboard) to control sorting state globally.
@@ -389,6 +532,8 @@ const SortCard = ({
   const lastRunTrigger = React.useRef(triggerRun);
   const lastResumeTrigger = React.useRef(triggerResume);
   const lastStopTrigger = React.useRef(triggerStop);
+  const lastStepBackTrigger = React.useRef(triggerStepBack);
+  const lastStepForwardTrigger = React.useRef(triggerStepForward);
 
   useEffect(() => {
     if (triggerRun > lastRunTrigger.current) {
@@ -417,6 +562,20 @@ const SortCard = ({
   }, [triggerStop, togglePause]);
 
   useEffect(() => {
+    if (triggerStepBack > lastStepBackTrigger.current) {
+      lastStepBackTrigger.current = triggerStepBack;
+      stepHistory(-1);
+    }
+  }, [triggerStepBack, stepHistory]);
+
+  useEffect(() => {
+    if (triggerStepForward > lastStepForwardTrigger.current) {
+      lastStepForwardTrigger.current = triggerStepForward;
+      stepHistory(1);
+    }
+  }, [triggerStepForward, stepHistory]);
+
+  useEffect(() => {
     localReset();
   }, [initialArray, triggerReset, localReset]);
 
@@ -429,6 +588,28 @@ const SortCard = ({
   useEffect(() => { 
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  useEffect(() => {
+    if (!isSorting || isPaused || !captureHistoryRef.current) return;
+    const interval = setInterval(() => {
+      currentSnapshotRef.current = {
+        array: [...arrayRef.current],
+        compareIndices: [...compareIndicesRef.current],
+        swapIndices: [...swapIndicesRef.current],
+        goodIndices: [...goodIndicesRef.current],
+        sortedIndices: [...sortedIndicesStateRef.current],
+        groupIndices: { ...groupIndicesRef.current },
+        pivotOrders: { ...pivotOrdersRef.current },
+        description: descriptionRef.current ? { ...descriptionRef.current } : { text: "", type: MSG_TYPES.INFO },
+        comparisons: comparisonsRef.current,
+        swaps: swapsRef.current,
+        elapsedTime: elapsedTimeRef.current
+      };
+      pushHistorySnapshot();
+    }, 120);
+
+    return () => clearInterval(interval);
+  }, [isSorting, isPaused, pushHistorySnapshot]);
 
   useEffect(() => {
     return () => {
@@ -525,7 +706,6 @@ const SortCard = ({
                 {description?.text || "Ready to sort..."}
              </p>
           </div>
-          
           <div className={`flex items-center justify-center ${isCinema ? 'gap-8 md:gap-12 py-3' : 'gap-3 md:gap-6 py-1.5'} border-t border-white/5 opacity-80`}>
             <div className="flex items-center gap-1.5 md:gap-2">
               <Timer size={isCinema ? 20 : 10} className="text-emerald-400/70" />

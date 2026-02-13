@@ -10,7 +10,7 @@ function App() {
   const [speed, setSpeed] = useState(50);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [volume, setVolume] = useState(0.1);
-  const [selectedIds, setSelectedIds] = useState(new Set(['heap']));
+  const [selectedIds, setSelectedIds] = useState(new Set(['shell']));
   const [isTubeMode, setIsTubeMode] = useState(false);
   
   const makeArray = useCallback((size) => {
@@ -29,6 +29,8 @@ function App() {
   const [triggerResume, setTriggerResume] = useState(0); // Global Resume signal
   const [triggerStop, setTriggerStop] = useState(0);  // Global Pause signal
   const [triggerReset, setTriggerReset] = useState(0); // Global Reset signal (increments to trigger)
+  const [triggerStepBack, setTriggerStepBack] = useState(0); // Global Step Back signal
+  const [triggerStepForward, setTriggerStepForward] = useState(0); // Global Step Forward signal
   const [runState, setRunState] = useState({ running: 0, paused: 0 });
 
   // Initial data generation
@@ -76,6 +78,14 @@ function App() {
 
   const handleDeselectAll = useCallback(() => {
     setSelectedIds(new Set());
+  }, []);
+
+  const handleStepBack = useCallback(() => {
+    setTriggerStepBack(prev => prev + 1);
+  }, []);
+
+  const handleStepForward = useCallback(() => {
+    setTriggerStepForward(prev => prev + 1);
   }, []);
 
   const handleRunningChange = useCallback((state) => {
@@ -127,6 +137,8 @@ function App() {
           triggerResume={triggerResume}
           triggerStop={triggerStop}
           triggerReset={triggerReset}
+          triggerStepBack={triggerStepBack}
+          triggerStepForward={triggerStepForward}
           selectedIds={selectedIds}
           onRunningChange={handleRunningChange}
         />
@@ -152,6 +164,8 @@ function App() {
           onSelectAll={handleSelectAll}
           onDeselectAll={handleDeselectAll}
           isAnyActive={runState.running > 0 || runState.paused > 0}
+          onStepBack={handleStepBack}
+          onStepForward={handleStepForward}
         />
       </main>
     </div>
