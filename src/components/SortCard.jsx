@@ -39,8 +39,6 @@ const SortCard = ({
   triggerResume, // To resume from outside
   triggerStop, // To stop from outside
   triggerReset, // To reset from outside
-  triggerStepBack, // To step backward from outside
-  triggerStepForward, // To step forward from outside
   onComplete,
   onRunning, // To notify parent about execution state
   isTubeMode
@@ -358,7 +356,8 @@ const SortCard = ({
     setIsSorting(true);
     setIsPaused(false);
     pausedRef.current = false;
-    captureHistoryRef.current = true;
+    // Step history is disabled; keep single-run execution only.
+    captureHistoryRef.current = false;
     historyRef.current = [];
     historyIndexRef.current = -1;
     
@@ -532,8 +531,6 @@ const SortCard = ({
   const lastRunTrigger = React.useRef(triggerRun);
   const lastResumeTrigger = React.useRef(triggerResume);
   const lastStopTrigger = React.useRef(triggerStop);
-  const lastStepBackTrigger = React.useRef(triggerStepBack);
-  const lastStepForwardTrigger = React.useRef(triggerStepForward);
 
   useEffect(() => {
     if (triggerRun > lastRunTrigger.current) {
@@ -560,20 +557,6 @@ const SortCard = ({
       }
     }
   }, [triggerStop, togglePause]);
-
-  useEffect(() => {
-    if (triggerStepBack > lastStepBackTrigger.current) {
-      lastStepBackTrigger.current = triggerStepBack;
-      stepHistory(-1);
-    }
-  }, [triggerStepBack, stepHistory]);
-
-  useEffect(() => {
-    if (triggerStepForward > lastStepForwardTrigger.current) {
-      lastStepForwardTrigger.current = triggerStepForward;
-      stepHistory(1);
-    }
-  }, [triggerStepForward, stepHistory]);
 
   useEffect(() => {
     localReset();

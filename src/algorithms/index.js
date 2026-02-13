@@ -7,6 +7,9 @@ import { mergeSort } from './mergeSort';
 import { heapSort } from './heapSort';
 import { shellSort } from './shellSort';
 import { cocktailSort } from './cocktailSort';
+import { combSort } from './combSort';
+import { introSort } from './introSort';
+import { countingSort } from './countingSort';
 
 export {
     bubbleSort,
@@ -16,7 +19,10 @@ export {
     mergeSort,
     heapSort,
     shellSort,
-    cocktailSort
+    cocktailSort,
+    combSort,
+    introSort,
+    countingSort
 };
 
 export const ALGORITHMS = [
@@ -91,5 +97,32 @@ export const ALGORITHMS = [
         desc: 'Bidirectional bubble sort, shaking elements both ways.',
         icon: '🍹',
         slogan: "Find the endpoints with bidirectional bubbling!"
+    },
+    { 
+        id: 'comb', 
+        title: 'Comb Sort', 
+        fn: combSort, 
+        complexity: 'O(n²)', 
+        desc: 'Improves bubble sort by comparing items with a shrinking gap.',
+        icon: '🪮',
+        slogan: "Sweep wide first, then fine-tune with tighter gaps!"
+    },
+    { 
+        id: 'intro', 
+        title: 'Intro Sort', 
+        fn: introSort, 
+        complexity: 'O(n log n)', 
+        desc: 'Starts with quick sort and falls back to safer strategies.',
+        icon: '🧠',
+        slogan: "Quick by default, safe by design under pressure!"
+    },
+    { 
+        id: 'counting', 
+        title: 'Counting Sort', 
+        fn: countingSort, 
+        complexity: 'O(n + k)', 
+        desc: 'Counts frequencies of values and writes back in order.',
+        icon: '🧮',
+        slogan: "Count first, then place each value in sorted order!"
     }
 ];

@@ -2,6 +2,10 @@
 
 **SortEasy Pro** is a premium, high-performance sorting algorithm visualizer designed for educators and YouTube content creators. Experience sorting algorithms in a stunning "Deep Sea Emerald" theme with professional-grade UI/UX.
 
+## Live Demo
+
+https://lastjung.github.io/sort-easy/
+
 ## ✨ Key Features
 
 - **8+ Core Algorithms**:

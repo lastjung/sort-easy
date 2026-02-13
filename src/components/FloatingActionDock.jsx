@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, RotateCcw, Volume2, VolumeX, Pause, Settings, CheckCircle, Circle, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
+import { Play, RotateCcw, Volume2, VolumeX, Pause, Settings, CheckCircle, Circle, Zap } from 'lucide-react';
 import { ALGORITHMS } from '../algorithms';
 
 const FloatingActionDock = ({
@@ -22,9 +22,7 @@ const FloatingActionDock = ({
   onDeselectAll,
   isAnyActive,
   isTubeMode,
-  setIsTubeMode,
-  onStepBack,
-  onStepForward
+  setIsTubeMode
 }) => {
   const [showConfig, setShowConfig] = useState(false);
   const mainLabel = isAnyRunning ? 'Pause All' : isAnyPaused ? 'Resume All' : (isAnyActive ? 'Re-run All' : 'Run All');
@@ -137,26 +135,6 @@ const FloatingActionDock = ({
           title={isTubeMode ? "Disable Tube Mode" : "Enable Tube Mode (Speed Up + Shorts UI Space)"}
         >
           <Zap size={20} fill={isTubeMode ? "currentColor" : "none"} className={isTubeMode ? "opacity-90" : ""} />
-        </button>
-
-        <div className="w-px h-6 bg-white/10 mx-0.5" />
-
-        {/* Step Back / Forward */}
-        <button
-          onClick={onStepBack}
-          disabled={visibleCount === 0}
-          className="relative p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Step Back"
-        >
-          <ChevronLeft size={16} />
-        </button>
-        <button
-          onClick={onStepForward}
-          disabled={visibleCount === 0}
-          className="relative p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Step Forward"
-        >
-          <ChevronRight size={16} />
         </button>
 
         <div className="w-px h-6 bg-white/10 mx-0.5" />

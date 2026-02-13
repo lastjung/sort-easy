@@ -66,5 +66,27 @@ export const ALGO_MESSAGES = {
     COMPARE: { text: "Comparing Adjacent Bars", type: MSG_TYPES.COMPARE },
     SWAP: { text: "Swapping Bar", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Cocktail Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  comb: {
+    START: { text: "Starting Comb Sort...", type: MSG_TYPES.INFO },
+    GAP: { text: "Shrinking Gap", type: MSG_TYPES.TARGET },
+    COMPARE: { text: "Comparing Gap Pair", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Swapping Gap Pair", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Comb Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  intro: {
+    START: { text: "Starting Intro Sort...", type: MSG_TYPES.INFO },
+    COMPARE: { text: "Comparing Against Pivot", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Swapping Elements", type: MSG_TYPES.SWAP },
+    INSERT: { text: "Using Insertion Sort on Small Range", type: MSG_TYPES.TARGET },
+    FALLBACK: { text: "Depth Limit Reached: Heap Fallback", type: MSG_TYPES.TARGET },
+    FINISHED: { text: "Intro Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  counting: {
+    START: { text: "Starting Counting Sort...", type: MSG_TYPES.INFO },
+    RANGE: { text: "Scanning Min/Max Range", type: MSG_TYPES.COMPARE },
+    COUNT: { text: "Counting Value Frequencies", type: MSG_TYPES.TARGET },
+    WRITE: { text: "Writing Values in Order", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Counting Sort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };

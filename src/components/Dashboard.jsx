@@ -14,8 +14,6 @@ const Dashboard = ({
   triggerResume,
   triggerStop,
   triggerReset,
-  triggerStepBack,
-  triggerStepForward,
   selectedIds, // Set of IDs to show
   onRunningChange,
   isTubeMode
@@ -127,8 +125,6 @@ const Dashboard = ({
               triggerResume={triggerResume}
               triggerStop={triggerStop}
               triggerReset={triggerReset}
-              triggerStepBack={triggerStepBack}
-              triggerStepForward={triggerStepForward}
               onComplete={handleComplete}
               onRunning={handleRunning}
               isTubeMode={isTubeMode}
