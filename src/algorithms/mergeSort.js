@@ -49,14 +49,8 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             
             const isAllSmall = currentQueue.every(q => (q.r - q.l + 1) <= 2);
             if (isAllSmall) {
-                const finalColors = {};
-                for (let i = 0; i < currentQueue.length; i++) {
-                    const { l, r } = currentQueue[i];
-                    for (let j = l; j <= r; j++) finalColors[j] = palette[i % palette.length];
-                    countSwap(); // 가속 신호
-                }
-                currentGroupColors = {...finalColors};
-                setGroupIndices({...currentGroupColors});
+                // Skip the final 'dust' phase colors to reduce noise
+                setGroupIndices({});
                 if (!(await wait(1.0))) return false;
                 break;
             }
@@ -95,8 +89,12 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             }
             
             // 병합 완료 시 이 영역의 색상(및 Divider)을 지워 하나로 합쳐진 느낌을 줌
-            delete currentGroupColors[k];
-            setGroupIndices({...currentGroupColors});
+            if (r - l + 1 >= 4) {
+               delete currentGroupColors[k];
+               setGroupIndices({...currentGroupColors});
+            } else {
+               setGroupIndices({});
+            }
 
             setCompareIndices(mergeRange.filter(idx => idx > k)); 
             setSwapIndices([k]);
@@ -114,8 +112,12 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 arr[k] = list[pointer];
                 setArray([...arr]);
                 setSwapIndices([k]);
-                delete currentGroupColors[k];
-                setGroupIndices({...currentGroupColors});
+                if (r - l + 1 >= 4) {
+                  delete currentGroupColors[k];
+                  setGroupIndices({...currentGroupColors});
+                } else {
+                  setGroupIndices({});
+                }
                 if (!(await wait(0.8))) break;
                 setSwapIndices([]);
                 pointer++; k++;

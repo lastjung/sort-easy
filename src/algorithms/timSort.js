@@ -77,11 +77,15 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
         if (!(await wait(1))) return;
 
         let i = 0, j = 0, k = l;
-        const currentGroups = {};
-        for(let idx = l; idx <= r; idx++) {
-            currentGroups[idx] = idx <= m ? palette[1] : palette[3];
+        if (r - l + 1 >= 4) {
+            const currentGroups = {};
+            for(let idx = l; idx <= r; idx++) {
+                currentGroups[idx] = idx <= m ? palette[1] : palette[3];
+            }
+            setGroupIndices(currentGroups);
+        } else {
+            setGroupIndices({});
         }
-        setGroupIndices(currentGroups);
 
         while (i < leftArr.length && j < rightArr.length) {
             if (!sortingRef.current) return;
@@ -98,9 +102,13 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                 arr[k] = rightArr[j++];
             }
             
-            // Remove group color as it's merged
-            delete currentGroups[k];
-            setGroupIndices({...currentGroups});
+            // Apply group colors only if the range is significant (>= 4)
+            if (r - l + 1 >= 4) {
+                delete currentGroups[k];
+                setGroupIndices({...currentGroups});
+            } else {
+                setGroupIndices({}); // Keep it clean for small pairs
+            }
 
             setSwapIndices([k]);
             countSwap();

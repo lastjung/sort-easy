@@ -18,17 +18,11 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let item = arr[cycleStart];
         let pos = cycleStart;
 
-        // Visual State: Start of a new cycle
-        const cycleGroups = {};
-        for(let k = 0; k < n; k++) {
-            if (sortedIndices.includes(k)) cycleGroups[k] = palette[2]; // Sorted
-            else if (k === cycleStart) cycleGroups[k] = palette[3]; // Current Cycle Start
-            else cycleGroups[k] = palette[1]; // Unsorted/Scanning
-        }
-        setGroupIndices(cycleGroups);
+        // Visual State: Minimalist status - only highlight the current active bar
         setGoodIndices([cycleStart]);
-        setDescription({ text: `New Cycle starting at ${cycleStart}`, type: 'TARGET' });
-        if (!(await wait(1))) break;
+        setGroupIndices({}); // Remove chaotic group splitting
+        setDescription({ text: `Processing Cycle at ${cycleStart}`, type: 'TARGET' });
+        if (!(await wait(0.5))) break;
 
         // Step 1: Find the position for the initial item
         setDescription(msg.SCAN);
@@ -53,7 +47,8 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         // Initial Placement
         if (pos !== cycleStart) {
-            setSwapIndices([pos, cycleStart]);
+            setSwapIndices([pos]); // Highlight only the placement destination
+            setGoodIndices([cycleStart]); // Keep source highlighted
             setDescription(msg.PLACE);
             playSound(100 + item * 5, 'sawtooth');
             countSwap();
@@ -82,7 +77,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             while (item === arr[pos]) pos++;
 
             if (item !== arr[pos]) {
-                setSwapIndices([pos, cycleStart]);
+                setSwapIndices([pos]);
                 setDescription(msg.PLACE);
                 playSound(100 + item * 5, 'sawtooth');
                 countSwap();
@@ -95,6 +90,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         sortedIndices.push(cycleStart);
         setSortedIndices([...sortedIndices]);
+        setGoodIndices([]);
     }
 
     if (!sortingRef.current) return false;
