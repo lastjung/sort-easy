@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { COLORS } from '../constants/colors';
 
-const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, groupIndices = {}, pivotOrders = {}, isCinema, title }) => {
+const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, groupIndices = {}, pivotOrders = {}, isCinema, title, disableGroupGaps = false }) => {
   const isHeap = title?.toLowerCase().includes('heap');
   const [hoveredIdx, setHoveredIdx] = useState(null);
   
@@ -147,7 +147,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         const pivotOrder = pivotOrders[idx];
         const groupColor = groupIndices[idx];
         const nextGroupColor = groupIndices[idx + 1];
-        const hasGap = groupColor && nextGroupColor && groupColor !== nextGroupColor;
+        const hasGap = !disableGroupGaps && groupColor && nextGroupColor && groupColor !== nextGroupColor;
 
         return (
           <div

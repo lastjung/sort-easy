@@ -137,10 +137,10 @@ export const ALGORITHMS = [
         id: 'bitonic', 
         title: 'Bitonic Sort', 
         fn: bitonicSort, 
-        complexity: 'O(log² n)', 
+        complexity: 'O(n log² n)', 
         desc: 'A parallelizable sorting network that recursively builds bitonic sequences and merges them. Ideal for hardware and GPU implementations.',
         icon: '🌐',
-        slogan: "A network of mirrors for parallel perfection!"
+        slogan: "Mirror, compare, and merge in parallel!"
     },
     { 
         id: 'radix', 
@@ -158,7 +158,7 @@ export const ALGORITHMS = [
         complexity: 'O(n²)', 
         desc: 'A simple sorting algorithm inspired by how a garden gnome sorts flower pots. It moves elements backward and forward like a shuttle.',
         icon: '🍄',
-        slogan: "Forward and back like a tireless garden gnome!"
+        slogan: "Step forward or shuffle back, one pot at a time!"
     },
     { 
         id: 'pancake', 

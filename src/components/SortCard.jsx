@@ -52,6 +52,7 @@ const SortCard = ({
   const [goodIndices, setGoodIndices] = useState([]);
   const [sortedIndices, setSortedIndices] = useState([]);
   const [groupIndices, setGroupIndices] = useState({}); 
+  const [disableGroupGaps, setDisableGroupGaps] = useState(false);
   const [pivotOrders, setPivotOrders] = useState({}); // New: Order of found pivots (e.g. {idx: 1, idx2: 2})
   const [description, setDescription] = useState({ text: "", type: MSG_TYPES.INFO }); 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -248,6 +249,7 @@ const SortCard = ({
     setGoodIndices([]);
     setSortedIndices([]);
     setGroupIndices({}); 
+    setDisableGroupGaps(false);
     setPivotOrders({});
     setElapsedTime(0);
     setComparisons(0);
@@ -367,6 +369,7 @@ const SortCard = ({
     setSwapIndices([]);
     setGoodIndices([]);
     setGroupIndices({}); 
+    setDisableGroupGaps(false);
     setPivotOrders({}); // 명시적으로 피벗 순서 데이터 초기화
     setComparisons(0);
     setSwaps(0);
@@ -441,6 +444,9 @@ const SortCard = ({
          checkSession();
          setGroupIndices(indicesMap);
          pushHistorySnapshot({ groupIndices: { ...indicesMap } });
+      },
+      setDisableGroupGaps: (val) => {
+         setDisableGroupGaps(val);
       },
       setPivotOrders: (ordersMap) => {
          checkSession();
@@ -673,6 +679,7 @@ const SortCard = ({
           goodIndices={goodIndices}
           compareIndices={compareIndices}
           groupIndices={groupIndices}
+          disableGroupGaps={disableGroupGaps}
           pivotOrders={pivotOrders}
           title={item.title}
         />

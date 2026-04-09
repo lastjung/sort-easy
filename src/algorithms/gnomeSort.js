@@ -4,18 +4,7 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
     const n = arr.length;
     let index = 0;
 
-    const { COLORS } = await import('../constants/colors');
-    const palette = COLORS.GROUP_PALETTE;
-
-    const paintRainbow = () => {
-        const groups = {};
-        for (let i = 0; i < n; i++) {
-            groups[i] = palette[i % palette.length];
-        }
-        setGroupIndices(groups);
-    };
-
-    paintRainbow();
+    setGroupIndices({});
     setDescription(msg.START);
     if (!(await wait(1))) return;
 

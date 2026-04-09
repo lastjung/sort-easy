@@ -2,20 +2,11 @@
 export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
+    const sortedIndices = [];
 
-    const { COLORS } = await import('../constants/colors');
-    const palette = COLORS.GROUP_PALETTE;
-
-    const paintRainbow = () => {
-        const groups = {};
-        for (let i = 0; i < n; i++) {
-            groups[i] = palette[i % palette.length];
-        }
-        setGroupIndices(groups);
-    };
+    setGroupIndices({});
 
     const flip = async (k) => {
-        paintRainbow();
         let left = 0;
         while (left < k) {
             if (!sortingRef.current) return;
@@ -53,7 +44,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
         }
 
         if (maxIdx !== currSize - 1) {
-            // Flip to bring max elements to front
+            // Flip to bring max element to front
             if (maxIdx !== 0) {
                 setDescription(msg.FLIP);
                 await flip(maxIdx);
@@ -62,6 +53,11 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
             setDescription(msg.FLIP);
             await flip(currSize - 1);
         }
+
+        // This position is now confirmed (largest element placed at the end)
+        sortedIndices.push(currSize - 1);
+        setSortedIndices([...sortedIndices]);
+        playSound(600, 'square');
     }
 
     if (!sortingRef.current) return false;
