@@ -2,12 +2,13 @@
 export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
-    const sortedIndices = [];
+    let sortedIndices = [];
 
     const { COLORS } = await import('../constants/colors');
     const palette = COLORS.GROUP_PALETTE;
 
     setGroupIndices({});
+    setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return;
 
@@ -17,41 +18,40 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let item = arr[cycleStart];
         let pos = cycleStart;
 
-        // Paint: sorted region vs current vs unsorted
-        const groups = {};
-        for (let k = 0; k < n; k++) {
-            groups[k] = k < cycleStart ? palette[0] : palette[1];
+        // Visual State: Start of a new cycle
+        const cycleGroups = {};
+        for(let k = 0; k < n; k++) {
+            if (sortedIndices.includes(k)) cycleGroups[k] = palette[2]; // Sorted
+            else if (k === cycleStart) cycleGroups[k] = palette[3]; // Current Cycle Start
+            else cycleGroups[k] = palette[1]; // Unsorted/Scanning
         }
-        groups[cycleStart] = palette[3]; // highlight current cycle start
-        setGroupIndices(groups);
+        setGroupIndices(cycleGroups);
+        setGoodIndices([cycleStart]);
+        setDescription({ text: `New Cycle starting at ${cycleStart}`, type: 'TARGET' });
+        if (!(await wait(1))) break;
 
-        // Find the correct position for item
+        // Step 1: Find the position for the initial item
         setDescription(msg.SCAN);
         for (let i = cycleStart + 1; i < n; i++) {
             if (!sortingRef.current) break;
             setCompareIndices([i, cycleStart]);
             countCompare();
             playSound(200 + arr[i] * 5, 'sine');
-            if (arr[i] < item) {
-                pos++;
-            }
-            if (!(await wait(0.5))) break;
+            if (arr[i] < item) pos++;
+            if (!(await wait(0.4))) break;
         }
         setCompareIndices([]);
 
         if (pos === cycleStart) {
-            // Already in correct position
             sortedIndices.push(cycleStart);
             setSortedIndices([...sortedIndices]);
             continue;
         }
 
-        // Skip duplicates
-        while (item === arr[pos]) {
-            pos++;
-        }
+        // Handle duplicates
+        while (item === arr[pos]) pos++;
 
-        // Place item at its correct position
+        // Initial Placement
         if (pos !== cycleStart) {
             setSwapIndices([pos, cycleStart]);
             setDescription(msg.PLACE);
@@ -63,7 +63,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setSwapIndices([]);
         }
 
-        // Rotate the rest of the cycle
+        // Step 2: Rotate the rest of the elements in the cycle
         while (pos !== cycleStart) {
             if (!sortingRef.current) break;
             pos = cycleStart;
@@ -74,16 +74,12 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 setCompareIndices([i, cycleStart]);
                 countCompare();
                 playSound(200 + arr[i] * 5, 'sine');
-                if (arr[i] < item) {
-                    pos++;
-                }
-                if (!(await wait(0.5))) break;
+                if (arr[i] < item) pos++;
+                if (!(await wait(0.4))) break;
             }
             setCompareIndices([]);
 
-            while (item === arr[pos]) {
-                pos++;
-            }
+            while (item === arr[pos]) pos++;
 
             if (item !== arr[pos]) {
                 setSwapIndices([pos, cycleStart]);
@@ -97,7 +93,6 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             }
         }
 
-        // This cycle is complete - mark cycleStart as sorted
         sortedIndices.push(cycleStart);
         setSortedIndices([...sortedIndices]);
     }
@@ -105,6 +100,9 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
     if (!sortingRef.current) return false;
 
     setGroupIndices({});
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;

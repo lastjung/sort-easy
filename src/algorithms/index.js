@@ -18,6 +18,7 @@ import { gravitySort } from './gravitySort';
 import { timSort } from './timSort';
 import { cycleSort } from './cycleSort';
 import { bucketSort } from './bucketSort';
+import { circleSort } from './circleSort';
 
 export {
     bubbleSort,
@@ -38,7 +39,8 @@ export {
     gravitySort,
     timSort,
     cycleSort,
-    bucketSort
+    bucketSort,
+    circleSort
 };
 
 export const ALGORITHMS = [
@@ -212,5 +214,14 @@ export const ALGORITHMS = [
         desc: 'Distributes elements into value-range buckets, sorts each bucket, then concatenates. Efficient for uniform distributions.',
         icon: '🪣',
         slogan: "Divide into buckets, conquer each one!"
+    },
+    { 
+        id: 'circle', 
+        title: 'Circle Sort', 
+        fn: circleSort, 
+        complexity: 'O(n log n log n)', 
+        desc: 'A recursive sorting algorithm that compares elements at opposite ends of a range, creating a circle-like comparison pattern.',
+        icon: '⭕',
+        slogan: "Compare across the circle to spiral into order!"
     }
 ];

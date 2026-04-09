@@ -8,103 +8,144 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
     const palette = COLORS.GROUP_PALETTE;
 
     setGroupIndices({});
+    setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return;
 
-    // Phase 1: Insertion sort on small runs
-    const insertionSortRun = async (left, right) => {
+    // Phase 1: Rich Insertion sort on small runs
+    const insertionSortRun = async (left, right, runIdx) => {
         for (let i = left + 1; i <= right; i++) {
             if (!sortingRef.current) return;
+            
+            // PICK PHASE
+            setGoodIndices([i]);
+            const splitGroups = {};
+            for (let k = 0; k < n; k++) {
+                if (k >= left && k <= right) {
+                    splitGroups[k] = k < i ? palette[0] : palette[1];
+                } else {
+                    splitGroups[k] = 'transparent';
+                }
+            }
+            setGroupIndices(splitGroups);
+            setDescription({ text: `Run ${runIdx}: Picking element`, type: 'TARGET' });
+            if (!(await wait(0.8))) return;
+
             let temp = arr[i];
             let j = i - 1;
+            let pivotPos = i;
 
-            while (j >= left && arr[j] > temp) {
+            while (j >= left) {
                 if (!sortingRef.current) return;
-                setCompareIndices([j, i]);
+                
+                setGoodIndices([pivotPos]);
                 countCompare();
+                setDescription(msg.COMPARE);
                 playSound(200 + arr[j] * 5, 'sine');
-                if (!(await wait(0.5))) return;
+                if (!(await wait(1))) break;
 
-                arr[j + 1] = arr[j];
-                setArray([...arr]);
-                setSwapIndices([j, j + 1]);
-                countSwap();
-                if (!(await wait(0.5))) return;
-                setSwapIndices([]);
-                j--;
+                if (arr[j] > temp) {
+                    setDescription(msg.SHIFT);
+                    setSwapIndices([j, j + 1]);
+                    countSwap();
+                    arr[j + 1] = arr[j];
+                    setArray([...arr]);
+                    if (!(await wait(1))) break;
+                    
+                    pivotPos = j;
+                    setSwapIndices([]);
+                    j--;
+                } else {
+                    setDescription(msg.INSERT);
+                    break;
+                }
             }
             arr[j + 1] = temp;
             setArray([...arr]);
+            setGoodIndices([]);
         }
     };
 
-    // Phase 2: Merge two sorted runs
+    // Phase 2: Rich Merge two sorted runs
     const merge = async (l, m, r) => {
-        const left = arr.slice(l, m + 1);
-        const right = arr.slice(m + 1, r + 1);
+        const leftArr = arr.slice(l, m + 1);
+        const rightArr = arr.slice(m + 1, r + 1);
+        
+        const mergeRange = [...Array(r - l + 1).keys()].map(x => x + l);
+        setCompareIndices(mergeRange);
+        setDescription(msg.MERGE);
+        if (!(await wait(1))) return;
+
         let i = 0, j = 0, k = l;
+        const currentGroups = {};
+        for(let idx = l; idx <= r; idx++) {
+            currentGroups[idx] = idx <= m ? palette[1] : palette[3];
+        }
+        setGroupIndices(currentGroups);
 
-        while (i < left.length && j < right.length) {
+        while (i < leftArr.length && j < rightArr.length) {
             if (!sortingRef.current) return;
-            setCompareIndices([l + i, m + 1 + j]);
+            
+            setCompareIndices(mergeRange.filter(idx => idx >= k));
             countCompare();
+            setDescription(msg.COMPARE);
             playSound(200 + arr[k] * 5, 'sine');
-            if (!(await wait(0.5))) return;
+            if (!(await wait(1))) return;
 
-            if (left[i] <= right[j]) {
-                arr[k] = left[i++];
+            if (leftArr[i] <= rightArr[j]) {
+                arr[k] = leftArr[i++];
             } else {
-                arr[k] = right[j++];
+                arr[k] = rightArr[j++];
             }
+            
+            // Remove group color as it's merged
+            delete currentGroups[k];
+            setGroupIndices({...currentGroups});
+
             setSwapIndices([k]);
             countSwap();
             setArray([...arr]);
             playSound(100 + arr[k] * 5, 'sawtooth');
-            if (!(await wait(0.5))) return;
+            if (!(await wait(1))) return;
             setSwapIndices([]);
             k++;
         }
 
-        while (i < left.length) {
-            if (!sortingRef.current) return;
-            arr[k] = left[i++];
-            setSwapIndices([k]);
-            setArray([...arr]);
-            countSwap();
-            if (!(await wait(0.3))) return;
-            setSwapIndices([]);
-            k++;
-        }
-        while (j < right.length) {
-            if (!sortingRef.current) return;
-            arr[k] = right[j++];
-            setSwapIndices([k]);
-            setArray([...arr]);
-            countSwap();
-            if (!(await wait(0.3))) return;
-            setSwapIndices([]);
-            k++;
-        }
+        const finalize = async (list, pointer) => {
+            while (pointer < list.length) {
+                if (!sortingRef.current) break;
+                arr[k] = list[pointer];
+                setArray([...arr]);
+                setSwapIndices([k]);
+                delete currentGroups[k];
+                setGroupIndices({...currentGroups});
+                countSwap();
+                if (!(await wait(0.8))) break;
+                setSwapIndices([]);
+                pointer++; k++;
+            }
+        };
+
+        await finalize(leftArr, i);
+        await finalize(rightArr, j);
+
+        setCompareIndices([]);
     };
 
-    // Run insertion sort on each run block
+    // 1. Divide and Insertion Sort Runs
     let runCount = 0;
     for (let i = 0; i < n; i += RUN) {
         if (!sortingRef.current) break;
         const right = Math.min(i + RUN - 1, n - 1);
-
-        // Paint current run being sorted
-        const groups = {};
-        for (let k = 0; k < n; k++) {
-            groups[k] = k >= i && k <= right ? palette[1] : palette[0];
-        }
-        setGroupIndices(groups);
-        setDescription({ text: `Insertion Sort Run ${++runCount}`, type: 'TARGET' });
-
-        await insertionSortRun(i, right);
+        await insertionSortRun(i, right, ++runCount);
+        
+        // Mark run as "partially sorted" for Tube Mode
+        const sorted = [];
+        for(let s = 0; s <= right; s++) sorted.push(s);
+        setSortedIndices(sorted);
     }
 
-    // Merge runs bottom-up
+    // 2. Merge Runs bottom-up
     for (let size = RUN; size < n; size *= 2) {
         if (!sortingRef.current) break;
 
@@ -114,17 +155,12 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             const right = Math.min(left + 2 * size - 1, n - 1);
 
             if (mid < right) {
-                // Paint merge range
-                const groups = {};
-                for (let k = 0; k < n; k++) {
-                    if (k >= left && k <= mid) groups[k] = palette[1];
-                    else if (k > mid && k <= right) groups[k] = palette[3];
-                    else groups[k] = palette[0];
-                }
-                setGroupIndices(groups);
-                setDescription({ text: `Merging Blocks (size ${size})`, type: 'SWAP' });
-
                 await merge(left, mid, right);
+                
+                // Update sorted indices
+                const sorted = [];
+                for(let s = 0; s <= right; s++) sorted.push(s);
+                setSortedIndices(sorted);
             }
         }
     }
