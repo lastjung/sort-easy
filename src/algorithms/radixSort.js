@@ -13,62 +13,64 @@ export const radixSort = async ({ array, setArray, setCompareIndices, setSwapInd
     setDescription(msg.START);
     if (!(await wait(1))) return;
 
+    const digitLabel = (e) => e === 1 ? "1's" : e === 10 ? "10's" : e === 100 ? "100's" : `${e}'s`;
+
     while (Math.floor(max / exp) > 0) {
         if (!sortingRef.current) break;
 
         const output = new Array(n).fill(0);
         const count = new Array(10).fill(0);
 
-        // 1. Paint ALL elements by current digit at once (scatter view)
-        const groups = {};
-        for (let i = 0; i < n; i++) {
-            const digit = Math.floor(arr[i] / exp) % 10;
-            count[digit]++;
-            groups[i] = palette[digit % palette.length];
-        }
-        setGroupIndices({ ...groups });
-        setDescription(msg.COUNT);
-        if (!(await wait(1.5))) break;
-
-        // 2. Scan — highlight each element briefly
+        // 1. Count frequencies (no color change, just scan)
+        setDescription({ text: `Scanning ${digitLabel(exp)} Digit...`, type: 'TARGET' });
         for (let i = 0; i < n; i++) {
             if (!sortingRef.current) break;
-            setCompareIndices([i]);
+            const digit = Math.floor(arr[i] / exp) % 10;
+            count[digit]++;
             countCompare();
+            setCompareIndices([i]);
             playSound(200 + arr[i] * 5, 'sine');
             if (!(await wait(0.5))) break;
         }
         setCompareIndices([]);
 
-        // 3. Cumulative count
+        // 2. Cumulative count
         for (let i = 1; i < 10; i++) {
             count[i] += count[i - 1];
         }
 
-        // 4. Build output array
+        // 3. Build output array
         for (let i = n - 1; i >= 0; i--) {
             if (!sortingRef.current) break;
             const digit = Math.floor(arr[i] / exp) % 10;
             output[--count[digit]] = arr[i];
         }
 
-        // 5. Write back — colors reorganize as elements find their positions
+        // 4. Write back — color each element as it's placed
+        const groups = {};
         for (let i = 0; i < n; i++) {
             if (!sortingRef.current) break;
-            setDescription(msg.WRITE);
+            setDescription({ text: `Placing by ${digitLabel(exp)} Digit...`, type: 'SWAP' });
             arr[i] = output[i];
+            setArray([...arr]);
 
-            // Re-color by digit at new position
-            const newDigit = Math.floor(arr[i] / exp) % 10;
-            groups[i] = palette[newDigit % palette.length];
+            // Color this element by its digit immediately
+            const digit = Math.floor(arr[i] / exp) % 10;
+            groups[i] = palette[digit % palette.length];
             setGroupIndices({ ...groups });
 
-            setArray([...arr]);
             setSwapIndices([i]);
             countSwap();
             playSound(100 + arr[i] * 5, 'sawtooth');
             if (!(await wait(1))) break;
             setSwapIndices([]);
+        }
+
+        // Brief pause to appreciate the grouped result
+        if (sortingRef.current) {
+            setDescription({ text: `${digitLabel(exp)} Digit Sorted!`, type: 'SUCCESS' });
+            if (!(await wait(2))) break;
+            setGroupIndices({});
         }
 
         exp *= 10;

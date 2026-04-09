@@ -3,6 +3,18 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
     const arr = [...array];
     const n = arr.length;
     let index = 0;
+    let maxIndex = 0;
+
+    const { COLORS } = await import('../constants/colors');
+    const palette = COLORS.GROUP_PALETTE;
+
+    const paintDivide = () => {
+        const groups = {};
+        for (let i = 0; i < n; i++) {
+            groups[i] = i < maxIndex ? palette[0] : palette[1];
+        }
+        setGroupIndices(groups);
+    };
 
     setGroupIndices({});
     setDescription(msg.START);
@@ -13,6 +25,12 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         if (index === 0) {
             index++;
+        }
+
+        // Track the frontier
+        if (index > maxIndex) {
+            maxIndex = index;
+            paintDivide();
         }
 
         setCompareIndices([index, index - 1]);
@@ -30,7 +48,7 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setSwapIndices([index, index - 1]);
             setDescription(msg.SWAP);
             playSound(100 + arr[index] * 5, 'sawtooth');
-            
+
             countSwap();
             [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
             setArray([...arr]);
@@ -42,6 +60,7 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
     if (!sortingRef.current) return false;
 
+    setGroupIndices({});
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;
