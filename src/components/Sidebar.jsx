@@ -89,7 +89,7 @@ const Sidebar = ({
             </button>
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 max-h-[calc(100vh-420px)] overflow-y-auto pr-2 custom-scrollbar">
             {ALGORITHMS.map((algo) => (
               <button
                 key={algo.id}

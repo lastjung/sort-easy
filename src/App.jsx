@@ -12,6 +12,7 @@ function App() {
   const [volume, setVolume] = useState(0.1);
   const [selectedIds, setSelectedIds] = useState(new Set(['shell']));
   const [isTubeMode, setIsTubeMode] = useState(false);
+  const [isFullView, setIsFullView] = useState(false);
   
   const makeArray = useCallback((size) => {
     const newArray = [];
@@ -54,12 +55,47 @@ function App() {
   };
 
   const handleReset = () => {
-    // Hard reset of global state
+    // Hard reset to the SAME data
     setRunState({ running: 0, paused: 0 }); 
+    setTriggerStop(prev => prev + 1);
+    setTriggerReset(prev => prev + 1);
+  };
+
+  const handleShuffle = () => {
+    // Generate COMPLETELY NEW data
+    setRunState({ running: 0, paused: 0 });
     setTriggerStop(prev => prev + 1);
     setTriggerReset(prev => prev + 1);
     generateData();
   };
+
+  // Global Key Shortcuts (Space for Play/Pause, Esc for Restore)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Space: Play/Pause
+      if (e.code === 'Space') {
+        e.preventDefault(); 
+        if (runState.running > 0) handleStop();
+        else handleRun();
+      }
+      // Escape: Restore UI
+      if (e.key === 'Escape') {
+        setIsFullView(false);
+        if (document.fullscreenElement) document.exitFullscreen();
+      }
+      // R / Shift+R: Reset / Shuffle
+      if (e.code === 'KeyR') {
+        if (e.shiftKey) {
+          handleShuffle();
+        } else {
+          handleReset();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [runState.running, runState.paused, setIsFullView, handleRun, handleStop, handleReset, handleShuffle]);
+
 
   const toggleSelect = (id) => {
     setSelectedIds(prev => {
@@ -91,30 +127,34 @@ function App() {
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(67,56,202,0.15),transparent)] pointer-events-none" />
       
       {/* Brand Header - Left Aligned */}
-      <header className="relative z-50 w-full pt-6 pb-2 px-10">
-        <div className="flex flex-col items-start gap-0.5">
-            <h1 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase italic drop-shadow-2xl">
-                SORT<span className="text-emerald-400">EASY</span>
-            </h1>
-            <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] opacity-80">
-                Advanced Environment Config v2.0
-            </p>
-        </div>
-      </header>
+      {!isFullView && (
+        <header className="relative z-50 w-full pt-6 pb-2 px-10 animate-in fade-in duration-500">
+          <div className="flex flex-col items-start gap-0.5">
+              <h1 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase italic drop-shadow-2xl">
+                  SORT<span className="text-emerald-400">EASY</span>
+              </h1>
+              <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] opacity-80">
+                  Advanced Environment Config v2.0
+              </p>
+          </div>
+        </header>
+      )}
 
-      <main className="relative lg:pr-80 transition-all duration-700">
+      <main className={`relative transition-all duration-700 ${isFullView ? 'pr-0 pt-10' : 'lg:pr-80'}`}>
         {/* Desktop Configuration Sidebar (Hidden on Mobile) */}
-        <Sidebar 
-          arraySize={arraySize}
-          setArraySize={setArraySize}
-          speed={speed}
-          setSpeed={setSpeed}
-          selectedIds={selectedIds}
-          toggleSelect={toggleSelect}
-          onSelectAll={handleSelectAll}
-          onDeselectAll={handleDeselectAll}
-          isAnyActive={runState.running > 0 || runState.paused > 0}
-        />
+        {!isFullView && (
+          <Sidebar 
+            arraySize={arraySize}
+            setArraySize={setArraySize}
+            speed={speed}
+            setSpeed={setSpeed}
+            selectedIds={selectedIds}
+            toggleSelect={toggleSelect}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
+            isAnyActive={runState.running > 0 || runState.paused > 0}
+          />
+        )}
 
         <Dashboard 
           data={data}
@@ -131,28 +171,33 @@ function App() {
           onRunningChange={handleRunningChange}
         />
 
-        <FloatingActionDock 
-          onRun={handleRun}
-          onStop={handleStop}
-          onReset={handleReset}
-          isAnyRunning={runState.running > 0} 
-          isAnyPaused={runState.paused > 0}
-          soundEnabled={soundEnabled}
-          setSoundEnabled={setSoundEnabled}
-          isTubeMode={isTubeMode}
-          setIsTubeMode={setIsTubeMode}
-          visibleCount={selectedIds.size}
-          // Props for Drawer (Mobile Mode)
-          arraySize={arraySize}
-          setArraySize={setArraySize}
-          speed={speed}
-          setSpeed={setSpeed}
-          selectedIds={selectedIds}
-          toggleSelect={toggleSelect}
-          onSelectAll={handleSelectAll}
-          onDeselectAll={handleDeselectAll}
-          isAnyActive={runState.running > 0 || runState.paused > 0}
-        />
+        {!isFullView && (
+          <FloatingActionDock 
+            onRun={handleRun}
+            onStop={handleStop}
+            onReset={handleReset}
+            onShuffle={handleShuffle}
+            isAnyRunning={runState.running > 0} 
+            isAnyPaused={runState.paused > 0}
+            soundEnabled={soundEnabled}
+            setSoundEnabled={setSoundEnabled}
+            isTubeMode={isTubeMode}
+            setIsTubeMode={setIsTubeMode}
+            isFullView={isFullView}
+            setIsFullView={setIsFullView}
+            visibleCount={selectedIds.size}
+            // Props for Drawer (Mobile Mode)
+            arraySize={arraySize}
+            setArraySize={setArraySize}
+            speed={speed}
+            setSpeed={setSpeed}
+            selectedIds={selectedIds}
+            toggleSelect={toggleSelect}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
+            isAnyActive={runState.running > 0 || runState.paused > 0}
+          />
+        )}
       </main>
     </div>
   );

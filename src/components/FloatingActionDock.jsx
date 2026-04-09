@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Play, RotateCcw, Volume2, VolumeX, Pause, Settings, CheckCircle, Circle, Zap } from 'lucide-react';
+import { Play, RotateCcw, Volume2, VolumeX, Pause, Settings, CheckCircle, Circle, Zap, Maximize, Minimize, Dices } from 'lucide-react';
 import { ALGORITHMS } from '../algorithms';
 
 const FloatingActionDock = ({
   onRun,
   onStop,
   onReset,
+  onShuffle,
   isAnyRunning,
   isAnyPaused,
   soundEnabled,
@@ -22,11 +23,26 @@ const FloatingActionDock = ({
   onDeselectAll,
   isAnyActive,
   isTubeMode,
-  setIsTubeMode
+  setIsTubeMode,
+  isFullView,
+  setIsFullView
 }) => {
   const [showConfig, setShowConfig] = useState(false);
   const mainLabel = isAnyRunning ? 'Pause All' : isAnyPaused ? 'Resume All' : (isAnyActive ? 'Re-run All' : 'Run All');
   const isAllSelected = selectedIds.size === ALGORITHMS.length;
+  
+  // Apple UI Standard: Handle Fullscreen and Window Expansion
+  const handleExpander = (e) => {
+    if (e.shiftKey) {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    } else {
+      setIsFullView(!isFullView);
+    }
+  };
 
   return (
     <div className="fixed bottom-10 left-0 right-0 mx-auto w-fit z-[100] flex flex-col items-center gap-4">
@@ -102,79 +118,97 @@ const FloatingActionDock = ({
       {/* Main Dock */}
       <div className="relative bg-slate-900/40 backdrop-blur-3xl border border-white/20 px-3 py-2 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-2 group transition-transform duration-500 hover:scale-105 will-change-transform">
         
-        {/* Config Toggle: Only shown on Mobile/Pad, hidden on Desktop as menu is in header */}
-        <button 
-          onClick={() => setShowConfig(!showConfig)}
-          className={`p-1.5 rounded-full transition-all duration-300 lg:hidden ${
-            showConfig ? 'bg-indigo-500/20 text-indigo-400 rotate-90' : 'bg-white/5 text-slate-400 hover:bg-white/10'
-          } shadow-sm will-change-transform active:scale-90`}
-          title="Toggle Settings"
-        >
-          <Settings size={16} />
-        </button>
+        {/* Toggles Group */}
+        <div className="flex items-center gap-2 px-1">
+          {/* Sound Toggle */}
+          <button 
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className={`p-1.5 rounded-full transition-all duration-300 ${
+              soundEnabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-slate-400'
+            } shadow-sm active:scale-90`}
+            title="Toggle Sound"
+          >
+            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
 
-        <div className="w-px h-6 bg-white/10 mx-0.5 lg:hidden" />
+          {/* Tube Mode Toggle */}
+          <button 
+            onClick={() => setIsTubeMode(!isTubeMode)}
+            className={`p-1.5 rounded-full transition-all duration-300 ${isTubeMode ? 'bg-amber-500/10 text-amber-500' : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+            title="Tube Mode"
+          >
+            <Zap size={16} fill={isTubeMode ? "currentColor" : "none"} />
+          </button>
 
-        {/* Sound Toggle */}
-        <button 
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          className={`p-1.5 rounded-full transition-all duration-300 ${
-            soundEnabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-slate-400'
-          } shadow-sm will-change-transform active:scale-90`}
-          title="Toggle Sound"
-        >
-          {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-        </button>
+          {/* Config Toggle (Mobile) */}
+          <button 
+            onClick={() => setShowConfig(!showConfig)}
+            className={`p-1.5 rounded-full transition-all duration-300 lg:hidden ${
+              showConfig ? 'bg-indigo-500/20 text-indigo-400 rotate-90' : 'bg-white/5 text-slate-400 hover:bg-white/10'
+            } shadow-sm active:scale-90`}
+            title="Settings"
+          >
+            <Settings size={16} />
+          </button>
+        </div>
 
         <div className="w-px h-6 bg-white/10 mx-0.5" />
 
-        {/* Tube Mode Toggle */}
-        <button 
-          onClick={() => setIsTubeMode(!isTubeMode)}
-          className={`p-2 rounded-full transition-all duration-300 ${isTubeMode ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
-          title={isTubeMode ? "Disable Tube Mode" : "Enable Tube Mode (Speed Up + Shorts UI Space)"}
-        >
-          <Zap size={20} fill={isTubeMode ? "currentColor" : "none"} className={isTubeMode ? "opacity-90" : ""} />
-        </button>
+        {/* Playback Group (Symmetry) */}
+        <div className="flex items-center gap-3 px-1">
+          {/* Half Reset: Restore SAME data */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onReset(); }}
+            className="p-1.5 text-slate-400 hover:text-emerald-400 transition-all hover:scale-110 active:rotate-[-180deg] duration-500"
+            title="Half Reset: Try again with same data"
+          >
+            <RotateCcw size={18} />
+          </button>
+
+          {/* Main Play/Pause */}
+          <button
+            onClick={() => {
+              if (isAnyRunning) onStop();
+              else onRun();
+              if (showConfig) setShowConfig(false);
+            }}
+            disabled={visibleCount === 0}
+            className={`group/btn flex items-center gap-2 px-4 py-1.5 rounded-full text-white font-black transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xl relative overflow-hidden w-[130px] justify-center will-change-transform ${
+              isAnyRunning 
+                ? 'bg-gradient-to-r from-orange-500 to-rose-600 shadow-orange-500/40' 
+                : isAnyPaused
+                ? 'bg-gradient-to-r from-amber-400 to-yellow-600 shadow-amber-500/40'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/40 hover:-translate-y-0.5'
+            }`}
+          >
+            <div className="bg-white/20 p-1 rounded-full">
+              {isAnyRunning ? <Pause size={14} fill="white" /> : <Play size={14} fill="white" />}
+            </div>
+            <span className="text-[11px] tracking-tight uppercase italic whitespace-nowrap">
+              {mainLabel} 
+            </span>
+            {isAnyRunning && <div className="absolute inset-0 bg-white/10 animate-pulse pointer-events-none" />}
+          </button>
+
+          {/* Full Reset: New Shuffle */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onShuffle(); }}
+            className="p-1.5 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-125 duration-300"
+            title="Full Reset: Generate new random data"
+          >
+            <Dices size={20} />
+          </button>
+        </div>
 
         <div className="w-px h-6 bg-white/10 mx-0.5" />
 
-        {/* Global Reset */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onReset();
-          }}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-transform active:rotate-180 duration-500 will-change-transform"
-          title="Reset All"
+        {/* Expander/All View at the far right */}
+        <button 
+          onClick={handleExpander}
+          className={`p-1.5 rounded-full transition-all duration-300 ${isFullView ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}
+          title="Cinema View (Esc to Exit)"
         >
-          <RotateCcw size={16} />
-        </button>
-
-        {/* Global Play/Pause - The Main iOS style button */}
-        <button
-          onClick={() => {
-            if (isAnyRunning) onStop();
-            else onRun();
-            if (showConfig) setShowConfig(false); // Auto-close on run
-          }}
-          disabled={visibleCount === 0}
-          className={`group/btn flex items-center gap-2 px-3 py-1.5 rounded-full text-white font-black transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xl relative overflow-hidden w-[130px] justify-center will-change-transform ${
-            isAnyRunning 
-              ? 'bg-gradient-to-r from-orange-500 to-rose-600 shadow-orange-500/40' 
-              : isAnyPaused
-              ? 'bg-gradient-to-r from-amber-400 to-yellow-600 shadow-amber-500/40'
-              : 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/40 hover:-translate-y-0.5'
-          }`}
-        >
-          <div className="bg-white/20 p-1 rounded-full transition-transform group-active/btn:scale-75">
-            {isAnyRunning ? <Pause size={14} fill="white" /> : <Play size={14} fill="white" />}
-          </div>
-          <span className="text-[11px] tracking-tight uppercase italic whitespace-nowrap">
-            {mainLabel} 
-          </span>
-          {/* Subtle Glow on Running */}
-          {isAnyRunning && <div className="absolute inset-0 bg-white/10 animate-pulse pointer-events-none" />}
+          {isFullView ? <Minimize size={16} /> : <Maximize size={16} />}
         </button>
 
       </div>
