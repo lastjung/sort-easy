@@ -634,10 +634,10 @@ const SortCard = ({
   };
 
   return (
-    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-700 group ${
+    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[32px] md:rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-700 group ${
       isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''
     } ${isCinema && isTubeMode ? 'translate-y-[-40px] scale-[0.98]' : ''}`}>
-      <div className={`${isCinema ? 'p-6' : 'p-3 md:p-4'} bg-white/5 border-b border-white/5 flex flex-col gap-1.5 order-first`}>
+      <div className={`${isCinema ? 'p-6' : 'p-2 md:p-4'} bg-white/5 border-b border-white/5 flex flex-col gap-1 md:gap-1.5 order-first`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 min-w-0">
             <span className={isCinema ? 'text-3xl' : 'text-lg md:text-xl'}>{item.icon}</span>
@@ -685,8 +685,8 @@ const SortCard = ({
         />
         
         {/* Bottom Description & Stats Bar */}
-        <div className="mt-2 flex flex-col gap-1">
-          <div className="min-h-[3.5em] flex items-center justify-center px-6 relative">
+        <div className="mt-1 md:mt-2 flex flex-col gap-1">
+          <div className={`${isCinema ? 'min-h-[3.5em]' : 'min-h-[2.5em] md:min-h-[3.5em]'} flex items-center justify-center px-6 relative`}>
              {isPaused && (
                <div className="absolute top-0 inset-x-0 flex justify-center -translate-y-2">
                  <span className="bg-amber-500/20 text-amber-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-500/30 tracking-widest uppercase animate-pulse">Hold</span>

@@ -106,10 +106,10 @@ const Dashboard = ({
   return (
     <div className={`w-full mx-auto px-6 py-4 transition-all duration-500 ${isCinema ? 'max-w-[1800px] h-[calc(100vh-180px)] overflow-visible' : 'max-w-[1600px]'}`}>
         {/* Dashboard Padding / Space Sync (Ensures slogan doesn't clip) */}
-        <div className={`grid gap-6 h-full transition-all duration-700 ${
+        <div className={`grid transition-all duration-700 ${
           isCinema 
-            ? 'grid-cols-1 pt-12 pb-24' 
-            : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'
+            ? 'grid-cols-1 pt-12 pb-24 gap-6' 
+            : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 pb-32'
         }`}>
         {visibleAlgos.map((algo) => (
           <div key={algo.id} className={isCinema ? 'transform scale-100' : ''}>

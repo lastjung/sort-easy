@@ -140,7 +140,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
     <div className={`relative w-full flex items-end justify-center transition-all duration-500 overflow-visible ${
       isCinema 
         ? 'flex-1 gap-[4px] p-8 bg-slate-900/60 rounded-[40px]' 
-        : 'h-80 md:h-[450px] gap-[2px] p-4 bg-slate-900/40 rounded-2xl'
+        : 'h-56 md:h-[450px] gap-[2px] p-2 md:p-4 bg-slate-900/40 rounded-2xl'
     } border border-white/5 shadow-inner`}>
       {array.map((value, idx) => {
         const colorClass = getBarColorClass(idx);
