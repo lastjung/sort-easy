@@ -19,6 +19,7 @@ export const introSort = async ({
 
   setSortedIndices([]);
   setGoodIndices([]);
+  let sortedIndices = [];
   setDescription(msg.START);
   if (!(await wait(1))) return false;
 
@@ -47,6 +48,12 @@ export const introSort = async ({
       countSwap();
       if (!(await wait(0.6))) return false;
     }
+    for (let k = lo; k <= hi; k++) {
+      if (!sortedIndices.includes(k)) sortedIndices.push(k);
+    }
+    setSortedIndices([...sortedIndices]);
+    playSound(600, 'square');
+    if (!(await wait(0.3))) return false;
     return true;
   };
 
@@ -93,6 +100,12 @@ export const introSort = async ({
       if (!(await wait(0.8))) return false;
       if (!(await heapify(end, 0))) return false;
     }
+    for (let k = lo; k <= hi; k++) {
+      if (!sortedIndices.includes(k)) sortedIndices.push(k);
+    }
+    setSortedIndices([...sortedIndices]);
+    playSound(600, 'square');
+    if (!(await wait(0.3))) return false;
     return true;
   };
 
@@ -127,7 +140,13 @@ export const introSort = async ({
 
   const sort = async (lo, hi, depth) => {
     if (!sortingRef.current) return false;
-    if (lo >= hi) return true;
+    if (lo >= hi) {
+      if (lo === hi && !sortedIndices.includes(lo)) {
+        sortedIndices.push(lo);
+        setSortedIndices([...sortedIndices]);
+      }
+      return true;
+    }
 
     const size = hi - lo + 1;
     if (size <= 12) {
@@ -142,6 +161,11 @@ export const introSort = async ({
 
     const p = await partition(lo, hi);
     if (p === -1) return false;
+    if (!sortedIndices.includes(p)) {
+      sortedIndices.push(p);
+      setSortedIndices([...sortedIndices]);
+      playSound(600, 'square');
+    }
     if (!(await sort(lo, p - 1, depth - 1))) return false;
     return sort(p + 1, hi, depth - 1);
   };

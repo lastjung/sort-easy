@@ -88,5 +88,29 @@ export const ALGO_MESSAGES = {
     COUNT: { text: "Counting Value Frequencies", type: MSG_TYPES.TARGET },
     WRITE: { text: "Writing Values in Order", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Counting Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  bitonic: {
+    START: { text: "Starting Bitonic Sort...", type: MSG_TYPES.INFO },
+    COMPARE: { text: "Comparing Network Pair", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Positioning Elements", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Bitonic Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  radix: {
+    START: { text: "Starting Radix Sort...", type: MSG_TYPES.INFO },
+    COUNT: { text: "Counting Digit Frequencies", type: MSG_TYPES.TARGET },
+    WRITE: { text: "Writing Values by Digit", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Radix Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  gnome: {
+    START: { text: "Starting Gnome Sort...", type: MSG_TYPES.INFO },
+    COMPARE: { text: "Gnome Checking Pots", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Shuttling Backward...", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Gnome Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  pancake: {
+    START: { text: "Starting Pancake Sort...", type: MSG_TYPES.INFO },
+    MAX: { text: "Finding Largest Pancake", type: MSG_TYPES.TARGET },
+    FLIP: { text: "Flipping the Stack!", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Pancake Sort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };

@@ -10,6 +10,10 @@ import { cocktailSort } from './cocktailSort';
 import { combSort } from './combSort';
 import { introSort } from './introSort';
 import { countingSort } from './countingSort';
+import { bitonicSort } from './bitonicSort';
+import { radixSort } from './radixSort';
+import { gnomeSort } from './gnomeSort';
+import { pancakeSort } from './pancakeSort';
 
 export {
     bubbleSort,
@@ -22,7 +26,11 @@ export {
     cocktailSort,
     combSort,
     introSort,
-    countingSort
+    countingSort,
+    bitonicSort,
+    radixSort,
+    gnomeSort,
+    pancakeSort
 };
 
 export const ALGORITHMS = [
@@ -102,7 +110,7 @@ export const ALGORITHMS = [
         id: 'comb', 
         title: 'Comb Sort', 
         fn: combSort, 
-        complexity: 'O(n²)', 
+        complexity: 'O(n log n)', 
         desc: 'Improves bubble sort by comparing items with a shrinking gap.',
         icon: '🪮',
         slogan: "Sweep wide first, then fine-tune with tighter gaps!"
@@ -124,5 +132,41 @@ export const ALGORITHMS = [
         desc: 'Counts frequencies of values and writes back in order.',
         icon: '🧮',
         slogan: "Count first, then place each value in sorted order!"
+    },
+    { 
+        id: 'bitonic', 
+        title: 'Bitonic Sort', 
+        fn: bitonicSort, 
+        complexity: 'O(log² n)', 
+        desc: 'A parallelizable sorting network that recursively builds bitonic sequences and merges them. Ideal for hardware and GPU implementations.',
+        icon: '🌐',
+        slogan: "A network of mirrors for parallel perfection!"
+    },
+    { 
+        id: 'radix', 
+        title: 'Radix Sort', 
+        fn: radixSort, 
+        complexity: 'O(nk)', 
+        desc: 'A non-comparative sorting algorithm that sorts numbers digit by digit. It bypasses the O(n log n) limit for specific data types.',
+        icon: '🔢',
+        slogan: "Sorting digit by digit, from the ground up!"
+    },
+    { 
+        id: 'gnome', 
+        title: 'Gnome Sort', 
+        fn: gnomeSort, 
+        complexity: 'O(n²)', 
+        desc: 'A simple sorting algorithm inspired by how a garden gnome sorts flower pots. It moves elements backward and forward like a shuttle.',
+        icon: '🍄',
+        slogan: "Forward and back like a tireless garden gnome!"
+    },
+    { 
+        id: 'pancake', 
+        title: 'Pancake Sort', 
+        fn: pancakeSort, 
+        complexity: 'O(n²)', 
+        desc: 'Focuses on reversing array segments. Like flipping a stack of pancakes to bring the largest one to the bottom of the pile.',
+        icon: '🥞',
+        slogan: "Flip the stack to get the perfect order!"
     }
 ];

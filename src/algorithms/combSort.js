@@ -18,6 +18,8 @@ export const combSort = async ({
   const shrink = 1.3;
   let gap = n;
   let swapped = true;
+  let sortedEnd = n;
+  let sortedIndices = [];
 
   setSortedIndices([]);
   setGoodIndices([]);
@@ -32,7 +34,7 @@ export const combSort = async ({
     setDescription({ ...(msg.GAP || {}), text: `Gap: ${gap}` });
     if (!(await wait(0.8))) break;
 
-    for (let i = 0; i + gap < n; i++) {
+    for (let i = 0; i + gap < sortedEnd; i++) {
       if (!sortingRef.current) break;
       const j = i + gap;
 
@@ -52,6 +54,22 @@ export const combSort = async ({
         setDescription(msg.SWAP);
         playSound(130 + arr[i] * 5, 'sawtooth');
         if (!(await wait(1))) break;
+      }
+    }
+    if (sortingRef.current) {
+      let newSortedEnd = sortedEnd;
+      for (let i = sortedEnd - 1; i >= 0; i--) {
+        if (arr[i] === i + 1) newSortedEnd = i;
+        else break;
+      }
+      if (newSortedEnd < sortedEnd) {
+        for (let k = newSortedEnd; k < sortedEnd; k++) {
+          sortedIndices.push(k);
+        }
+        sortedEnd = newSortedEnd;
+        setSortedIndices([...sortedIndices]);
+        playSound(600, 'square');
+        if (!(await wait(0.5))) break;
       }
     }
   }
