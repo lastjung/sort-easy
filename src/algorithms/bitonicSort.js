@@ -41,15 +41,17 @@ export const bitonicSort = async ({ array, setArray, setCompareIndices, setSwapI
 
     const bitonicMerge = async (low, cnt, dir) => {
         if (cnt > 1) {
-            const k = Math.floor(cnt / 2);
+            const k = cnt / 2;
 
             for (let i = low; i < low + k; i++) {
                 if (!sortingRef.current) return;
 
                 const i2 = i + k;
 
-                // Only visualize if within array bounds
-                if (i < n && i2 < n) {
+                // Crucial for non-power-of-2: Only swap if both indices are in range.
+                // This is equivalent to treating virtual elements as Infinity 
+                // that always stay in the virtual zone.
+                if (i2 < n) {
                     // 1. Compare
                     setCompareIndices([i, i2]);
                     setSwapIndices([]);
@@ -79,21 +81,22 @@ export const bitonicSort = async ({ array, setArray, setCompareIndices, setSwapI
     };
 
     const bitonicSortRecursive = async (low, cnt, dir) => {
+        if (!sortingRef.current) return;
         if (cnt > 1) {
-            const k = Math.floor(cnt / 2);
-            // Sort in ascending order
-            await bitonicSortRecursive(low, k, true);
-            // Sort in descending order
-            await bitonicSortRecursive(low + k, k, false);
+            const k = cnt / 2;
+            
+            // Create a bitonic sequence: 
+            // First half opposite, second half target direction
+            await bitonicSortRecursive(low, k, !dir);
+            await bitonicSortRecursive(low + k, k, dir);
 
-            // Before merge: clear sub-blocks (they will be merged into one)
+            if (!sortingRef.current) return;
+
             clearBlocksInRange(low, cnt);
             paintCompletedBlocks();
 
-            // Merge the whole sequence in dir order
             await bitonicMerge(low, cnt, dir);
 
-            // After merge: register this range as a completed block
             const actualCnt = Math.min(cnt, n - low);
             if (actualCnt > 0) {
                 completedBlocks.push({ low, cnt: actualCnt });
@@ -104,7 +107,6 @@ export const bitonicSort = async ({ array, setArray, setCompareIndices, setSwapI
         }
     };
 
-    // To handle non-power-of-2, we find the next power of 2 for the logic
     const nextPowerOfTwo = (v) => {
         let p = 1;
         while (p < v) p *= 2;

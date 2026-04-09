@@ -83,14 +83,6 @@ function App() {
         setIsFullView(false);
         if (document.fullscreenElement) document.exitFullscreen();
       }
-      // R / Shift+R: Reset / Shuffle
-      if (e.code === 'KeyR') {
-        if (e.shiftKey) {
-          handleShuffle();
-        } else {
-          handleReset();
-        }
-      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
