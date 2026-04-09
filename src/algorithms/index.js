@@ -14,6 +14,10 @@ import { bitonicSort } from './bitonicSort';
 import { radixSort } from './radixSort';
 import { gnomeSort } from './gnomeSort';
 import { pancakeSort } from './pancakeSort';
+import { gravitySort } from './gravitySort';
+import { timSort } from './timSort';
+import { cycleSort } from './cycleSort';
+import { bucketSort } from './bucketSort';
 
 export {
     bubbleSort,
@@ -30,7 +34,11 @@ export {
     bitonicSort,
     radixSort,
     gnomeSort,
-    pancakeSort
+    pancakeSort,
+    gravitySort,
+    timSort,
+    cycleSort,
+    bucketSort
 };
 
 export const ALGORITHMS = [
@@ -168,5 +176,41 @@ export const ALGORITHMS = [
         desc: 'Focuses on reversing array segments. Like flipping a stack of pancakes to bring the largest one to the bottom of the pile.',
         icon: '🥞',
         slogan: "Flip the stack to get the perfect order!"
+    },
+    { 
+        id: 'gravity', 
+        title: 'Gravity Sort', 
+        fn: gravitySort, 
+        complexity: 'O(n × max)', 
+        desc: 'Beads on an abacus fall under gravity. Each column settles to the bottom, naturally sorting values.',
+        icon: '⬇️',
+        slogan: "Let gravity do the sorting!"
+    },
+    { 
+        id: 'tim', 
+        title: 'Tim Sort', 
+        fn: timSort, 
+        complexity: 'O(n log n)', 
+        desc: 'A hybrid algorithm combining Insertion Sort for small runs and Merge Sort for combining. Used in Python and Java.',
+        icon: '⏱️',
+        slogan: "The real-world champion of sorting!"
+    },
+    { 
+        id: 'cycle', 
+        title: 'Cycle Sort', 
+        fn: cycleSort, 
+        complexity: 'O(n²)', 
+        desc: 'Minimizes writes by finding the correct position through counting. Each element is placed exactly once.',
+        icon: '🔄',
+        slogan: "Every element finds its home in one move!"
+    },
+    { 
+        id: 'bucket', 
+        title: 'Bucket Sort', 
+        fn: bucketSort, 
+        complexity: 'O(n + k)', 
+        desc: 'Distributes elements into value-range buckets, sorts each bucket, then concatenates. Efficient for uniform distributions.',
+        icon: '🪣',
+        slogan: "Divide into buckets, conquer each one!"
     }
 ];

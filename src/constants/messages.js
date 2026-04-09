@@ -112,5 +112,28 @@ export const ALGO_MESSAGES = {
     MAX: { text: "Finding Largest Pancake", type: MSG_TYPES.TARGET },
     FLIP: { text: "Flipping the Stack!", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Pancake Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  gravity: {
+    START: { text: "Starting Gravity Sort...", type: MSG_TYPES.INFO },
+    SETUP: { text: "Placing Beads on Grid", type: MSG_TYPES.TARGET },
+    DROP: { text: "Beads Falling Down...", type: MSG_TYPES.SWAP },
+    WRITE: { text: "Reading Sorted Values", type: MSG_TYPES.TARGET },
+    FINISHED: { text: "Gravity Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  tim: {
+    START: { text: "Starting Tim Sort...", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Tim Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  cycle: {
+    START: { text: "Starting Cycle Sort...", type: MSG_TYPES.INFO },
+    SCAN: { text: "Finding Correct Position", type: MSG_TYPES.COMPARE },
+    PLACE: { text: "Placing Element in Cycle", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Cycle Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  bucket: {
+    START: { text: "Starting Bucket Sort...", type: MSG_TYPES.INFO },
+    DISTRIBUTE: { text: "Distributing into Buckets", type: MSG_TYPES.TARGET },
+    SORT: { text: "Sorting Each Bucket", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Bucket Sort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };

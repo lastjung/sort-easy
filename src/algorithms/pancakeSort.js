@@ -37,6 +37,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
             if (!sortingRef.current) break;
             setCompareIndices([i, maxIdx]);
             countCompare();
+            playSound(200 + arr[i] * 5, 'sine');
             if (arr[i] > arr[maxIdx]) {
                 maxIdx = i;
             }
