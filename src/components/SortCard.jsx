@@ -669,7 +669,7 @@ const SortCard = ({
         </p>
       </div>
 
-      <div className={`${isCinema ? 'p-4 flex-1' : 'px-0 pt-2 pb-0'} bg-black/10 flex flex-col justify-end`}>
+      <div className={`${isCinema ? 'p-4 flex-1' : 'px-0 pt-2 pb-0'} bg-black/10 flex flex-col`}>
         <SortChart 
           array={array}
           isCinema={isCinema}

@@ -108,7 +108,7 @@ const Dashboard = ({
         {/* Dashboard Padding / Space Sync (Ensures slogan doesn't clip) */}
         <div className={`grid transition-all duration-700 ${
           isCinema 
-            ? 'grid-cols-1 pt-12 pb-24 gap-6' 
+            ? 'grid-cols-1 items-start gap-6 pt-10 md:pt-16 pb-32' 
             : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 pb-32'
         }`}>
         {visibleAlgos.map((algo) => (
