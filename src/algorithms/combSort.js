@@ -15,6 +15,7 @@ export const combSort = async ({
 }) => {
   const arr = [...array];
   const n = arr.length;
+  const { COLORS } = await import('../constants/colors');
   const shrink = 1.3;
   let gap = n;
   let swapped = true;
@@ -42,7 +43,7 @@ export const combSort = async ({
       setSwapIndices([]);
       countCompare();
       setDescription(msg.COMPARE);
-      playSound(220 + arr[i] * 5, 'sine');
+      playSound(arr[i], 'sine', i);
       if (!(await wait(1))) break;
 
       if (arr[i] > arr[j]) {
@@ -52,7 +53,7 @@ export const combSort = async ({
         countSwap();
         swapped = true;
         setDescription(msg.SWAP);
-        playSound(130 + arr[i] * 5, 'sawtooth');
+        playSound(arr[i], 'triangle', i);
         if (!(await wait(1))) break;
       }
     }
@@ -68,7 +69,7 @@ export const combSort = async ({
         }
         sortedEnd = newSortedEnd;
         setSortedIndices([...sortedIndices]);
-        playSound(600, 'square');
+        playSound(arr[sortedEnd], 'sine', sortedEnd);
         if (!(await wait(0.5))) break;
       }
     }

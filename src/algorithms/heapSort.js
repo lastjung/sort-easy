@@ -2,6 +2,7 @@
 export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
+    
     setSortedIndices([]);
     let sortedIndices = [];
 
@@ -12,37 +13,34 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     for (let i = 0; i < n; i++) {
         if (!sortingRef.current) return false;
         setCompareIndices([i]);
-        playSound(300 + i * 20, 'sine');
+        playSound(arr[i], 'sine', i);
         if (!(await wait(0.8))) return false; 
     }
     
     setCompareIndices([]);
     if (!(await wait(0.5))) return false; 
 
-    const heapify = async (n, i) => {
+    const heapify = async (heapSize, i) => {
         const parent = i;
         let largest = i;
         const left = 2 * i + 1;
         const right = 2 * i + 2;
         
-        const getFloor = (idx) => Math.floor(Math.log2(idx + 1)) + 1;
-
-        if (left < n) {
+        if (left < heapSize) {
             setCompareIndices([parent, left]);
             setDescription({ type: 'COMPARE', text: "Comparing Parent and Child" });
             countCompare();
-            playSound(200 + arr[left] * 5, 'sine');
+            playSound(arr[left], 'sine', left);
             if (!(await wait(1))) return;
             setCompareIndices([]);
-            // Small separation so the next compare doesn't overlap visually.
             if (!(await wait(0.25))) return;
             if (arr[left] > arr[largest]) largest = left;
         }
-        if (right < n) {
+        if (right < heapSize) {
             setCompareIndices([parent, right]);
             setDescription({ type: 'COMPARE', text: "Comparing Parent and Child" });
             countCompare();
-            playSound(200 + arr[right] * 5, 'sine');
+            playSound(arr[right], 'sine', right);
             if (!(await wait(1))) return;
             setCompareIndices([]);
             if (!(await wait(0.25))) return;
@@ -53,12 +51,12 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             setSwapIndices([i, largest]);
             setDescription({ type: 'SWAP', text: "Swapping Nodes" });
             countSwap();
-            playSound(100 + arr[largest] * 5, 'sawtooth');
+            playSound(arr[largest], 'triangle', largest);
             [arr[i], arr[largest]] = [arr[largest], arr[i]];
             setArray([...arr]);
             if (!(await wait(1))) return;
             setSwapIndices([]);
-            await heapify(n, largest);
+            await heapify(heapSize, largest);
         }
     };
 
@@ -66,7 +64,6 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     setDescription({ type: 'TARGET', text: "Building Max Heap..." });
     if (!(await wait(2))) return false;
 
-    // Build heap bottom-up, but left-to-right within each level for clearer visualization.
     const lastParent = Math.floor(n / 2) - 1;
     if (lastParent >= 0) {
         const maxParentDepth = Math.floor(Math.log2(lastParent + 1));
@@ -98,14 +95,14 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
 
         setSwapIndices([0, i]);
         countSwap();
-        playSound(100 + arr[i] * 5, 'sawtooth');
+        playSound(arr[i], 'triangle', i);
         [arr[0], arr[i]] = [arr[i], arr[0]];
         setArray([...arr]);
         if (!(await wait(1.5))) break;
         
         sortedIndices.push(i);
         setSortedIndices([...sortedIndices]);
-        playSound(600, 'square');
+        playSound(arr[i], 'sine', i);
         setSwapIndices([]);
         
         setDescription({ type: 'INFO', text: `Restoring heap...` });

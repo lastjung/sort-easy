@@ -5,6 +5,7 @@ export const countingSort = async ({
   setSwapIndices,
   setGoodIndices,
   setSortedIndices,
+  setGroupIndices,
   setDescription,
   playSound,
   wait,
@@ -15,9 +16,11 @@ export const countingSort = async ({
 }) => {
   const arr = [...array];
   const n = arr.length;
+  const { COLORS } = await import('../constants/colors');
 
   setSortedIndices([]);
   setGoodIndices([]);
+  setGroupIndices({});
   setDescription(msg.START);
   if (!(await wait(1))) return false;
 
@@ -30,6 +33,7 @@ export const countingSort = async ({
     if (arr[i] < min) min = arr[i];
     if (arr[i] > max) max = arr[i];
     setDescription(msg.RANGE || msg.COMPARE);
+    playSound(arr[i], 'sine', i);
     if (!(await wait(0.7))) return false;
   }
 
@@ -42,7 +46,7 @@ export const countingSort = async ({
     if (!sortingRef.current) return false;
     setGoodIndices([i]);
     counts[arr[i] - min]++;
-    playSound(320 + arr[i] * 5, 'triangle');
+    playSound(arr[i], 'triangle', i);
     if (!(await wait(0.5))) return false;
   }
 
@@ -56,9 +60,16 @@ export const countingSort = async ({
       const actual = value + min;
       arr[writeIdx] = actual;
       setArray([...arr]);
-      setSwapIndices([writeIdx, writeIdx]);
+      setSwapIndices([writeIdx]);
       countSwap();
-      playSound(140 + actual * 5, 'square');
+      playSound(actual, 'triangle', writeIdx);
+      
+      const groups = {};
+      for (let k = 0; k < n; k++) {
+          groups[k] = k <= writeIdx ? COLORS.GROUP_PALETTE[12] : COLORS.GROUP_PALETTE[1];
+      }
+      setGroupIndices(groups);
+      
       setSortedIndices([...Array(writeIdx + 1).keys()]);
       if (!(await wait(0.6))) return false;
       writeIdx++;
@@ -66,6 +77,7 @@ export const countingSort = async ({
     }
   }
 
+  setGroupIndices({});
   setCompareIndices([]);
   setSwapIndices([]);
   setGoodIndices([]);

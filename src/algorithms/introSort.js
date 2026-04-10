@@ -5,6 +5,7 @@ export const introSort = async ({
   setSwapIndices,
   setGoodIndices,
   setSortedIndices,
+  setGroupIndices,
   setDescription,
   playSound,
   wait,
@@ -15,13 +16,24 @@ export const introSort = async ({
 }) => {
   const arr = [...array];
   const n = arr.length;
+  const { COLORS } = await import('../constants/colors');
   const depthLimit = 2 * Math.floor(Math.log2(Math.max(2, n)));
 
   setSortedIndices([]);
   setGoodIndices([]);
+  setGroupIndices({});
   let sortedIndices = [];
   setDescription(msg.START);
   if (!(await wait(1))) return false;
+
+  const updateGroups = () => {
+    const groups = {};
+    const sortedSet = new Set(sortedIndices);
+    for (let k = 0; k < n; k++) {
+        groups[k] = sortedSet.has(k) ? COLORS.GROUP_PALETTE[12] : COLORS.GROUP_PALETTE[1];
+    }
+    setGroupIndices(groups);
+  };
 
   const insertionSortRange = async (lo, hi) => {
     for (let i = lo + 1; i <= hi; i++) {
@@ -33,12 +45,13 @@ export const introSort = async ({
         setCompareIndices([j, j + 1]);
         countCompare();
         setDescription(msg.COMPARE);
-        playSound(260 + arr[j] * 5, 'sine');
+        playSound(arr[j], 'sine', j);
         if (!(await wait(0.8))) return false;
         arr[j + 1] = arr[j];
         setArray([...arr]);
         setSwapIndices([j, j + 1]);
         countSwap();
+        playSound(arr[j + 1], 'triangle', j + 1);
         if (!(await wait(0.8))) return false;
         j--;
       }
@@ -52,7 +65,8 @@ export const introSort = async ({
       if (!sortedIndices.includes(k)) sortedIndices.push(k);
     }
     setSortedIndices([...sortedIndices]);
-    playSound(600, 'square');
+    playSound(arr[hi], 'sine', hi);
+    updateGroups();
     if (!(await wait(0.3))) return false;
     return true;
   };
@@ -67,12 +81,14 @@ export const introSort = async ({
       if (left < size) {
         setCompareIndices([lo + largest, lo + left]);
         countCompare();
+        playSound(arr[lo + left], 'sine', lo + left);
         if (!(await wait(0.6))) return false;
         if (arr[lo + left] > arr[lo + largest]) largest = left;
       }
       if (right < size) {
         setCompareIndices([lo + largest, lo + right]);
         countCompare();
+        playSound(arr[lo + right], 'sine', lo + right);
         if (!(await wait(0.6))) return false;
         if (arr[lo + right] > arr[lo + largest]) largest = right;
       }
@@ -81,6 +97,7 @@ export const introSort = async ({
         setArray([...arr]);
         setSwapIndices([lo + root, lo + largest]);
         countSwap();
+        playSound(arr[lo + largest], 'triangle', lo + largest);
         if (!(await wait(0.8))) return false;
         return heapify(size, largest);
       }
@@ -97,6 +114,7 @@ export const introSort = async ({
       setArray([...arr]);
       setSwapIndices([lo, lo + end]);
       countSwap();
+      playSound(arr[lo + end], 'triangle', lo + end);
       if (!(await wait(0.8))) return false;
       if (!(await heapify(end, 0))) return false;
     }
@@ -104,7 +122,8 @@ export const introSort = async ({
       if (!sortedIndices.includes(k)) sortedIndices.push(k);
     }
     setSortedIndices([...sortedIndices]);
-    playSound(600, 'square');
+    playSound(arr[hi], 'sine', hi);
+    updateGroups();
     if (!(await wait(0.3))) return false;
     return true;
   };
@@ -118,7 +137,7 @@ export const introSort = async ({
       setCompareIndices([j, hi]);
       countCompare();
       setDescription(msg.COMPARE);
-      playSound(240 + arr[j] * 5, 'sine');
+      playSound(arr[j], 'sine', j);
       if (!(await wait(0.7))) return -1;
       if (arr[j] <= pivot) {
         i++;
@@ -127,6 +146,7 @@ export const introSort = async ({
         setSwapIndices([i, j]);
         countSwap();
         setDescription(msg.SWAP);
+        playSound(arr[i], 'triangle', i);
         if (!(await wait(0.7))) return -1;
       }
     }
@@ -134,6 +154,7 @@ export const introSort = async ({
     setArray([...arr]);
     setSwapIndices([i + 1, hi]);
     countSwap();
+    playSound(arr[i + 1], 'triangle', i + 1);
     if (!(await wait(0.7))) return -1;
     return i + 1;
   };
@@ -144,6 +165,7 @@ export const introSort = async ({
       if (lo === hi && !sortedIndices.includes(lo)) {
         sortedIndices.push(lo);
         setSortedIndices([...sortedIndices]);
+        updateGroups();
       }
       return true;
     }
@@ -164,15 +186,18 @@ export const introSort = async ({
     if (!sortedIndices.includes(p)) {
       sortedIndices.push(p);
       setSortedIndices([...sortedIndices]);
-      playSound(600, 'square');
+      updateGroups();
+      playSound(arr[p], 'sine', p);
     }
     if (!(await sort(lo, p - 1, depth - 1))) return false;
     return sort(p + 1, hi, depth - 1);
   };
 
+  updateGroups();
   const done = await sort(0, n - 1, depthLimit);
   if (!done || !sortingRef.current) return false;
 
+  setGroupIndices({});
   setCompareIndices([]);
   setSwapIndices([]);
   setGoodIndices([]);
