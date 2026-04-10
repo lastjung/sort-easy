@@ -23,7 +23,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setSwapIndices([]);
             countCompare();
             setDescription(msg.COMPARE);
-            playSound(200 + arr[j] * 5, 'sine');
+            playSound(arr[j], 'sine', j);
             if (!(await wait(1))) break;
   
             if (arr[j] > arr[j + 1]) {
@@ -31,7 +31,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 setCompareIndices([]); 
                 setSwapIndices([j, j + 1]); 
                 setDescription(msg.SWAP);
-                playSound(100 + arr[j] * 5, 'sawtooth');
+                playSound(arr[j], 'triangle', j);
                 
                 countSwap();
                 let temp = arr[j];
@@ -55,7 +55,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         setSortedIndices([...newSortedIndices]);
         setGoodIndices([]);
         
-        playSound(600, 'square');
+        playSound(arr[lastIdx], 'sine', lastIdx);
         if (!(await wait(0.5))) break; // Outro wait 0.5
         if (!swapped) {
             const remaining = [];

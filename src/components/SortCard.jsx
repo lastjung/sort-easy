@@ -7,24 +7,57 @@ import { ALGO_MESSAGES, MSG_TYPES } from '../constants/messages';
 // --- Shared Sound Utility (Singleton Pattern) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
+let masterCompressor = null;
 
-const playTone = (freq, type = 'sine', duration = 0.1, vol = 0.1, enabled = true) => {
+// Pentatonic Scale for Harmonic Sound (C4 to C6)
+const PENTATONIC = [
+  261.63, 293.66, 329.63, 392.00, 440.00, // C4 D4 E4 G4 A4
+  523.25, 587.33, 659.25, 783.99, 880.00, // C5 D5 E5 G5 A5
+  1046.50, 1174.66, 1318.51, 1567.98, 1760.00 // C6 D6 E6 G6 A6
+];
+
+const playTone = (freq, type = 'sine', duration = 0.1, vol = 0.1, enabled = true, pan = 0) => {
   if (!enabled) return;
   if (!audioCtx) audioCtx = new AudioContext();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   
+  if (!masterCompressor) {
+    masterCompressor = audioCtx.createDynamicsCompressor();
+    masterCompressor.threshold.setValueAtTime(-20, audioCtx.currentTime);
+    masterCompressor.knee.setValueAtTime(40, audioCtx.currentTime);
+    masterCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+    masterCompressor.attack.setValueAtTime(0, audioCtx.currentTime);
+    masterCompressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+    masterCompressor.connect(audioCtx.destination);
+  }
+
+  // Use Panner for Spatial Depth
+  const panner = audioCtx.createStereoPanner();
+  panner.pan.setValueAtTime(pan, audioCtx.currentTime);
+
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   
-  osc.type = type;
+  osc.type = type === 'sawtooth' || type === 'square' ? 'triangle' : type; 
   osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  
+  // Premium Piano Envelope
+  gain.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.005); 
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
   
   osc.connect(gain);
-  gain.connect(audioCtx.destination);
+  gain.connect(panner);
+  panner.connect(masterCompressor); 
+  
   osc.start();
   osc.stop(audioCtx.currentTime + duration);
+
+  setTimeout(() => {
+    osc.disconnect();
+    gain.disconnect();
+    panner.disconnect();
+  }, (duration + 0.1) * 1000);
 };
 
 const SortCard = ({ 
@@ -324,9 +357,21 @@ const SortCard = ({
     return sortingRef.current;
   }, []);
 
-  const playSound = useCallback((freq, type) => {
-    playTone(freq, type, 0.1, volume, soundEnabled);
-  }, [volume, soundEnabled]);
+  const playSound = useCallback((freqOrVal, type, idx = null) => {
+    // 1. Scale Mapping (SORTEASY 특색: 펜타토닉 음계)
+    // 입력값이 주파수가 아닌 배열 값(1~size)인 경우 음계로 변환
+    let finalFreq = freqOrVal;
+    if (freqOrVal <= arraySize + 5) {
+        const scaleIdx = Math.floor(((freqOrVal - 1) / arraySize) * (PENTATONIC.length - 1));
+        finalFreq = PENTATONIC[Math.max(0, scaleIdx)] || freqOrVal;
+    }
+
+    // 2. Spatial Panning (SORTEASY 특색: 스테레오 입체 음향)
+    // idx가 넘어오면 왼쪽(-1)에서 오른쪽(1) 사이로 배치
+    const pan = idx !== null ? (idx / (arraySize - 1)) * 2 - 1 : 0;
+
+    playTone(finalFreq, type, 0.1, volume, soundEnabled, pan);
+  }, [volume, soundEnabled, arraySize]);
 
   const togglePause = useCallback(() => {
     if (!isSorting) return;
