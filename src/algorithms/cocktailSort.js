@@ -1,12 +1,30 @@
 
-export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
+export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
+    const n = arr.length;
+    const { COLORS } = await import('../constants/colors');
+
     setSortedIndices([]);
-    let start = 0, end = arr.length - 1, swapped = true;
+    setGroupIndices({});
+    let start = 0, end = n - 1, swapped = true;
     let sortedIndices = [];
+
+    const updateGroups = (s, e) => {
+        const groups = {};
+        for (let k = 0; k < n; k++) {
+            if (k < s || k > e) {
+                groups[k] = COLORS.GROUP_PALETTE[12]; // 정렬완료 (초록)
+            } else {
+                groups[k] = COLORS.GROUP_PALETTE[1];  // 미정렬 (핑크)
+            }
+        }
+        setGroupIndices(groups);
+    };
+
     while (swapped) {
         swapped = false;
         setDescription(msg.FORWARD);
+        updateGroups(start, end);
         if (!(await wait(1.5))) break; // Setup 1.5
         
         for (let i = start; i < end; ++i) {
@@ -14,7 +32,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
             setCompareIndices([i, i + 1]);
             setDescription(msg.COMPARE);
             countCompare(); 
-            playSound(200 + arr[i] * 5, 'sine');
+            playSound(arr[i], 'sine', i);
             if (!(await wait(1))) break; // Compare 1.0
             
             if (arr[i] > arr[i + 1]) {
@@ -22,7 +40,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
                 setArray([...arr]); setSwapIndices([i, i + 1]);
                 countSwap(); 
                 setDescription(msg.SWAP);
-                playSound(100 + arr[i] * 5, 'sawtooth');
+                playSound(arr[i], 'triangle', i);
                 swapped = true; 
                 if (!(await wait(1))) break; // Action 1.0
                 setSwapIndices([]);
@@ -32,8 +50,9 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         swapped = false;
         sortedIndices.push(end);
         setSortedIndices([...sortedIndices]);
-        playSound(600, 'square');
+        playSound(arr[end], 'sine', end);
         end--;
+        updateGroups(start, end);
         if (!(await wait(0.5))) break; // Outro 0.5
 
         setDescription(msg.BACKWARD);
@@ -44,7 +63,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
             setCompareIndices([i, i + 1]);
             setDescription(msg.COMPARE);
             countCompare(); 
-            playSound(200 + arr[i] * 5, 'sine');
+            playSound(arr[i], 'sine', i);
             if (!(await wait(1))) break; // Compare 1.0
             
             if (arr[i] > arr[i + 1]) {
@@ -52,7 +71,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
                 setArray([...arr]); setSwapIndices([i, i + 1]);
                 countSwap(); 
                 setDescription(msg.SWAP);
-                playSound(100 + arr[i] * 5, 'sawtooth');
+                playSound(arr[i], 'triangle', i);
                 swapped = true; 
                 if (!(await wait(1))) break; // Action 1.0
                 setSwapIndices([]);
@@ -60,14 +79,16 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         }
         sortedIndices.push(start);
         setSortedIndices([...sortedIndices]);
-        playSound(600, 'square');
+        playSound(arr[start], 'sine', start);
         start++;
+        updateGroups(start, end);
         if (!(await wait(0.5))) break; // Outro 0.5
     }
     
     if (!sortingRef.current) return false;
 
-    setSortedIndices([...Array(arr.length).keys()]);
+    setGroupIndices({});
+    setSortedIndices([...Array(n).keys()]);
     setDescription("Cocktail Sort Completed!");
     return true;
 };

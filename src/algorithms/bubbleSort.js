@@ -1,8 +1,11 @@
 
-export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
+export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
+    const { COLORS } = await import('../constants/colors');
+
     setSortedIndices([]); 
+    setGroupIndices({});
     let newSortedIndices = []; 
   
     setDescription(msg.START);
@@ -14,6 +17,15 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
   
         let swapped = false;
         const lastIdx = n - i - 1;
+
+        // ========================================
+        // 그룹 분리 시각화 (핑크: 미정렬, 초록: 정렬완료)
+        // ========================================
+        const groups = {};
+        for (let k = 0; k < n; k++) {
+            groups[k] = k < lastIdx ? COLORS.GROUP_PALETTE[1] : COLORS.GROUP_PALETTE[12]; 
+        }
+        setGroupIndices(groups);
   
         for (let j = 0; j < lastIdx; j++) {
             if (!sortingRef.current) break;
@@ -66,6 +78,7 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
     }
     if (!sortingRef.current) return false;
 
+    setGroupIndices({});
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;
