@@ -30,7 +30,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             if (!sortingRef.current) break;
             setCompareIndices([i, cycleStart]);
             countCompare();
-            playSound(200 + arr[i] * 5, 'sine');
+            playSound(arr[i], 'sine', i);
             if (arr[i] < item) pos++;
             if (!(await wait(0.4))) break;
         }
@@ -50,7 +50,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setSwapIndices([pos]); // Highlight only the placement destination
             setGoodIndices([cycleStart]); // Keep source highlighted
             setDescription(msg.PLACE);
-            playSound(100 + item * 5, 'sawtooth');
+            playSound(item, 'triangle', pos);
             countSwap();
             [arr[pos], item] = [item, arr[pos]];
             setArray([...arr]);
@@ -68,7 +68,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 if (!sortingRef.current) break;
                 setCompareIndices([i, cycleStart]);
                 countCompare();
-                playSound(200 + arr[i] * 5, 'sine');
+                playSound(arr[i], 'sine', i);
                 if (arr[i] < item) pos++;
                 if (!(await wait(0.4))) break;
             }
@@ -79,7 +79,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             if (item !== arr[pos]) {
                 setSwapIndices([pos]);
                 setDescription(msg.PLACE);
-                playSound(100 + item * 5, 'sawtooth');
+                playSound(item, 'triangle', pos);
                 countSwap();
                 [arr[pos], item] = [item, arr[pos]];
                 setArray([...arr]);

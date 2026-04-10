@@ -29,7 +29,7 @@ export const radixSort = async ({ array, setArray, setCompareIndices, setSwapInd
             count[digit]++;
             countCompare();
             setCompareIndices([i]);
-            playSound(200 + arr[i] * 5, 'sine');
+            playSound(arr[i], 'sine', i);
             if (!(await wait(0.5))) break;
         }
         setCompareIndices([]);
@@ -61,7 +61,7 @@ export const radixSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
             setSwapIndices([i]);
             countSwap();
-            playSound(100 + arr[i] * 5, 'sawtooth');
+            playSound(arr[i], 'triangle', i);
             if (!(await wait(1))) break;
             setSwapIndices([]);
         }

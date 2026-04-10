@@ -57,7 +57,7 @@ export const bitonicSort = async ({ array, setArray, setCompareIndices, setSwapI
                     setSwapIndices([]);
                     countCompare();
                     setDescription(msg.COMPARE);
-                    playSound(200 + arr[i] * 5, 'sine');
+                    playSound(arr[i], 'sine', i);
                     if (!(await wait(1))) return;
 
                     if ((dir && arr[i] > arr[i2]) || (!dir && arr[i] < arr[i2])) {
@@ -65,7 +65,7 @@ export const bitonicSort = async ({ array, setArray, setCompareIndices, setSwapI
                         setCompareIndices([]);
                         setSwapIndices([i, i2]);
                         setDescription(msg.SWAP);
-                        playSound(100 + arr[i] * 5, 'sawtooth');
+                        playSound(arr[i2], 'triangle', i2);
 
                         countSwap();
                         [arr[i], arr[i2]] = [arr[i2], arr[i]];

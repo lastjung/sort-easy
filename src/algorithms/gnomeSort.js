@@ -37,7 +37,7 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setSwapIndices([]);
         countCompare();
         setDescription(msg.COMPARE);
-        playSound(200 + arr[index] * 5, 'sine');
+        playSound(arr[index], 'sine', index);
         if (!(await wait(1))) break;
 
         if (arr[index] >= arr[index - 1]) {
@@ -47,7 +47,7 @@ export const gnomeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setCompareIndices([]);
             setSwapIndices([index, index - 1]);
             setDescription(msg.SWAP);
-            playSound(100 + arr[index] * 5, 'sawtooth');
+            playSound(arr[index - 1], 'triangle', index - 1);
 
             countSwap();
             [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];

@@ -80,6 +80,8 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setCompareIndices(mergeRange.filter(idx => idx >= k)); 
             setDescription(msg.COMPARE);
             countCompare();
+            // 비교 시 소리 추가
+            playSound(L[i] <= R[j] ? L[i] : R[j], 'sine', k);
             if (!(await wait(1.2))) break;
 
             if (L[i] <= R[j]) {
@@ -99,7 +101,7 @@ export const mergeSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setCompareIndices(mergeRange.filter(idx => idx > k)); 
             setSwapIndices([k]);
             setArray([...arr]);
-            playSound(400, 'square');
+            playSound(arr[k], 'triangle', k);
             if (!(await wait(1.2))) break;
             
             setSwapIndices([]); 

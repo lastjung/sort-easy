@@ -15,7 +15,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
             countSwap();
             [arr[left], arr[k]] = [arr[k], arr[left]];
             setArray([...arr]);
-            playSound(100 + arr[left] * 5, 'sawtooth');
+            playSound(arr[left], 'triangle', left);
             if (!(await wait(1))) return;
             
             left++;
@@ -37,7 +37,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
             if (!sortingRef.current) break;
             setCompareIndices([i, maxIdx]);
             countCompare();
-            playSound(200 + arr[i] * 5, 'sine');
+            playSound(arr[i], 'sine', i);
             if (arr[i] > arr[maxIdx]) {
                 maxIdx = i;
             }
@@ -58,7 +58,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
         // This position is now confirmed (largest element placed at the end)
         sortedIndices.push(currSize - 1);
         setSortedIndices([...sortedIndices]);
-        playSound(600, 'square');
+        playSound(arr[currSize - 1], 'sine', currSize - 1);
     }
 
     if (!sortingRef.current) return false;

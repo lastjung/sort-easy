@@ -33,7 +33,7 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
 
         setCompareIndices([i]);
         countCompare();
-        playSound(200 + arr[i] * 5, 'sine');
+        playSound(arr[i], 'sine', i);
         if (!(await wait(0.5))) break;
     }
     setCompareIndices([]);
@@ -69,7 +69,7 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
 
             setSwapIndices([idx]);
             countSwap();
-            playSound(100 + val * 5, 'sawtooth');
+            playSound(val, 'triangle', idx);
             if (!(await wait(1))) break;
             setSwapIndices([]);
             idx++;

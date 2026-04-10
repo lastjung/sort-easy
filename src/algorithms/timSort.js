@@ -41,7 +41,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                 setGoodIndices([pivotPos]);
                 countCompare();
                 setDescription(msg.COMPARE);
-                playSound(200 + arr[j] * 5, 'sine');
+                playSound(arr[j], 'sine', j);
                 if (!(await wait(1))) break;
 
                 if (arr[j] > temp) {
@@ -93,7 +93,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             setCompareIndices(mergeRange.filter(idx => idx >= k));
             countCompare();
             setDescription(msg.COMPARE);
-            playSound(200 + arr[k] * 5, 'sine');
+            playSound(arr[k], 'sine', k);
             if (!(await wait(1))) return;
 
             if (leftArr[i] <= rightArr[j]) {
@@ -113,7 +113,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             setSwapIndices([k]);
             countSwap();
             setArray([...arr]);
-            playSound(100 + arr[k] * 5, 'sawtooth');
+            playSound(arr[k], 'triangle', k);
             if (!(await wait(1))) return;
             setSwapIndices([]);
             k++;

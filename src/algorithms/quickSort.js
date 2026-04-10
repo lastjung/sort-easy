@@ -31,14 +31,14 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
             
             countCompare();
             setDescription({ type: 'COMPARE', text: `Comparing ${arr[j]} with Pivot ${pivotValue}` });
-            playSound(300 + arr[j] * 5, 'sine');
+            playSound(arr[j], 'sine', j);
             if (!(await wait(1.0))) break;
 
             if (arr[j] < pivotValue) {
                 i++;
                 setSwapIndices([i, j]); // 일반 스왑은 빨간색
                 setDescription({ type: 'SWAP', text: `Moving smaller element...` });
-                playSound(150, 'sawtooth');
+                playSound(arr[i], 'triangle', i);
                 countSwap();
                 [arr[i], arr[j]] = [arr[j], arr[i]];
                 setArray([...arr]);
@@ -61,7 +61,7 @@ export const quickSort = async ({ array, setArray, setCompareIndices, setSwapInd
         countSwap();
         [arr[pi], arr[high]] = [arr[high], arr[pi]];
         setArray([...arr]);
-        playSound(600, 'sine');
+        playSound(arr[pi], 'sine', pi);
         
         // 보라색 상태를 충분히 보여줌
         if (!(await wait(1.5))) return -1;

@@ -23,7 +23,7 @@ export const gravitySort = async ({ array, setArray, setCompareIndices, setSwapI
         }
         setCompareIndices([i]);
         countCompare();
-        playSound(200 + arr[i] * 5, 'sine');
+        playSound(arr[i], 'sine', i);
         if (!(await wait(0.5))) break;
     }
     setCompareIndices([]);
@@ -68,7 +68,7 @@ export const gravitySort = async ({ array, setArray, setCompareIndices, setSwapI
         setGroupIndices({ ...groups });
 
         setSwapIndices([Math.max(0, n - sum - 1), n - 1]);
-        playSound(100 + j * 10, 'sawtooth');
+        playSound(palette.length > 0 ? (j * 10 % 100) : 50, 'triangle', Math.floor(n / 2)); // Column sound
         if (!(await wait(1))) break;
         setSwapIndices([]);
     }
@@ -79,7 +79,7 @@ export const gravitySort = async ({ array, setArray, setCompareIndices, setSwapI
     for (let i = 0; i < n; i++) {
         if (!sortingRef.current) break;
         setSwapIndices([i]);
-        playSound(300 + arr[i] * 5, 'triangle');
+        playSound(arr[i], 'sine', i);
         if (!(await wait(0.5))) break;
         setSwapIndices([]);
     }

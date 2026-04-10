@@ -35,12 +35,12 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
 
             setCompareIndices([l, h]);
             countCompare();
-            playSound(200 + arr[l] * 5, 'sine');
+            playSound(arr[l], 'sine', l);
             if (!(await wait(1))) return false;
 
             if (arr[l] > arr[h]) {
                 setSwapIndices([l, h]);
-                playSound(100 + arr[l] * 5, 'sawtooth');
+                playSound(arr[l], 'triangle', l);
                 countSwap();
                 [arr[l], arr[h]] = [arr[h], arr[l]];
                 setArray([...arr]);
