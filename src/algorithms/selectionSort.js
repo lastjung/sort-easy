@@ -41,7 +41,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
             setSortedIndices([minIndex, ...sortedRange]); // 최솟값 + 정렬된 영역: 초록색
             
             countCompare();
-            playSound(300 + arr[j] * 5, 'sine'); 
+            playSound(arr[j], 'sine', j); 
             if (!(await wait(1))) break;
 
             if (arr[j] < arr[minIndex]) {
@@ -49,7 +49,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
                 minIndex = j;
                 setSortedIndices([minIndex, ...sortedRange]); // 새 최솟값: 초록색
                 setDescription(msg.NEW_MIN); 
-                playSound(800, 'triangle'); 
+                playSound(arr[minIndex], 'triangle', minIndex); 
                 if (!(await wait(1))) break;
                 setDescription(msg.SCAN);
             }
@@ -64,7 +64,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         if (minIndex !== i) {
             setSortedIndices([minIndex, ...sortedRange]);
             setDescription(msg.SWAP);
-            playSound(150, 'sawtooth'); 
+            playSound(arr[i], 'triangle', i); 
             countSwap();
             [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
             setArray([...arr]);
@@ -83,7 +83,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         }
         setGroupIndices(newDivideGroups);
         
-        await new Promise(r => setTimeout(r, 350));
+        if (!(await wait(0.4))) break;
         if (!sortingRef.current) break;
         
         // 정렬된 영역 표시 (초록색)
@@ -91,7 +91,7 @@ export const selectionSort = async ({ array, setArray, setCompareIndices, setSwa
         for (let k = 0; k < sortedCount; k++) sortedRange.push(k);
         setSortedIndices(sortedRange);
         
-        playSound(600, 'square');
+        playSound(arr[i], 'sine', i);
     }
     
     if (!sortingRef.current) return false;

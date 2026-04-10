@@ -24,8 +24,8 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
         setGroupIndices(splitGroups);
         setDescription(msg.PICK);
         
-        // CSS 애니메이션(700ms) 완료 대기 (고정)
-        await new Promise(r => setTimeout(r, 350));
+        // CSS 애니메이션 완료 대기 (사용자 설정 속도에 동기화)
+        if (!(await wait(0.4))) break;
         if (!sortingRef.current) break;
         if (!(await wait(0.5))) break;
         
@@ -38,8 +38,8 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
         }
         setGroupIndices(joinedGroups);
         
-        // CSS 애니메이션 완료 대기 (고정)
-        await new Promise(r => setTimeout(r, 350));
+        // CSS 애니메이션 완료 대기 (사용자 설정 속도에 동기화)
+        if (!(await wait(0.4))) break;
         if (!sortingRef.current) break;
         
         // ========================================
@@ -55,7 +55,7 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
             setGoodIndices([pivotPos]);
             countCompare();
             setDescription(msg.COMPARE);
-            playSound(300 + arr[j] * 5, 'sine');
+            playSound(arr[j], 'sine', j);
             if (!(await wait(1))) break;
             
             if (arr[j] > arr[j + 1]) {
@@ -63,7 +63,7 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
                 setGoodIndices([pivotPos]); // 피벗 보라색 유지
                 setSortedIndices([j]); // 스왑 상대 초록색
                 setDescription(msg.SHIFT);
-                playSound(150, 'sawtooth');
+                playSound(arr[j], 'triangle', j);
                 countSwap();
                 [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
                 setArray([...arr]);
@@ -92,7 +92,7 @@ export const insertionSort = async ({ array, setArray, setCompareIndices, setSwa
         setSortedIndices(sortedRange);
         setGoodIndices([]);
         
-        playSound(600, 'square');
+        playSound(arr[i], 'sine', i);
     }
     
     if (!sortingRef.current) return false;
