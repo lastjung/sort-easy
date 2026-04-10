@@ -16,7 +16,8 @@ const Dashboard = ({
   triggerReset,
   selectedIds, // Set of IDs to show
   onRunningChange,
-  isTubeMode
+  isTubeMode,
+  isFullView
 }) => {
   const [results, setResults] = useState({});
   const [activeAlgorithms, setActiveAlgorithms] = useState(new Set());
@@ -104,7 +105,11 @@ const Dashboard = ({
   const isCinema = visibleAlgos.length === 1;
 
   return (
-    <div className={`w-full mx-auto px-6 py-4 transition-all duration-500 ${isCinema ? 'max-w-[1800px] h-[calc(100vh-180px)] overflow-visible' : 'max-w-[1600px]'}`}>
+    <div className={`w-full mx-auto px-6 py-4 transition-all duration-500 ${
+      isFullView 
+        ? 'max-w-[2000px] h-[calc(100vh-100px)]' 
+        : (isCinema ? 'max-w-[1800px] h-[calc(100vh-180px)]' : 'max-w-[1600px]')
+    } overflow-visible`}>
         {/* Dashboard Padding / Space Sync (Ensures slogan doesn't clip) */}
         <div className={`grid transition-all duration-700 ${
           isCinema 
@@ -116,6 +121,7 @@ const Dashboard = ({
             <SortCard
               item={algo}
               isCinema={isCinema}
+              isFullView={isFullView}
               initialArray={data}
               arraySize={arraySize}
               speed={speed}

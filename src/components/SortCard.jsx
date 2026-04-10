@@ -30,6 +30,7 @@ const playTone = (freq, type = 'sine', duration = 0.1, vol = 0.1, enabled = true
 const SortCard = ({ 
   item, // { id, title, fn, complexity, desc, icon, slogan }
   isCinema,
+  isFullView,
   initialArray, 
   arraySize, 
   speed, 
@@ -628,16 +629,18 @@ const SortCard = ({
       case MSG_TYPES.COMPARE: return 'bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(253,224,71,0.5)]';
       case MSG_TYPES.SWAP: return 'bg-gradient-to-r from-rose-500 to-rose-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(244,63,94,0.6)] font-black';
       case MSG_TYPES.TARGET: return 'bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]';
-      case MSG_TYPES.SUCCESS: return 'bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]';
-      default: return 'text-slate-100';
+      case MSG_TYPES.SUCCESS: return 'bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(52,211,153,0.5)]';
+      default: return 'text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]';
     }
   };
 
   return (
-    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[32px] md:rounded-[40px] border border-white/10 shadow-2xl overflow-hidden transition-all duration-700 group ${
-      isCinema ? 'ring-12 ring-emerald-500/10 h-full' : ''
+    <div className={`flex flex-col bg-slate-900/60 backdrop-blur-3xl rounded-[32px] md:rounded-[40px] shadow-2xl overflow-hidden transition-all duration-700 group ${
+      isFullView ? 'border-none ring-0' : 'border border-white/10'
+    } ${
+      isCinema && !isFullView ? 'ring-12 ring-emerald-500/10 h-full' : ''
     } ${isCinema && isTubeMode ? 'translate-y-[-40px] scale-[0.98]' : ''}`}>
-      <div className={`${isCinema ? 'p-6' : 'p-2 md:p-4'} bg-white/5 border-b border-white/5 flex flex-col gap-1 md:gap-1.5 order-first`}>
+      <div className={`${isCinema ? 'p-6' : 'p-2 md:p-4'} ${isFullView ? 'bg-transparent border-none' : 'bg-white/5 border-b border-white/5'} flex flex-col gap-1 md:gap-1.5 order-first`}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 min-w-0">
             <span className={isCinema ? 'text-3xl' : 'text-lg md:text-xl'}>{item.icon}</span>
@@ -669,10 +672,11 @@ const SortCard = ({
         </p>
       </div>
 
-      <div className={`${isCinema ? 'p-4 flex-1' : 'px-0 pt-2 pb-0'} bg-black/10 flex flex-col`}>
+      <div className={`${isCinema ? 'p-4 flex-1' : 'px-0 pt-2 pb-0'} ${isFullView ? 'bg-transparent' : 'bg-black/10'} flex flex-col`}>
         <SortChart 
           array={array}
           isCinema={isCinema}
+          isFullView={isFullView}
           arraySize={arraySize}
           sortedIndices={sortedIndices}
           swapIndices={swapIndices}
@@ -696,7 +700,7 @@ const SortCard = ({
                 {description?.text || "Ready to sort..."}
              </p>
           </div>
-          <div className={`flex items-center justify-center ${isCinema ? 'gap-8 md:gap-12 py-3' : 'gap-3 md:gap-6 py-1.5'} border-t border-white/5 opacity-80`}>
+          <div className={`flex items-center justify-center ${isCinema ? 'gap-8 md:gap-12 py-3' : 'gap-3 md:gap-6 py-1.5'} ${isFullView ? 'border-none' : 'border-t border-white/5'} opacity-80`}>
             <div className="flex items-center gap-1.5 md:gap-2">
               <Timer size={isCinema ? 20 : 10} className="text-emerald-400/70" />
               <span className={`${isCinema ? 'text-lg md:text-2xl' : 'text-[12px] md:text-xs'} font-mono font-normal text-slate-300 tracking-tighter`}>{formatTime(elapsedTime)}</span>

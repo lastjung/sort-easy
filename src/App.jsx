@@ -153,6 +153,7 @@ function App() {
           arraySize={arraySize}
           speed={speed}
           isTubeMode={isTubeMode}
+          isFullView={isFullView}
           soundEnabled={soundEnabled}
           volume={volume}
           triggerRun={triggerRun}

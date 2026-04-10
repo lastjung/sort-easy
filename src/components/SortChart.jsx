@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { COLORS } from '../constants/colors';
 
-const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, groupIndices = {}, pivotOrders = {}, isCinema, title, disableGroupGaps = false }) => {
+const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, groupIndices = {}, pivotOrders = {}, isCinema, isFullView, title, disableGroupGaps = false }) => {
   const isHeap = title?.toLowerCase().includes('heap');
   const [hoveredIdx, setHoveredIdx] = useState(null);
   
@@ -41,7 +41,9 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
     return (
       <div className={`w-full flex flex-col gap-4 animate-in fade-in duration-700 ${isCinema ? 'flex-1 p-4' : ''}`}>
         {/* Top: Theoretical Heap Tree */}
-        <div className={`relative w-full transition-all duration-700 overflow-visible bg-slate-900/40 rounded-2xl border border-white/5 shadow-inner ${
+        <div className={`relative w-full transition-all duration-700 overflow-visible bg-slate-900/40 rounded-2xl ${
+          isFullView ? 'border-none' : 'border border-white/5 shadow-inner'
+        } ${
           isCinema ? 'h-[55%]' : 'h-48 md:h-64'
         } p-4`}>
             <div className="absolute top-2 left-4 flex items-center gap-2 opacity-30">
@@ -99,7 +101,9 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         </div>
 
         {/* Bottom: Physical Array Bar Chart */}
-        <div className={`relative w-full flex items-end justify-center transition-all duration-500 overflow-visible bg-slate-900/40 rounded-2xl border border-white/5 shadow-inner p-4 ${
+        <div className={`relative w-full flex items-end justify-center transition-all duration-500 overflow-visible bg-slate-900/40 rounded-2xl ${
+          isFullView ? 'border-none' : 'border border-white/5 shadow-inner'
+        } p-4 ${
             isCinema ? 'h-[40%]' : 'h-32 md:h-48'
         } gap-[2px]`}>
             <div className="absolute top-2 left-4 flex items-center gap-2 opacity-30">
@@ -141,7 +145,7 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
       isCinema 
         ? 'h-[40vh] md:h-[45vh] gap-[4px] p-8 bg-slate-900/60 rounded-[40px]' 
         : 'h-56 md:h-[450px] gap-[2px] p-2 md:p-4 bg-slate-900/40 rounded-2xl'
-    } border border-white/5 shadow-inner`}>
+    } ${isFullView ? 'border-none' : 'border border-white/5 shadow-inner'}`}>
       {array.map((value, idx) => {
         const colorClass = getBarColorClass(idx);
         const pivotOrder = pivotOrders[idx];
