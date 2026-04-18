@@ -22,6 +22,9 @@ import { circleSort } from './circleSort';
 import { pigeonholeSort } from './pigeonholeSort';
 import { msdRadixSort } from './msdRadixSort';
 import { flashSort } from './flashSort';
+import { tournamentSort } from './tournamentSort';
+import { strandSort } from './strandSort';
+import { librarySort } from './librarySort';
 
 export {
     bubbleSort,
@@ -46,7 +49,10 @@ export {
     circleSort,
     pigeonholeSort,
     msdRadixSort,
-    flashSort
+    flashSort,
+    tournamentSort,
+    strandSort,
+    librarySort
 };
 
 export const ALGORITHMS = [
@@ -256,5 +262,32 @@ export const ALGORITHMS = [
         desc: 'A recursive sorting algorithm that compares elements at opposite ends of a range, creating a circle-like comparison pattern.',
         icon: '⭕',
         slogan: "Compare across the circle to spiral into order!"
+    },
+    { 
+        id: 'tournament', 
+        title: 'Tournament Sort', 
+        fn: tournamentSort, 
+        complexity: 'O(n log n)', 
+        desc: 'Mimics a tournament bracket to find winners (minimums) and move them to sorted order.',
+        icon: '🏔️',
+        slogan: "Who will be the next champion of order?"
+    },
+    { 
+        id: 'strand', 
+        title: 'Strand Sort', 
+        fn: strandSort, 
+        complexity: 'O(n²)', 
+        desc: 'Extracts sorted strands from the data and merges them into a single sorted list.',
+        icon: '🎣',
+        slogan: "Catch the sorted items like a pro angler!"
+    },
+    { 
+        id: 'library', 
+        title: 'Library Sort', 
+        fn: librarySort, 
+        complexity: 'O(n log n)', 
+        desc: 'An insertion sort variation that keeps gaps between items for faster shelving.',
+        icon: '📚',
+        slogan: "Make some room for the new books on the shelf!"
     }
 ];
