@@ -15,24 +15,25 @@ export const msdRadixSort = async ({ array, setArray, setCompareIndices, setSwap
     while (Math.floor(maxVal / (maxExp * 10)) > 0) maxExp *= 10;
 
     const groups = {};
-    const getColor = (val, exp) => {
-        const digit = Math.floor(val / exp) % 10;
+    const getColor = (val) => {
+        // ALWAYS use the most significant digit (maxExp) for consistent coloring
+        const digit = Math.floor(val / maxExp) % 10;
         return palette[digit % palette.length];
     };
 
     const sortRange = async (start, end, exp) => {
         if (exp < 1 || start >= end || !sortingRef.current) return;
 
-        setDescription({ text: `MSD: Partitioning by ${exp}'s Digit...`, type: "TARGET" });
+        setDescription({ text: `Partitioning by ${exp}'s Digit...`, type: "TARGET" });
         
         // Phase 0: Color the current range
         for (let i = start; i <= end; i++) {
             if (!sortingRef.current) return;
-            groups[i] = getColor(arr[i], exp);
+            groups[i] = getColor(arr[i]);
             setGroupIndices({ ...groups });
             setCompareIndices([i]);
             playSound(arr[i], 'sine', i);
-            if (!(await wait(0.3))) return;
+            if (!(await wait(0.5))) return;
         }
         setCompareIndices([]);
 
@@ -50,13 +51,13 @@ export const msdRadixSort = async ({ array, setArray, setCompareIndices, setSwap
                 arr[writeIdx] = val;
                 setArray([...arr]);
                 
-                groups[writeIdx] = getColor(val, exp);
+                groups[writeIdx] = getColor(val);
                 setGroupIndices({ ...groups });
                 
                 setSwapIndices([writeIdx]);
                 countSwap();
                 playSound(val, 'triangle', writeIdx);
-                if (!(await wait(0.5))) return;
+                if (!(await wait(1.0))) return; // Synced with LSD's write-back speed
                 writeIdx++;
             }
             const bucketEnd = writeIdx - 1;

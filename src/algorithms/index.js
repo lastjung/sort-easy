@@ -168,6 +168,15 @@ export const ALGORITHMS = [
         slogan: "Sorting digit by digit, from the ground up!"
     },
     { 
+        id: 'msdradix', 
+        title: 'MSD Radix Sort', 
+        fn: msdRadixSort, 
+        complexity: 'O(nk)', 
+        desc: 'Most Significant Digit Radix Sort. Sorts numbers from left to right, recursively partitioning buckets.',
+        icon: '🔡',
+        slogan: "Sorting from top to bottom, one digit at a time!"
+    },
+    { 
         id: 'gnome', 
         title: 'Gnome Sort', 
         fn: gnomeSort, 
@@ -222,15 +231,6 @@ export const ALGORITHMS = [
         slogan: "Divide into buckets, conquer each one!"
     },
     { 
-        id: 'circle', 
-        title: 'Circle Sort', 
-        fn: circleSort, 
-        complexity: 'O(n log n log n)', 
-        desc: 'A recursive sorting algorithm that compares elements at opposite ends of a range, creating a circle-like comparison pattern.',
-        icon: '⭕',
-        slogan: "Compare across the circle to spiral into order!"
-    },
-    { 
         id: 'pigeonhole', 
         title: 'Pigeonhole Sort', 
         fn: pigeonholeSort, 
@@ -240,15 +240,6 @@ export const ALGORITHMS = [
         slogan: "Every pigeon finds its own perfectly sized hole!"
     },
     { 
-        id: 'msdradix', 
-        title: 'MSD Radix Sort', 
-        fn: msdRadixSort, 
-        complexity: 'O(nk)', 
-        desc: 'Most Significant Digit Radix Sort. Sorts numbers from left to right, recursively partitioning buckets.',
-        icon: '🔡',
-        slogan: "Sorting from top to bottom, one digit at a time!"
-    },
-    { 
         id: 'flash', 
         title: 'Flash Sort', 
         fn: flashSort, 
@@ -256,5 +247,14 @@ export const ALGORITHMS = [
         desc: 'A distribution sort that uses a mathematical formula to predict where each value belongs.',
         icon: '⚡',
         slogan: "Lightning fast placement with mathematical precision!"
+    },
+    { 
+        id: 'circle', 
+        title: 'Circle Sort', 
+        fn: circleSort, 
+        complexity: 'O(n log n log n)', 
+        desc: 'A recursive sorting algorithm that compares elements at opposite ends of a range, creating a circle-like comparison pattern.',
+        icon: '⭕',
+        slogan: "Compare across the circle to spiral into order!"
     }
 ];
