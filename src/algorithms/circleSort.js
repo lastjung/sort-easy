@@ -37,30 +37,41 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
     }
     setCompareIndices([]);
 
-    const circleSortRecursive = async (low, high) => {
+    const circleSortRecursive = async (low, high, depth = 0) => {
         if (low === high || !sortingRef.current) return false;
 
         let swapped = false;
         let l = low;
         let h = high;
 
-        setDescription({ text: `Circular Merge [${low}-${high}]`, type: 'INFO' });
+        // Visual Cues for Depth: Categorize circles by their recursion level
+        const levelText = depth === 0 ? "Global Circle" : `Sub-Circle (Lev ${depth})`;
+        const depthColor = palette[Math.min(depth * 3, palette.length - 1)];
+        
+        setDescription({ text: `${levelText} [${low}-${high}]`, type: 'INFO' });
 
         while (l < h) {
             if (!sortingRef.current) return false;
 
-            // Highlight the circular pair
+            // Highlight the circular pair based on depth
             setCompareIndices([l, h]);
             countCompare();
+            
+            // Temporary group highlight to show the "active branch"
+            const rangeGroups = { ...groups };
+            rangeGroups[l] = depthColor;
+            rangeGroups[h] = depthColor;
+            setGroupIndices(rangeGroups);
+            
             playSound(arr[l], 'sine', l);
-            if (!(await wait(0.8))) return false;
+            if (!(await wait(0.6))) return false;
 
             if (arr[l] > arr[h]) {
                 setSwapIndices([l, h]);
                 countSwap();
                 [arr[l], arr[h]] = [arr[h], arr[l]];
                 
-                // Keep colors moving with values
+                // Finalize value colors after swap
                 groups[l] = getColor(arr[l]);
                 groups[h] = getColor(arr[h]);
                 
@@ -80,7 +91,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setCompareIndices([l, h + 1]);
             countCompare();
             playSound(arr[l], 'sine', l);
-            if (!(await wait(0.8))) return false; // Show middle comparison
+            if (!(await wait(0.8))) return false;
 
             if (arr[l] > arr[h + 1]) {
                 setSwapIndices([l, h + 1]);
@@ -98,17 +109,16 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         }
 
         const mid = Math.floor((high - low) / 2);
-        const leftSwapped = await circleSortRecursive(low, low + mid);
-        const rightSwapped = await circleSortRecursive(low + mid + 1, high);
+        const leftSwapped = await circleSortRecursive(low, low + mid, depth + 1);
+        const rightSwapped = await circleSortRecursive(low + mid + 1, high, depth + 1);
 
         return swapped || leftSwapped || rightSwapped;
     };
 
     while (true) {
         if (!sortingRef.current) break;
-        const swapped = await circleSortRecursive(0, n - 1);
+        const swapped = await circleSortRecursive(0, n - 1, 0);
         if (!swapped) break;
-        // Each full pass is considered a step in the overall sort
     }
 
     if (!sortingRef.current) return false;
