@@ -19,6 +19,9 @@ import { timSort } from './timSort';
 import { cycleSort } from './cycleSort';
 import { bucketSort } from './bucketSort';
 import { circleSort } from './circleSort';
+import { pigeonholeSort } from './pigeonholeSort';
+import { msdRadixSort } from './msdRadixSort';
+import { flashSort } from './flashSort';
 
 export {
     bubbleSort,
@@ -40,7 +43,10 @@ export {
     timSort,
     cycleSort,
     bucketSort,
-    circleSort
+    circleSort,
+    pigeonholeSort,
+    msdRadixSort,
+    flashSort
 };
 
 export const ALGORITHMS = [
@@ -223,5 +229,32 @@ export const ALGORITHMS = [
         desc: 'A recursive sorting algorithm that compares elements at opposite ends of a range, creating a circle-like comparison pattern.',
         icon: '⭕',
         slogan: "Compare across the circle to spiral into order!"
+    },
+    { 
+        id: 'pigeonhole', 
+        title: 'Pigeonhole Sort', 
+        fn: pigeonholeSort, 
+        complexity: 'O(n + Range)', 
+        desc: 'Similar to counting sort, but assigns items to specific holes based on their value.',
+        icon: '🐦',
+        slogan: "Every pigeon finds its own perfectly sized hole!"
+    },
+    { 
+        id: 'msdradix', 
+        title: 'MSD Radix Sort', 
+        fn: msdRadixSort, 
+        complexity: 'O(nk)', 
+        desc: 'Most Significant Digit Radix Sort. Sorts numbers from left to right, recursively partitioning buckets.',
+        icon: '🔡',
+        slogan: "Sorting from top to bottom, one digit at a time!"
+    },
+    { 
+        id: 'flash', 
+        title: 'Flash Sort', 
+        fn: flashSort, 
+        complexity: 'O(n)', 
+        desc: 'A distribution sort that uses a mathematical formula to predict where each value belongs.',
+        icon: '⚡',
+        slogan: "Lightning fast placement with mathematical precision!"
     }
 ];
