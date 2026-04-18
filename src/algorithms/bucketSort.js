@@ -38,7 +38,7 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
         setCompareIndices([i]);
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.2))) break; // Fast scan
+        if (!(await wait(0.5))) break; // Synced scan speed
     }
     setCompareIndices([]);
     if (!(await wait(1))) return;

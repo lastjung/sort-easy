@@ -20,13 +20,19 @@ export const radixSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         const output = new Array(n).fill(0);
         const count = new Array(10).fill(0);
+        const groups = {};
 
-        // 1. Count frequencies (no color change, just scan)
+        // 1. Count frequencies & Apply Color (Color by current digit)
         setDescription({ text: `Scanning ${digitLabel(exp)} Digit...`, type: 'TARGET' });
         for (let i = 0; i < n; i++) {
             if (!sortingRef.current) break;
             const digit = Math.floor(arr[i] / exp) % 10;
             count[digit]++;
+            
+            // Color this element by its current digit (0-9)
+            groups[i] = palette[digit % palette.length];
+            setGroupIndices({ ...groups });
+
             countCompare();
             setCompareIndices([i]);
             playSound(arr[i], 'sine', i);
@@ -46,16 +52,17 @@ export const radixSort = async ({ array, setArray, setCompareIndices, setSwapInd
             output[--count[digit]] = arr[i];
         }
 
-        // 4. Write back — color each element as it's placed
-        const groups = {};
+        // 4. Write back — Maintain/Update color as it's placed
         for (let i = 0; i < n; i++) {
             if (!sortingRef.current) break;
             setDescription({ text: `Placing by ${digitLabel(exp)} Digit...`, type: 'SWAP' });
-            arr[i] = output[i];
+            
+            const val = output[i];
+            arr[i] = val;
             setArray([...arr]);
 
-            // Color this element by its digit immediately
-            const digit = Math.floor(arr[i] / exp) % 10;
+            // Update color in the existing groups object to maintain others
+            const digit = Math.floor(val / exp) % 10;
             groups[i] = palette[digit % palette.length];
             setGroupIndices({ ...groups });
 
@@ -70,7 +77,7 @@ export const radixSort = async ({ array, setArray, setCompareIndices, setSwapInd
         if (sortingRef.current) {
             setDescription({ text: `${digitLabel(exp)} Digit Sorted!`, type: 'SUCCESS' });
             if (!(await wait(2))) break;
-            setGroupIndices({});
+            // Removed setGroupIndices({}) here to keep colors until next digit scan starts
         }
 
         exp *= 10;
