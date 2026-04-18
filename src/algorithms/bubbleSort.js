@@ -54,8 +54,6 @@ export const bubbleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 swapped = true;
                 if (!(await wait(1))) break;
                 setSwapIndices([]);
-            } else {
-                if (!(await wait(0.5))) break;
             }
         }
         

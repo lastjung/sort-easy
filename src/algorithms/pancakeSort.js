@@ -3,6 +3,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
     const arr = [...array];
     const n = arr.length;
     const sortedIndices = [];
+    const { COLORS } = await import('../constants/colors');
 
     setGroupIndices({});
 
@@ -30,6 +31,13 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
     for (let currSize = n; currSize > 1; currSize--) {
         if (!sortingRef.current) break;
 
+        // Visual gap update (Pink: unsorted, Green: confirmed sorted)
+        const groups = {};
+        for (let k = 0; k < n; k++) {
+            groups[k] = k < currSize ? COLORS.GROUP_PALETTE[1] : COLORS.GROUP_PALETTE[12];
+        }
+        setGroupIndices(groups);
+
         setDescription(msg.MAX);
         // Find index of maximum element in arr[0..currSize-1]
         let maxIdx = 0;
@@ -41,7 +49,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
             if (arr[i] > arr[maxIdx]) {
                 maxIdx = i;
             }
-            if (!(await wait(0.5))) break;
+            if (!(await wait(1))) break;
         }
 
         if (maxIdx !== currSize - 1) {
@@ -63,6 +71,7 @@ export const pancakeSort = async ({ array, setArray, setCompareIndices, setSwapI
 
     if (!sortingRef.current) return false;
 
+    setGroupIndices({});
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;

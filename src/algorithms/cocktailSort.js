@@ -25,7 +25,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         swapped = false;
         setDescription(msg.FORWARD);
         updateGroups(start, end);
-        if (!(await wait(1.5))) break; // Setup 1.5
+        if (!(await wait(0.5))) break;
         
         for (let i = start; i < end; ++i) {
             if (!sortingRef.current) break;
@@ -53,10 +53,10 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         playSound(arr[end], 'sine', end);
         end--;
         updateGroups(start, end);
-        if (!(await wait(0.5))) break; // Outro 0.5
+        if (!(await wait(0.2))) break;
 
         setDescription(msg.BACKWARD);
-        if (!(await wait(1.5))) break; // Setup 1.5
+        if (!(await wait(0.5))) break;
         
         for (let i = end - 1; i >= start; --i) {
             if (!sortingRef.current) break;
@@ -82,7 +82,7 @@ export const cocktailSort = async ({ array, setArray, setCompareIndices, setSwap
         playSound(arr[start], 'sine', start);
         start++;
         updateGroups(start, end);
-        if (!(await wait(0.5))) break; // Outro 0.5
+        if (!(await wait(0.2))) break;
     }
     
     if (!sortingRef.current) return false;
