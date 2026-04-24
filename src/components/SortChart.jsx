@@ -3,6 +3,7 @@ import { COLORS } from '../constants/colors';
 
 const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, compareIndices, groupIndices = {}, pivotOrders = {}, isCinema, isFullView, title, disableGroupGaps = false }) => {
   const isHeap = title?.toLowerCase().includes('heap');
+  const isLibrary = title?.toLowerCase().includes('library');
   const [hoveredIdx, setHoveredIdx] = useState(null);
   
   const swapSet = useMemo(() => new Set(swapIndices), [swapIndices]);
@@ -19,6 +20,21 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
     if (sortedSet.has(idx)) return COLORS.SORTED;
     if (groupIndices[idx] && groupIndices[idx].startsWith('bg-')) return groupIndices[idx];
     return COLORS.UNSORTED;                                 
+  };
+
+  const getCustomBarStyle = (idx, value) => {
+    if (!isLibrary) return {};
+    const customColor = groupIndices[idx];
+    const isGapSlot = value <= 0;
+
+    return {
+      backgroundColor: isGapSlot
+        ? 'transparent'
+        : (customColor && !customColor.startsWith('bg-') ? customColor : undefined),
+      border: isGapSlot ? '2px solid rgba(148,163,184,0.85)' : undefined,
+      boxShadow: isGapSlot ? 'inset 0 0 0 1px rgba(255,255,255,0.06)' : undefined,
+      opacity: 1
+    };
   };
 
   const maxVal = Math.max(...array, 1);
@@ -152,15 +168,17 @@ const SortChart = ({ array, arraySize, sortedIndices, swapIndices, goodIndices, 
         const groupColor = groupIndices[idx];
         const nextGroupColor = groupIndices[idx + 1];
         const hasGap = !disableGroupGaps && groupColor && nextGroupColor && groupColor !== nextGroupColor;
+        const shelfLikeHeight = isLibrary && value <= 0;
 
         return (
           <div
             key={idx}
             className={`w-full rounded-t-sm relative flex items-end justify-center pb-3 text-white font-black ${colorClass}`}
             style={{ 
-              height: `${(value / maxVal) * 92 + 3}%`,
+              height: shelfLikeHeight ? `${92 + 3}%` : `${(value / maxVal) * 92 + 3}%`,
               marginRight: hasGap ? (isCinema ? '24px' : '10px') : '0px',
-              transition: 'background-color 75ms linear, margin-right 300ms ease-out, height 700ms ease-out'
+              transition: 'background-color 75ms linear, margin-right 300ms ease-out, height 700ms ease-out',
+              ...getCustomBarStyle(idx, value)
             }}
           >
             {pivotOrder && (

@@ -49,47 +49,31 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
     for (let i = 1; i < m; i++) l[i] += l[i - 1];
 
     // Phase 1: Permutation (The Flash!)
+    // Use the class partition directly for a stable, safe flash distribution.
     setDescription({ text: "Flash: Permuting to classes...", type: "SWAP" });
-    let count = 0;
-    let j = 0;
-    let k = m - 1;
+    const buckets = Array.from({ length: m }, () => []);
+    for (let i = 0; i < n; i++) {
+        buckets[getClass(arr[i])].push(arr[i]);
+    }
 
-    // Swap max element to front for convenience in some implementations, 
-    // but here we follow the standard cycle leader approach
-    [arr[0], arr[maxIdx]] = [arr[maxIdx], arr[0]];
-    groups[0] = getColorForVal(arr[0], min, max, m, palette);
-    groups[maxIdx] = getColorForVal(arr[maxIdx], min, max, m, palette);
-    setArray([...arr]);
-    setGroupIndices({ ...groups });
-
-    while (count < n - 1) {
-        if (!sortingRef.current) return false;
-        while (j >= l[getClass(arr[j])]) {
-            j++;
-        }
-        let flash = arr[j];
-        if (j >= n) break; // Safety
-
-        while (j !== l[getClass(flash)]) {
+    let writeIdx = 0;
+    for (let c = 0; c < m; c++) {
+        for (const val of buckets[c]) {
             if (!sortingRef.current) return false;
-            let c = getClass(flash);
-            l[c]--;
-            let hold = arr[l[c]];
-            arr[l[c]] = flash;
-            flash = hold;
-
-            // Visualization
-            groups[l[c]] = getColorForVal(arr[l[c]], min, max, m, palette);
+            arr[writeIdx] = val;
+            groups[writeIdx] = getColorForVal(val, min, max, m, palette);
             setArray([...arr]);
             setGroupIndices({ ...groups });
-            setSwapIndices([l[c]]);
+            setSwapIndices([writeIdx]);
             countSwap();
-            playSound(arr[l[c]], 'triangle', l[c]);
-            if (!(await wait(0.6))) return false;
-            count++;
+            playSound(val, 'triangle', writeIdx);
+            if (!(await wait(0.35))) return false;
+            setSwapIndices([]);
+            writeIdx++;
         }
     }
-    setSwapIndices([]);
+    setCompareIndices([]);
+    setGoodIndices([]);
 
     // Phase 2: Final Insertion Sort (Correction)
     setDescription({ text: "Flash: Finalizing with Insertion...", type: "INFO" });
@@ -99,6 +83,8 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let j = i - 1;
         while (j >= 0 && arr[j] > key) {
             if (!sortingRef.current) return false;
+            setCompareIndices([j, j + 1]);
+            countCompare();
             arr[j + 1] = arr[j];
             groups[j + 1] = getColorForVal(arr[j + 1], min, max, m, palette);
             setArray([...arr]);
@@ -111,7 +97,10 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
         groups[j + 1] = getColorForVal(key, min, max, m, palette);
         setArray([...arr]);
         setGroupIndices({ ...groups });
+        setSwapIndices([j + 1]);
         if (!(await wait(0.2))) return false;
+        setSwapIndices([]);
+        setCompareIndices([]);
     }
 
     setGroupIndices({});

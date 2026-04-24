@@ -8,6 +8,10 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
 
     setGroupIndices({});
     setDisableGroupGaps(true);
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
+    setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return;
 
@@ -36,26 +40,43 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
         groups[i] = getColor(arr[i]);
         setGroupIndices({ ...groups });
         setCompareIndices([i]);
+        setGoodIndices([i]);
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.5))) break; // Synced scan speed
+        if (!(await wait(0.35))) break; // Synced scan speed
     }
     setCompareIndices([]);
+    setGoodIndices([]);
     if (!(await wait(1))) return;
 
     // Phase 1: Distribute elements into buckets
     setDescription(msg.DISTRIBUTE);
+    const bucketFillCounts = new Array(bucketCount).fill(0);
     for (let i = 0; i < n; i++) {
         if (!sortingRef.current) break;
         const bucketIdx = Math.min(Math.floor(((arr[i] - min) / range) * bucketCount), bucketCount - 1);
         buckets[bucketIdx].push(arr[i]);
+        bucketFillCounts[bucketIdx]++;
+
+        const bucketPreviewGroups = {};
+        let writeCursor = 0;
+        for (let b = 0; b < bucketCount; b++) {
+            for (let c = 0; c < bucketFillCounts[b]; c++) {
+                bucketPreviewGroups[writeCursor++] = palette[b % palette.length];
+            }
+        }
 
         setCompareIndices([i]);
+        setGoodIndices([i]);
+        setGroupIndices({ ...groups, ...bucketPreviewGroups });
+        setDescription({ text: `Distributing into Bucket ${bucketIdx + 1}/${bucketCount}`, type: 'TARGET' });
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.5))) break;
+        if (!(await wait(0.35))) break;
     }
     setCompareIndices([]);
+    setGoodIndices([]);
+    setGroupIndices({ ...groups });
     if (!(await wait(1))) return;
 
     // Phase 2: Sort each bucket and write back (Visualized)
@@ -68,6 +89,7 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
         if (!sortingRef.current) break;
         
         const bucketStart = currentIdx;
+        setDescription({ text: `Writing Bucket ${b + 1}/${bucketCount}`, type: 'TARGET' });
         
         // 1. Gather elements from bucket to main array
         for (const val of buckets[b]) {
@@ -80,13 +102,15 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setArray([...arr]);
 
             setSwapIndices([currentIdx]);
+            setGoodIndices([currentIdx]);
             countSwap();
             playSound(val, 'triangle', currentIdx);
-            if (!(await wait(1))) break;
+            if (!(await wait(0.5))) break;
             setSwapIndices([]);
             currentIdx++;
         }
         const bucketEnd = currentIdx - 1;
+        setGoodIndices(bucketStart <= bucketEnd ? [...Array(bucketEnd - bucketStart + 1).keys()].map(offset => bucketStart + offset) : []);
 
         // 2. Internal Sort within the bucket range
         if (bucketStart < bucketEnd) {
@@ -114,7 +138,7 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
                     countSwap();
                     playSound(arr[j + 1], 'sine', j + 1);
                     
-                    if (!(await wait(0.5))) break;
+                    if (!(await wait(0.35))) break;
                     j--;
                 }
                 arr[j + 1] = key;
@@ -124,16 +148,23 @@ export const bucketSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 
                 setSwapIndices([j + 1]);
                 playSound(key, 'triangle', j + 1);
-                if (!(await wait(0.5))) break;
+                if (!(await wait(0.35))) break;
                 setSwapIndices([]);
                 setCompareIndices([]);
             }
         }
+
+        setGoodIndices([]);
+        setCompareIndices([]);
+        setSwapIndices([]);
     }
 
     if (!sortingRef.current) return false;
 
     setGroupIndices({});
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;

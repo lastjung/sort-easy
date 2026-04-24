@@ -6,11 +6,11 @@ import Sidebar from './components/Sidebar';
 import { ALGORITHMS } from './algorithms';
 
 function App() {
-  const [arraySize, setArraySize] = useState(16);
-  const [speed, setSpeed] = useState(50);
+  const [arraySize, setArraySize] = useState(44);
+  const [speed, setSpeed] = useState(60);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [volume, setVolume] = useState(0.1);
-  const [selectedIds, setSelectedIds] = useState(new Set(['shell']));
+  const [selectedIds, setSelectedIds] = useState(new Set(['tim']));
   const [isTubeMode, setIsTubeMode] = useState(false);
   const [isFullView, setIsFullView] = useState(false);
   
@@ -25,12 +25,16 @@ function App() {
     return newArray;
   }, []);
 
-  const [data, setData] = useState(() => makeArray(16));
+  const [data, setData] = useState(() => makeArray(44));
   const [triggerRun, setTriggerRun] = useState(0);   // Global Start signal
   const [triggerResume, setTriggerResume] = useState(0); // Global Resume signal
   const [triggerStop, setTriggerStop] = useState(0);  // Global Pause signal
   const [triggerReset, setTriggerReset] = useState(0); // Global Reset signal (increments to trigger)
   const [runState, setRunState] = useState({ running: 0, paused: 0 });
+
+  useEffect(() => {
+    setSelectedIds(new Set(['tim']));
+  }, []);
 
   // Initial data generation
   const generateData = useCallback(() => {

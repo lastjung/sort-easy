@@ -6,17 +6,22 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
     const palette = COLORS.GROUP_PALETTE;
 
     setGroupIndices({});
-    setDisableGroupGaps(false);
+    setDisableGroupGaps(true);
+    setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return false;
 
-    // Standard Library Sort: Use gaps to optimize insertions
-    const GAP_VAL = -1; 
+    const GAP_VAL = -1; // Use -1 for gaps to avoid confusion with small values
+    const SHELF_COLOR = "#1a1a2e";
+    
+    // We use the same size 'n' but we will be very careful with space.
+    // In a real Library Sort, we'd use (1+epsilon)*n, but here we stay within bounds.
     let libArr = new Array(n).fill(GAP_VAL);
     const groups = {};
+    for (let i = 0; i < n; i++) groups[i] = SHELF_COLOR;
 
     const getColor = (val) => {
-        if (val === GAP_VAL) return "#1a1a2e";
+        if (val === GAP_VAL) return SHELF_COLOR;
         const minVal = Math.min(...originalArr);
         const maxVal = Math.max(...originalArr);
         const range = maxVal - minVal + 1;
@@ -24,127 +29,168 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
         return palette[Math.min(groupIdx, 4)];
     };
 
-    // Rebalance: Spread elements to maintain O(1) insertions
-    const rebalance = (currentLib) => {
-        const items = currentLib.filter(x => x !== GAP_VAL);
+    const rebalance = async (currentItems) => {
+        setDescription({ text: "Rebalancing: Spreading books evenly...", type: "SWAP" });
+        const items = currentItems.filter(x => x !== GAP_VAL);
         const newLib = new Array(n).fill(GAP_VAL);
         const step = n / (items.length + 1);
+        
         for (let i = 0; i < items.length; i++) {
-            const idx = Math.floor((i + 1) * step);
-            newLib[idx] = items[i];
+            const newIdx = Math.floor((i + 1) * step);
+            newLib[newIdx] = items[i];
         }
-        return newLib;
+        
+        libArr = [...newLib];
+        for (let i = 0; i < n; i++) {
+            groups[i] = getColor(libArr[i]);
+        }
+        setArray([...libArr]);
+        setGroupIndices({ ...groups });
+        if (!(await wait(0.8))) return false;
+        return true;
     };
 
-    // 1. Initial placement of the first element
-    libArr[Math.floor(n / 2)] = originalArr[0];
+    // Initial item placement: show the first book moving from index 0 to the middle shelf.
+    const firstTargetIdx = Math.floor(n / 2);
+    setGoodIndices([0, firstTargetIdx]);
+    setDescription({ text: "Opening shelf: moving first book to the center...", type: "TARGET" });
+    if (!(await wait(0.4))) return false;
+
+    setSwapIndices([0, firstTargetIdx]);
+    playSound(originalArr[0], 'triangle', firstTargetIdx);
+    if (!(await wait(0.4))) return false;
+
+    libArr[firstTargetIdx] = originalArr[0];
+    groups[firstTargetIdx] = getColor(originalArr[0]);
+    setArray([...libArr]);
+    setGroupIndices({ ...groups });
+    setSwapIndices([]);
+    setGoodIndices([]);
+    if (!(await wait(0.5))) return false;
 
     for (let i = 1; i < n; i++) {
         if (!sortingRef.current) return false;
         const val = originalArr[i];
-        setDescription({ text: `Library: Placing '${val}' using Binary Search...`, type: "INFO" });
+        setDescription({ text: `Finding a spot for '${val}'...`, type: "INFO" });
 
-        // 2. Binary Search among non-gap elements
+        // 1. Find correct insertion point (Binary-like search on non-gaps)
+        let insertIdx = -1;
         let left = 0, right = n - 1;
+        
+        // Find the first non-gap index
         while (left < n && libArr[left] === GAP_VAL) left++;
+        // Find the last non-gap index
         while (right >= 0 && libArr[right] === GAP_VAL) right--;
 
-        let targetIdx = -1;
         if (val < libArr[left]) {
-            targetIdx = left;
+            insertIdx = left;
         } else if (val > libArr[right]) {
-            targetIdx = right + 1;
+            insertIdx = right + 1;
         } else {
-            // Find insertion point between non-gap elements
-            let searchLeft = left, searchRight = right;
-            while (searchLeft <= searchRight) {
-                let mid = Math.floor((searchLeft + searchRight) / 2);
-                // Find nearest non-gap to mid
-                let midValIdx = mid;
-                while (midValIdx <= searchRight && libArr[midValIdx] === GAP_VAL) midValIdx++;
-                
-                if (midValIdx > searchRight) {
-                    searchRight = mid - 1;
-                    continue;
-                }
-
-                setCompareIndices([midValIdx]);
-                if (libArr[midValIdx] === val) {
-                    targetIdx = midValIdx;
-                    break;
-                } else if (libArr[midValIdx] < val) {
-                    searchLeft = midValIdx + 1;
-                    targetIdx = searchLeft;
-                } else {
-                    searchRight = midValIdx - 1;
-                    targetIdx = midValIdx;
+            // Linear search between existing items (skipping gaps)
+            for (let j = left; j <= right; j++) {
+                if (libArr[j] !== GAP_VAL) {
+                    setCompareIndices([j]);
+                    playSound(libArr[j], 'sine', j);
+                    if (!(await wait(0.1))) return false;
+                    if (libArr[j] >= val) {
+                        insertIdx = j;
+                        break;
+                    }
                 }
             }
         }
+        setCompareIndices([]);
 
-        // 3. Insert and Shift (Library Shifting)
+        // 2. Insert and Shift
         let placed = false;
-        let pos = Math.max(0, Math.min(n - 1, targetIdx));
+        const shouldAppendAtEnd = insertIdx >= n;
+        let targetPos = shouldAppendAtEnd ? n - 1 : insertIdx;
 
-        // Check right for gap
+        // Try to find a gap nearby
         let rightGap = -1;
-        for (let j = pos; j < n; j++) if (libArr[j] === GAP_VAL) { rightGap = j; break; }
+        for (let j = targetPos; j < n; j++) {
+            if (libArr[j] === GAP_VAL) { rightGap = j; break; }
+        }
 
         if (rightGap !== -1) {
-            for (let j = rightGap; j > pos; j--) libArr[j] = libArr[j - 1];
-            libArr[pos] = val;
+            // Shift right
+            for (let j = rightGap; j > targetPos; j--) {
+                libArr[j] = libArr[j - 1];
+                groups[j] = getColor(libArr[j]);
+            }
+            libArr[targetPos] = val;
             placed = true;
         } else {
-            // Check left for gap
             let leftGap = -1;
-            for (let j = pos; j >= 0; j--) if (libArr[j] === GAP_VAL) { leftGap = j; break; }
+            for (let j = targetPos; j >= 0; j--) {
+                if (libArr[j] === GAP_VAL) { leftGap = j; break; }
+            }
             if (leftGap !== -1) {
-                for (let j = leftGap; j < pos - 1; j++) libArr[j] = libArr[j + 1];
-                libArr[pos - 1] = val;
+                // Shift left
+                if (shouldAppendAtEnd) {
+                    for (let j = leftGap; j < targetPos; j++) {
+                        libArr[j] = libArr[j + 1];
+                        groups[j] = getColor(libArr[j]);
+                    }
+                    libArr[targetPos] = val;
+                } else {
+                    for (let j = leftGap; j < targetPos - 1; j++) {
+                        libArr[j] = libArr[j + 1];
+                        groups[j] = getColor(libArr[j]);
+                    }
+                    libArr[targetPos - 1] = val;
+                    targetPos--;
+                }
                 placed = true;
             }
         }
 
-        // 4. Rebalance if the shelf is full
+        // 3. If still not placed (no gaps!), Rebalance and try again
         if (!placed) {
-            libArr = rebalance(libArr);
-            i--; // Retry this element after rebalance
+            if (!(await rebalance(libArr))) return false;
+            // Retry this element
+            i--; 
             continue;
         }
 
-        // Visualization
-        for (let j = 0; j < n; j++) groups[j] = getColor(libArr[j]);
+        groups[targetPos] = getColor(val);
         setArray([...libArr]);
-        setGroupIndices({...groups});
-        setSwapIndices([pos]);
+        setGroupIndices({ ...groups });
+        setSwapIndices([targetPos]);
         countSwap();
-        playSound(val, 'sine', pos);
-        if (!(await wait(0.3))) return false;
+        playSound(val, 'triangle', targetPos);
+        if (!(await wait(0.5))) return false;
+        setSwapIndices([]);
 
-        // Periodic Rebalance to maintain gaps
-        if (i % Math.max(1, Math.floor(n / 10)) === 0 && i < n - 1) {
-            libArr = rebalance(libArr);
-            for (let j = 0; j < n; j++) groups[j] = getColor(libArr[j]);
-            setArray([...libArr]);
-            setGroupIndices({...groups});
-            if (!(await wait(0.5))) return false;
+        // Periodically rebalance to keep gaps open
+        if (i > 0 && i % Math.max(2, Math.floor(n / 10)) === 0 && i < n - 1) {
+            if (!(await rebalance(libArr))) return false;
         }
     }
 
-    // 5. Final Compaction: Remove all gaps for the final result
-    setDescription({ text: "Finalizing: Closing all gaps...", type: "SWAP" });
+    // Final state: Close all gaps (Compact) without making books disappear again.
+    setDescription({ text: "Finalizing: Closing shelf gaps...", type: "SWAP" });
     const finalItems = libArr.filter(x => x !== GAP_VAL);
-    const result = new Array(n).fill(0);
+    const resultArr = [...finalItems];
+    const compactGroups = {};
+
     for (let i = 0; i < n; i++) {
-        result[i] = finalItems[i];
-        groups[i] = getColor(result[i]);
-        setArray([...result.slice(0, i + 1), ...new Array(n - i - 1).fill(0)]);
-        setGroupIndices({...groups});
-        playSound(result[i], 'sine', i);
+        compactGroups[i] = getColor(resultArr[i]);
+    }
+
+    setArray([...resultArr]);
+    setGroupIndices({ ...compactGroups });
+    setSortedIndices([]);
+    if (!(await wait(0.5))) return false;
+
+    for (let i = 0; i < n; i++) {
+        setSortedIndices([...Array(i + 1).keys()]);
+        playSound(resultArr[i], 'sine', i);
         if (!(await wait(0.1))) return false;
     }
-    setArray([...result]);
 
+    setDisableGroupGaps(true);
     setGroupIndices({});
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
