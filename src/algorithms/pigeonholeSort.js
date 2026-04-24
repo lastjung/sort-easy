@@ -36,10 +36,11 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
         setGoodIndices([i]);
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.35))) return false;
+        if (!(await wait(0.45))) return false;
     }
     setCompareIndices([]);
     setGoodIndices([]);
+    if (!(await wait(0.6))) return false;
 
     // Phase 1: Put elements into pigeonholes
     setDescription({ text: "Putting into Pigeonholes...", type: "INFO" });
@@ -64,10 +65,11 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
         setGroupIndices({ ...groups, ...holePreviewGroups });
         setDescription({ text: `Placing ${val} into hole ${val - min + 1}/${range}`, type: "TARGET" });
         playSound(val, 'triangle', i);
-        if (!(await wait(0.35))) return false;
+        if (!(await wait(0.5))) return false;
     }
     setGoodIndices([]);
     setGroupIndices({ ...groups });
+    if (!(await wait(0.7))) return false;
 
     // Phase 2: Gather back from holes
     setDescription({ text: "Gathering back...", type: "SWAP" });
@@ -75,6 +77,10 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
     if (!(await wait(1))) return false;
 
     for (let i = 0; i < range; i++) {
+        if (holes[i].length > 0) {
+            setDescription({ text: `Reading hole ${i + 1}/${range}`, type: "TARGET" });
+            if (!(await wait(0.35))) return false;
+        }
         for (const val of holes[i]) {
             if (!sortingRef.current) return false;
             arr[writeIdx] = val;
@@ -89,7 +95,7 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
             countSwap();
             playSound(val, 'triangle', writeIdx);
             
-            if (!(await wait(0.4))) return false;
+            if (!(await wait(0.55))) return false;
             setSwapIndices([]);
             writeIdx++;
         }
