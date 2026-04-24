@@ -7,6 +7,10 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
 
     setGroupIndices({});
     setDisableGroupGaps(true);
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
+    setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return false;
 
@@ -29,26 +33,41 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
         setGroupIndices({ ...groups });
         
         setCompareIndices([i]);
+        setGoodIndices([i]);
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(0.35))) return false;
     }
     setCompareIndices([]);
+    setGoodIndices([]);
 
     // Phase 1: Put elements into pigeonholes
     setDescription({ text: "Putting into Pigeonholes...", type: "INFO" });
     const holes = Array.from({ length: range }, () => []);
+    const holeFillCounts = new Array(range).fill(0);
     
     for (let i = 0; i < n; i++) {
         if (!sortingRef.current) return false;
         const val = arr[i];
         holes[val - min].push(val);
+        holeFillCounts[val - min]++;
+
+        const holePreviewGroups = {};
+        let writeCursor = 0;
+        for (let h = 0; h < range; h++) {
+            for (let c = 0; c < holeFillCounts[h]; c++) {
+                holePreviewGroups[writeCursor++] = getColor(h + min);
+            }
+        }
         
         setGoodIndices([i]);
+        setGroupIndices({ ...groups, ...holePreviewGroups });
+        setDescription({ text: `Placing ${val} into hole ${val - min + 1}/${range}`, type: "TARGET" });
         playSound(val, 'triangle', i);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(0.35))) return false;
     }
     setGoodIndices([]);
+    setGroupIndices({ ...groups });
 
     // Phase 2: Gather back from holes
     setDescription({ text: "Gathering back...", type: "SWAP" });
@@ -66,16 +85,20 @@ export const pigeonholeSort = async ({ array, setArray, setCompareIndices, setSw
             setGroupIndices({ ...groups });
 
             setSwapIndices([writeIdx]);
+            setGoodIndices([writeIdx]);
             countSwap();
             playSound(val, 'triangle', writeIdx);
             
-            if (!(await wait(0.6))) return false;
+            if (!(await wait(0.4))) return false;
             setSwapIndices([]);
             writeIdx++;
         }
     }
 
     setGroupIndices({});
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;

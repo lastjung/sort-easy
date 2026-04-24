@@ -7,6 +7,10 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
 
     setGroupIndices({});
     setDisableGroupGaps(true);
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
+    setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return false;
 
@@ -25,10 +29,12 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
         groups[i] = getColor(arr[i]);
         setGroupIndices({ ...groups });
         setCompareIndices([i]);
+        setGoodIndices([i]);
         playSound(arr[i], 'sine', i);
         if (!(await wait(0.2))) return false;
     }
     setCompareIndices([]);
+    setGoodIndices([]);
 
     // Set of indices that have already "won" and are now in the sorted portion
     const finishedIndices = new Set();
@@ -45,8 +51,11 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
         if (tournament.length === 0) break;
 
         setDescription({ text: `Tournament Round ${round + 1}: Competing for Rank ${round + 1}`, type: "TARGET" });
+        setGoodIndices(tournament);
+        if (!(await wait(0.3))) return false;
 
         // Simulate bracket levels
+        let bracketLevel = 1;
         while (tournament.length > 1) {
             let nextLevel = [];
             for (let i = 0; i < tournament.length; i += 2) {
@@ -60,7 +69,9 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
                     continue;
                 }
 
+                setDescription({ text: `Round ${round + 1}, Match ${Math.floor(i / 2) + 1}: Bracket ${bracketLevel}`, type: "COMPARE" });
                 setCompareIndices([left, right]);
+                setGoodIndices([left, right]);
                 countCompare();
                 playSound(arr[left], 'sine', left);
                 if (!(await wait(0.4))) return false;
@@ -75,7 +86,10 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
                 if (!(await wait(0.4))) return false;
                 setGoodIndices([]);
             }
+            setGoodIndices(nextLevel);
+            if (!(await wait(0.25))) return false;
             tournament = nextLevel;
+            bracketLevel++;
         }
 
         // Winner of this tournament pass
@@ -100,6 +114,7 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
         setArray([...arr]);
         setGroupIndices({ ...groups });
         setSortedIndices([...Array(round + 1).keys()]);
+        setGoodIndices([targetIdx]);
         
         // Mark the NEW targetIdx as finished (it's now sorted)
         finishedIndices.add(targetIdx);
@@ -113,6 +128,9 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
     }
 
     setGroupIndices({});
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;

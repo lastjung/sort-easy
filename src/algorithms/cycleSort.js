@@ -4,10 +4,10 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
     const n = arr.length;
     let sortedIndices = [];
 
-    const { COLORS } = await import('../constants/colors');
-    const palette = COLORS.GROUP_PALETTE;
-
     setGroupIndices({});
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return;
@@ -18,10 +18,10 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let item = arr[cycleStart];
         let pos = cycleStart;
 
-        // Visual State: Minimalist status - only highlight the current active bar
+        // Visual State: highlight the cycle start and current active item
         setGoodIndices([cycleStart]);
         setGroupIndices({}); // Remove chaotic group splitting
-        setDescription({ text: `Processing Cycle at ${cycleStart}`, type: 'TARGET' });
+        setDescription({ text: `Cycle starts at index ${cycleStart}`, type: 'TARGET' });
         if (!(await wait(0.5))) break;
 
         // Step 1: Find the position for the initial item
@@ -29,6 +29,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         for (let i = cycleStart + 1; i < n; i++) {
             if (!sortingRef.current) break;
             setCompareIndices([i, cycleStart]);
+            setGoodIndices([cycleStart]);
             countCompare();
             playSound(arr[i], 'sine', i);
             if (arr[i] < item) pos++;
@@ -47,9 +48,9 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
         // Initial Placement
         if (pos !== cycleStart) {
-            setSwapIndices([pos]); // Highlight only the placement destination
-            setGoodIndices([cycleStart]); // Keep source highlighted
-            setDescription(msg.PLACE);
+            setSwapIndices([cycleStart, pos]);
+            setGoodIndices([cycleStart, pos]);
+            setDescription({ text: `Sending ${item} to index ${pos}`, type: 'SWAP' });
             playSound(item, 'triangle', pos);
             countSwap();
             [arr[pos], item] = [item, arr[pos]];
@@ -62,11 +63,13 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         while (pos !== cycleStart) {
             if (!sortingRef.current) break;
             pos = cycleStart;
+            setGoodIndices([cycleStart]);
 
             setDescription(msg.SCAN);
             for (let i = cycleStart + 1; i < n; i++) {
                 if (!sortingRef.current) break;
                 setCompareIndices([i, cycleStart]);
+                setGoodIndices([cycleStart]);
                 countCompare();
                 playSound(arr[i], 'sine', i);
                 if (arr[i] < item) pos++;
@@ -77,8 +80,9 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             while (item === arr[pos]) pos++;
 
             if (item !== arr[pos]) {
-                setSwapIndices([pos]);
-                setDescription(msg.PLACE);
+                setSwapIndices([cycleStart, pos]);
+                setGoodIndices([cycleStart, pos]);
+                setDescription({ text: `Rotating ${item} into index ${pos}`, type: 'SWAP' });
                 playSound(item, 'triangle', pos);
                 countSwap();
                 [arr[pos], item] = [item, arr[pos]];
@@ -91,6 +95,8 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         sortedIndices.push(cycleStart);
         setSortedIndices([...sortedIndices]);
         setGoodIndices([]);
+        setCompareIndices([]);
+        setSwapIndices([]);
     }
 
     if (!sortingRef.current) return false;

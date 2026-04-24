@@ -7,6 +7,9 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
 
     setGroupIndices({});
     setDisableGroupGaps(true);
+    setCompareIndices([]);
+    setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([]);
     setDescription(msg.START);
     if (!(await wait(1))) return false;
@@ -32,10 +35,12 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         groups[i] = getColor(arr[i]);
         setGroupIndices({ ...groups });
         setCompareIndices([i]);
+        setGoodIndices([i]);
         playSound(arr[i], 'sine', i);
         if (!(await wait(0.4))) return false;
     }
     setCompareIndices([]);
+    setGoodIndices([]);
 
     const circleSortRecursive = async (low, high, depth = 0) => {
         if (low === high || !sortingRef.current) return false;
@@ -49,6 +54,8 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         const depthColor = palette[Math.min(depth * 3, palette.length - 1)];
         
         setDescription({ text: `${levelText} [${low}-${high}]`, type: 'INFO' });
+        setGoodIndices([...Array(high - low + 1).keys()].map(offset => low + offset));
+        if (!(await wait(0.25))) return false;
 
         while (l < h) {
             if (!sortingRef.current) return false;
@@ -62,6 +69,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             rangeGroups[l] = depthColor;
             rangeGroups[h] = depthColor;
             setGroupIndices(rangeGroups);
+            setGoodIndices([l, h]);
             
             playSound(arr[l], 'sine', l);
             if (!(await wait(0.6))) return false;
@@ -77,6 +85,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 
                 setArray([...arr]);
                 setGroupIndices({ ...groups });
+                setGoodIndices([l, h]);
                 playSound(arr[l], 'triangle', l);
                 swapped = true;
                 if (!(await wait(0.8))) return false;
@@ -89,6 +98,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         if (l === h && h + 1 < n) {
             if (!sortingRef.current) return false;
             setCompareIndices([l, h + 1]);
+            setGoodIndices([l, h + 1]);
             countCompare();
             playSound(arr[l], 'sine', l);
             if (!(await wait(0.8))) return false;
@@ -101,6 +111,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 groups[h + 1] = getColor(arr[h + 1]);
                 setArray([...arr]);
                 setGroupIndices({ ...groups });
+                setGoodIndices([l, h + 1]);
                 playSound(arr[l], 'triangle', l);
                 swapped = true;
                 if (!(await wait(0.8))) return false;
@@ -112,6 +123,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         const leftSwapped = await circleSortRecursive(low, low + mid, depth + 1);
         const rightSwapped = await circleSortRecursive(low + mid + 1, high, depth + 1);
 
+        setGoodIndices([]);
         return swapped || leftSwapped || rightSwapped;
     };
 
@@ -126,6 +138,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
     setGroupIndices({});
     setCompareIndices([]);
     setSwapIndices([]);
+    setGoodIndices([]);
     setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;
