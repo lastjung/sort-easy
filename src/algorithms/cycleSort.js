@@ -52,7 +52,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setGoodIndices([cycleStart]);
         setGroupIndices(divideGroups);
         setDescription({ text: `Cycle starts at index ${cycleStart}`, type: 'TARGET' });
-        if (!(await wait(0.5))) break;
+        if (!(await wait(1.0))) break;
 
         // Step 1: Find the position for the initial item
         setDescription({ text: `Counting smaller values for ${item}`, type: 'COMPARE' });
@@ -70,7 +70,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             }
             divideGroups = buildGroups(cycleStart, smallerIndices, largerIndices);
             setGroupIndices(divideGroups);
-            if (!(await wait(0.4))) break;
+            if (!(await wait(1.0))) break;
         }
         setCompareIndices([]);
         setGroupIndices(divideGroups);
@@ -87,7 +87,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setCompareIndices([]);
         setGoodIndices([cycleStart, pos]);
         setDescription({ text: `${item} belongs at index ${pos}`, type: 'TARGET' });
-        if (!(await wait(0.5))) break;
+        if (!(await wait(1.0))) break;
 
         // Initial Placement
         if (pos !== cycleStart) {
@@ -98,7 +98,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             countSwap();
             [arr[pos], item] = [item, arr[pos]];
             setArray([...arr]);
-            if (!(await wait(1))) break;
+            if (!(await wait(1.0))) break;
             markSorted(pos);
             setSwapIndices([]);
         }
@@ -128,7 +128,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 }
                 divideGroups = buildGroups(cycleStart, smallerIndices, largerIndices);
                 setGroupIndices(divideGroups);
-                if (!(await wait(0.4))) break;
+                if (!(await wait(1.0))) break;
             }
             setCompareIndices([]);
             setGroupIndices(divideGroups);
@@ -137,7 +137,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
 
             setGoodIndices([cycleStart, pos]);
             setDescription({ text: `Rotate ${item} into index ${pos}`, type: 'TARGET' });
-            if (!(await wait(0.35))) break;
+            if (!(await wait(1.0))) break;
 
             if (item !== arr[pos]) {
                 setSwapIndices([cycleStart, pos]);
@@ -147,7 +147,7 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
                 countSwap();
                 [arr[pos], item] = [item, arr[pos]];
                 setArray([...arr]);
-                if (!(await wait(1))) break;
+                if (!(await wait(1.0))) break;
                 markSorted(pos);
                 setSwapIndices([]);
             }
@@ -168,7 +168,6 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
     setCompareIndices([]);
     setSwapIndices([]);
     setGoodIndices([]);
-    setSortedIndices([...Array(n).keys()]);
     setDisableGroupGaps?.(false);
     setDescription(msg.FINISHED);
     return true;

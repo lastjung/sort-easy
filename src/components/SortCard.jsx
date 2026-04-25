@@ -547,13 +547,16 @@ const SortCard = ({
         
         // Success Sweep Effect: Gradually fill sortedIndices for a 'scanning' feel
         const allIndices = [...Array(arraySizeRef.current).keys()];
+        // Ultra-fast dynamic sweep delay (higher speed = near-instant sweep)
+        const sweepDelay = Math.max(1, 15 - (speedRef.current / 7));
+        
         for (let i = 0; i <= arraySizeRef.current; i++) {
             if (mySessionId !== sessionIdRef.current) break;
             setSortedIndices(allIndices.slice(0, i));
             if (i < arraySizeRef.current) {
                 // Play a high-pitched success tone during sweep
                 playSound(880 + (i * 20), 'sine');
-                await new Promise(r => setTimeout(r, 30));
+                await new Promise(r => setTimeout(r, sweepDelay));
             }
         }
 
