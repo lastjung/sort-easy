@@ -4,15 +4,10 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
     const n = arr.length;
     const { COLORS } = await import('../constants/colors');
     const palette = COLORS.GROUP_PALETTE;
-
-    setGroupIndices({});
-    setDisableGroupGaps(true);
-    setCompareIndices([]);
-    setSwapIndices([]);
-    setGoodIndices([]);
-    setSortedIndices([]);
-    setDescription(msg.START);
-    if (!(await wait(1))) return false;
+    const COMPARE_WAIT = 1;
+    const SWAP_WAIT = 1;
+    const LEVEL_WAIT = 0.35;
+    const RELATION_WAIT = 0.35;
 
     setGroupIndices({});
     setDisableGroupGaps(true);
@@ -43,7 +38,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
         
         setDescription({ text: `${levelText} [${low}-${high}]`, type: 'INFO' });
         
-        if (!(await wait(1.0))) return false;
+        if (!(await wait(LEVEL_WAIT))) return false;
 
         while (l < h) {
             if (!sortingRef.current) return false;
@@ -55,7 +50,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setDescription({ text: `${levelText}: Scanning...`, type: 'COMPARE' });
             
             playSound(arr[l], 'sine', l);
-            if (!(await wait(1.0))) return false;
+            if (!(await wait(COMPARE_WAIT))) return false;
 
             if (arr[l] > arr[h]) {
                 // 2. Swap (Red/Emphasis)
@@ -74,13 +69,13 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 groups[h] = currentBlue;
                 setArray([...arr]);
                 setGroupIndices({ ...groups });
-                if (!(await wait(1.0))) return false;
+                if (!(await wait(SWAP_WAIT))) return false;
             } else {
                 // Even if no swap, color them to show small/large relationship for this depth
                 groups[l] = currentRed;
                 groups[h] = currentBlue;
                 setGroupIndices({ ...groups });
-                if (!(await wait(1.0))) return false;
+                if (!(await wait(RELATION_WAIT))) return false;
             }
             
             // Cleanup indices for the next inward pair
@@ -97,7 +92,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
             countCompare();
             setDescription({ text: `${levelText}: Checking Center`, type: 'COMPARE' });
             playSound(arr[l], 'sine', l);
-            if (!(await wait(1.0))) return false;
+            if (!(await wait(COMPARE_WAIT))) return false;
 
             if (arr[l] > arr[h + 1]) {
                 setCompareIndices([]);
@@ -111,12 +106,12 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 groups[h + 1] = currentBlue;
                 setArray([...arr]);
                 setGroupIndices({ ...groups });
-                if (!(await wait(1.0))) return false;
+                if (!(await wait(SWAP_WAIT))) return false;
             } else {
                 groups[l] = currentRed;
                 groups[h + 1] = currentBlue;
                 setGroupIndices({ ...groups });
-                if (!(await wait(1.0))) return false;
+                if (!(await wait(RELATION_WAIT))) return false;
             }
             setCompareIndices([]);
             setSwapIndices([]);
@@ -140,6 +135,7 @@ export const circleSort = async ({ array, setArray, setCompareIndices, setSwapIn
     setCompareIndices([]);
     setSwapIndices([]);
     setGoodIndices([]);
+    setSortedIndices([...Array(n).keys()]);
     setDescription(msg.FINISHED);
     return true;
 };

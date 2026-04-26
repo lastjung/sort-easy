@@ -18,6 +18,7 @@ export const introSort = async ({
   const n = arr.length;
   const { COLORS } = await import('../constants/colors');
   const depthLimit = 2 * Math.floor(Math.log2(Math.max(2, n)));
+  const INSERTION_THRESHOLD = 16;
 
   setSortedIndices([]);
   setGoodIndices([]);
@@ -38,36 +39,74 @@ export const introSort = async ({
   const insertionSortRange = async (lo, hi) => {
     for (let i = lo + 1; i <= hi; i++) {
       if (!sortingRef.current) return false;
-      const key = arr[i];
-      let j = i - 1;
+
       setGoodIndices([i]);
-      while (j >= lo && arr[j] > key) {
-        setCompareIndices([j, j + 1]);
+
+      const splitGroups = {};
+      for (let k = 0; k < n; k++) {
+        splitGroups[k] = (k >= lo && k < i) ? COLORS.GROUP_PALETTE[0] : COLORS.GROUP_PALETTE[1];
+      }
+      setGroupIndices(splitGroups);
+      setDescription(msg.PICK);
+      if (!(await wait(0.4))) return false;
+      if (!sortingRef.current) return false;
+      if (!(await wait(0.5))) return false;
+
+      const joinedGroups = {};
+      for (let k = 0; k < n; k++) {
+        joinedGroups[k] = (k >= lo && k <= i) ? COLORS.GROUP_PALETTE[0] : COLORS.GROUP_PALETTE[1];
+      }
+      setGroupIndices(joinedGroups);
+      if (!(await wait(0.4))) return false;
+      if (!sortingRef.current) return false;
+
+      let pivotPos = i;
+      let j = i - 1;
+
+      while (j >= lo) {
+        if (!sortingRef.current) return false;
+
+        setGoodIndices([pivotPos]);
+        setCompareIndices([]);
         countCompare();
         setDescription(msg.COMPARE);
         playSound(arr[j], 'sine', j);
-        if (!(await wait(0.8))) return false;
-        arr[j + 1] = arr[j];
-        setArray([...arr]);
-        setSwapIndices([j, j + 1]);
-        countSwap();
-        playSound(arr[j + 1], 'triangle', j + 1);
-        if (!(await wait(0.8))) return false;
-        j--;
+        if (!(await wait(1))) return false;
+
+        if (arr[j] > arr[j + 1]) {
+          setGoodIndices([pivotPos]);
+          setSortedIndices([j]);
+          setDescription(msg.SHIFT);
+          playSound(arr[j], 'triangle', j);
+          countSwap();
+          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+          setArray([...arr]);
+          if (!(await wait(1))) return false;
+
+          pivotPos = j;
+          setSortedIndices([]);
+          j--;
+        } else {
+          setDescription(msg.INSERT);
+          break;
+        }
       }
-      arr[j + 1] = key;
-      setArray([...arr]);
-      setSwapIndices([j + 1, i]);
-      countSwap();
-      if (!(await wait(0.6))) return false;
+
+      setCompareIndices([]);
+      setSwapIndices([]);
+      setGroupIndices({});
+
+      const settledRange = [...sortedIndices];
+      for (let k = lo; k <= i; k++) {
+        if (!settledRange.includes(k)) settledRange.push(k);
+      }
+      sortedIndices = settledRange;
+      setSortedIndices([...sortedIndices]);
+      setGoodIndices([]);
+      playSound(arr[i], 'sine', i);
     }
-    for (let k = lo; k <= hi; k++) {
-      if (!sortedIndices.includes(k)) sortedIndices.push(k);
-    }
-    setSortedIndices([...sortedIndices]);
-    playSound(arr[hi], 'sine', hi);
+
     updateGroups();
-    if (!(await wait(0.3))) return false;
     return true;
   };
 
@@ -171,7 +210,7 @@ export const introSort = async ({
     }
 
     const size = hi - lo + 1;
-    if (size <= 12) {
+    if (size <= INSERTION_THRESHOLD) {
       setDescription(msg.INSERT || msg.COMPARE);
       return insertionSortRange(lo, hi);
     }

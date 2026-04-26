@@ -20,59 +20,69 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
         for (let i = left + 1; i <= right; i++) {
             if (!sortingRef.current) return;
 
-            const sortedRunPrefix = [];
-            for (let k = left; k < i; k++) sortedRunPrefix.push(k);
-            setSortedIndices(sortedRunPrefix);
-            setGroupIndices({});
             setGoodIndices([i]);
+
+            const splitGroups = {};
+            for (let k = 0; k < n; k++) {
+                splitGroups[k] = (k >= left && k < i) ? palette[0] : palette[1];
+            }
+            setGroupIndices(splitGroups);
+            setSortedIndices([]);
             setCompareIndices([]);
             setSwapIndices([]);
-            setDescription({ text: `Run ${runIdx}: Inserting next item`, type: 'TARGET' });
-            if (!(await wait(0.6))) return;
+            setDescription({ text: `Run ${runIdx}: Picking next pivot`, type: 'TARGET' });
+            if (!(await wait(0.4))) return;
+            if (!sortingRef.current) return;
+            if (!(await wait(0.5))) return;
 
-            let temp = arr[i];
-            let j = i - 1;
+            const joinedGroups = {};
+            for (let k = 0; k < n; k++) {
+                joinedGroups[k] = (k >= left && k <= i) ? palette[0] : palette[1];
+            }
+            setGroupIndices(joinedGroups);
+            if (!(await wait(0.4))) return;
+            if (!sortingRef.current) return;
+
             let pivotPos = i;
-
+            let j = i - 1;
+            
             while (j >= left) {
                 if (!sortingRef.current) return;
-
-                setSortedIndices(sortedRunPrefix);
-                setCompareIndices([j, pivotPos]);
+                
                 setGoodIndices([pivotPos]);
+                setCompareIndices([]);
                 countCompare();
-                setDescription({ text: 'Comparing inside current run', type: 'COMPARE' });
+                setDescription({ text: `Run ${runIdx}: Comparing pivot`, type: 'COMPARE' });
                 playSound(arr[j], 'sine', j);
-                if (!(await wait(0.8))) break;
-
-                if (arr[j] > temp) {
-                    setDescription({ text: 'Shifting larger value right', type: 'SWAP' });
-                    setSwapIndices([j, j + 1]);
+                if (!(await wait(1))) return;
+                
+                if (arr[j] > arr[j + 1]) {
+                    setGoodIndices([pivotPos]);
+                    setSortedIndices([j]);
+                    setDescription({ text: `Run ${runIdx}: Shifting right`, type: 'SWAP' });
+                    playSound(arr[j], 'triangle', j);
                     countSwap();
-                    arr[j + 1] = arr[j];
+                    [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
                     setArray([...arr]);
-                    if (!(await wait(0.8))) break;
+                    if (!(await wait(1))) return;
                     
                     pivotPos = j;
-                    setSwapIndices([]);
+                    setSortedIndices([]);
                     j--;
                 } else {
-                    setDescription({ text: 'Found insertion point', type: 'TARGET' });
+                    setDescription({ text: `Run ${runIdx}: Found insertion point`, type: 'TARGET' });
                     break;
                 }
             }
 
-            arr[j + 1] = temp;
             setCompareIndices([]);
+            setSwapIndices([]);
+            setGroupIndices({});
             const settledPrefix = [];
             for (let k = left; k <= i; k++) settledPrefix.push(k);
             setSortedIndices(settledPrefix);
-            setGoodIndices([j + 1]);
-            setSwapIndices([j + 1]);
-            setArray([...arr]);
-            if (!(await wait(0.7))) return;
-            setSwapIndices([]);
             setGoodIndices([]);
+            playSound(arr[i], 'sine', i);
         }
     };
 

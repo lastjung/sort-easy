@@ -1,21 +1,23 @@
-
 export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDisableGroupGaps, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
+    const { COLORS } = await import('../constants/colors');
+    const COMPARE_WAIT = 1;
+    const SETTLED_COMPARE_WAIT = 0.5;
+    const SWAP_WAIT = 1;
+    const CLOSE_WAIT = 0.35;
     let sortedIndices = [];
-    const sortedColor = 'bg-emerald-600 shadow-[0_0_15px_rgba(5,150,105,0.5)]';
+    const sortedColor = COLORS.SORTED;
     const smallerColor = 'bg-pink-400 shadow-[0_0_15px_rgba(244,114,182,0.5)]';
     const largerColor = 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.35)]';
 
-    const buildGroups = (cycleStart, smallers = new Set(), largers = new Set()) => {
+    const buildGroups = (cycleStart, smallers = new Set()) => {
         const groups = {};
         for (let k = 0; k < n; k++) {
-            if (k < cycleStart) {
+            if (sortedIndices.includes(k) || k < cycleStart) {
                 groups[k] = sortedColor;
             } else if (smallers.has(k)) {
                 groups[k] = smallerColor;
-            } else if (largers.has(k)) {
-                groups[k] = largerColor;
             } else {
                 groups[k] = largerColor;
             }
@@ -24,10 +26,22 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
     };
 
     const markSorted = (idx) => {
-        if (!sortedIndices.includes(idx)) {
+        if (idx >= 0 && idx < n && !sortedIndices.includes(idx)) {
             sortedIndices.push(idx);
             setSortedIndices([...sortedIndices]);
         }
+    };
+
+    const isVisuallySettled = (idx, cycleStart) => (
+        sortedIndices.includes(idx) || idx < cycleStart
+    );
+
+    const renderCycleState = (cycleStart, carriedItem) => {
+        const visualArr = [...arr];
+        if (cycleStart >= 0 && cycleStart < n) {
+            visualArr[cycleStart] = carriedItem;
+        }
+        setArray(visualArr);
     };
 
     setDisableGroupGaps?.(true);
@@ -46,34 +60,33 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         let pos = cycleStart;
         const smallerIndices = new Set();
         const largerIndices = new Set();
-        let divideGroups = buildGroups(cycleStart, smallerIndices, largerIndices);
-
-        // Visual State: highlight the cycle start and current active item
+        
+        // Step 1: Count smaller elements
         setGoodIndices([cycleStart]);
-        setGroupIndices(divideGroups);
-        setDescription({ text: `Cycle starts at index ${cycleStart}`, type: 'TARGET' });
-        if (!(await wait(1.0))) break;
-
-        // Step 1: Find the position for the initial item
+        setGroupIndices(buildGroups(cycleStart, smallerIndices, largerIndices));
         setDescription({ text: `Counting smaller values for ${item}`, type: 'COMPARE' });
+
         for (let i = cycleStart + 1; i < n; i++) {
             if (!sortingRef.current) break;
-            setCompareIndices([i]);
-            setGoodIndices([cycleStart]);
+            const shouldAnimateCompare = !isVisuallySettled(i, cycleStart);
             countCompare();
-            playSound(arr[i], 'sine', i);
+            if (shouldAnimateCompare) {
+                setCompareIndices([i]);
+                playSound(arr[i], 'sine', i);
+            } else {
+                setCompareIndices([]);
+            }
             if (arr[i] < item) {
                 pos++;
                 smallerIndices.add(i);
             } else {
                 largerIndices.add(i);
             }
-            divideGroups = buildGroups(cycleStart, smallerIndices, largerIndices);
-            setGroupIndices(divideGroups);
-            if (!(await wait(1.0))) break;
+            setGroupIndices(buildGroups(cycleStart, smallerIndices, largerIndices));
+            if (!(await wait(shouldAnimateCompare ? COMPARE_WAIT : SETTLED_COMPARE_WAIT))) break;
         }
+
         setCompareIndices([]);
-        setGroupIndices(divideGroups);
 
         if (pos === cycleStart) {
             markSorted(cycleStart);
@@ -81,75 +94,93 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
             continue;
         }
 
-        // Handle duplicates
-        while (item === arr[pos]) pos++;
+        // Handle duplicates: skip same values
+        while (pos < n && item === arr[pos]) pos++;
 
-        setCompareIndices([]);
-        setGoodIndices([cycleStart, pos]);
-        setDescription({ text: `${item} belongs at index ${pos}`, type: 'TARGET' });
-        if (!(await wait(1.0))) break;
-
-        // Initial Placement
-        if (pos !== cycleStart) {
+        if (pos < n && pos !== cycleStart) {
             setSwapIndices([cycleStart, pos]);
             setGoodIndices([cycleStart, pos]);
-            setDescription({ text: `Sending ${item} to index ${pos}`, type: 'SWAP' });
+            setDescription({ text: `Placing ${item} at index ${pos}`, type: 'SWAP' });
             playSound(item, 'triangle', pos);
             countSwap();
+            
             [arr[pos], item] = [item, arr[pos]];
-            setArray([...arr]);
-            if (!(await wait(1.0))) break;
+            
             markSorted(pos);
+            renderCycleState(cycleStart, item);
+            if (!(await wait(SWAP_WAIT))) break;
             setSwapIndices([]);
         }
 
-        // Step 2: Rotate the rest of the elements in the cycle
-        while (pos !== cycleStart) {
+        // Step 2: Cycle rotations
+        let safetyCounter = 0;
+        const MAX_CYCLES = n * 2; // Safety break
+
+        while (pos !== cycleStart && safetyCounter < MAX_CYCLES) {
+            safetyCounter++;
             if (!sortingRef.current) break;
             pos = cycleStart;
             smallerIndices.clear();
             largerIndices.clear();
-            divideGroups = buildGroups(cycleStart, smallerIndices, largerIndices);
+            
             setGoodIndices([cycleStart]);
-            setGroupIndices(divideGroups);
+            setGroupIndices(buildGroups(cycleStart, smallerIndices, largerIndices));
+            setDescription({ text: `Finding home for value ${item}`, type: 'COMPARE' });
 
-            setDescription({ text: `Finding next home for carried value ${item}`, type: 'COMPARE' });
             for (let i = cycleStart + 1; i < n; i++) {
                 if (!sortingRef.current) break;
-                setCompareIndices([i]);
-                setGoodIndices([cycleStart]);
+                const shouldAnimateCompare = !isVisuallySettled(i, cycleStart);
                 countCompare();
-                playSound(arr[i], 'sine', i);
+                if (shouldAnimateCompare) {
+                    setCompareIndices([i]);
+                    playSound(arr[i], 'sine', i);
+                } else {
+                    setCompareIndices([]);
+                }
                 if (arr[i] < item) {
                     pos++;
                     smallerIndices.add(i);
                 } else {
                     largerIndices.add(i);
                 }
-                divideGroups = buildGroups(cycleStart, smallerIndices, largerIndices);
-                setGroupIndices(divideGroups);
-                if (!(await wait(1.0))) break;
+                setGroupIndices(buildGroups(cycleStart, smallerIndices, largerIndices));
+                const compareWait = shouldAnimateCompare
+                    ? COMPARE_WAIT
+                    : SETTLED_COMPARE_WAIT;
+                if (!(await wait(compareWait))) break;
             }
-            setCompareIndices([]);
-            setGroupIndices(divideGroups);
 
-            while (item === arr[pos]) pos++;
+            while (pos < n && item === arr[pos]) pos++;
 
-            setGoodIndices([cycleStart, pos]);
-            setDescription({ text: `Rotate ${item} into index ${pos}`, type: 'TARGET' });
-            if (!(await wait(1.0))) break;
-
-            if (item !== arr[pos]) {
+            if (pos < n && pos !== cycleStart && item !== arr[pos]) {
+                setCompareIndices([]);
                 setSwapIndices([cycleStart, pos]);
                 setGoodIndices([cycleStart, pos]);
                 setDescription({ text: `Rotating ${item} into index ${pos}`, type: 'SWAP' });
                 playSound(item, 'triangle', pos);
                 countSwap();
+                
                 [arr[pos], item] = [item, arr[pos]];
-                setArray([...arr]);
-                if (!(await wait(1.0))) break;
+                
                 markSorted(pos);
+                renderCycleState(cycleStart, item);
+                if (!(await wait(SWAP_WAIT))) break;
                 setSwapIndices([]);
+            } else if (pos === cycleStart) {
+                setCompareIndices([]);
+                setSwapIndices([cycleStart]);
+                setGoodIndices([cycleStart]);
+                setDescription({ text: `Closing cycle with ${item}`, type: 'SWAP' });
+                playSound(item, 'triangle', cycleStart);
+                countSwap();
+                arr[cycleStart] = item;
+                setArray([...arr]);
+                if (!(await wait(CLOSE_WAIT))) break;
+                setSwapIndices([]);
+                break;
+            } else {
+                // Something is wrong or duplicate found its home
+                break;
             }
         }
 
@@ -157,11 +188,6 @@ export const cycleSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setGoodIndices([]);
         setCompareIndices([]);
         setSwapIndices([]);
-    }
-
-    if (!sortingRef.current) {
-        setDisableGroupGaps?.(false);
-        return false;
     }
 
     setGroupIndices({});
