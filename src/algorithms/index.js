@@ -25,6 +25,8 @@ import { flashSort } from './flashSort';
 import { tournamentSort } from './tournamentSort';
 import { strandSort } from './strandSort';
 import { librarySort } from './librarySort';
+import { oddEvenSort } from './oddEvenSort';
+import { oddEvenMergeSort } from './oddEvenMergeSort';
 
 export {
     bubbleSort,
@@ -52,7 +54,9 @@ export {
     flashSort,
     tournamentSort,
     strandSort,
-    librarySort
+    librarySort,
+    oddEvenSort,
+    oddEvenMergeSort
 };
 
 export const ALGORITHMS = [
@@ -129,6 +133,15 @@ export const ALGORITHMS = [
         slogan: "Find the endpoints with bidirectional bubbling!"
     },
     { 
+        id: 'oddeven', 
+        title: 'Odd-Even Sort', 
+        fn: oddEvenSort, 
+        complexity: 'O(n²)', 
+        desc: 'Alternates between odd-index and even-index adjacent comparisons until no swaps remain.',
+        icon: '↔️',
+        slogan: "Alternate odd and even passes until everything clicks!"
+    },
+    { 
         id: 'comb', 
         title: 'Comb Sort', 
         fn: combSort, 
@@ -163,6 +176,15 @@ export const ALGORITHMS = [
         desc: 'A parallelizable sorting network that recursively builds bitonic sequences and merges them. Ideal for hardware and GPU implementations.',
         icon: '🌐',
         slogan: "Mirror, compare, and merge in parallel!"
+    },
+    { 
+        id: 'oddevenmerge', 
+        title: 'Odd-Even Merge Sort', 
+        fn: oddEvenMergeSort, 
+        complexity: 'O(n log² n)', 
+        desc: 'A sorting network that recursively merges odd and even indexed subsequences through fixed compare-swap stages.',
+        icon: '🕸️',
+        slogan: "Weave odd and even lanes into a sorted network!"
     },
     { 
         id: 'radix', 

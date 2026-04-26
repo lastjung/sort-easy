@@ -67,6 +67,14 @@ export const ALGO_MESSAGES = {
     SWAP: { text: "Swapping Bar", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Cocktail Sort Completed!", type: MSG_TYPES.SUCCESS }
   },
+  oddeven: {
+    START: { text: "Starting Odd-Even Sort...", type: MSG_TYPES.INFO },
+    ODD: { text: "Checking Odd Pairs", type: MSG_TYPES.TARGET },
+    EVEN: { text: "Checking Even Pairs", type: MSG_TYPES.TARGET },
+    COMPARE: { text: "Comparing Adjacent Pair", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Swapping Out-of-Order Pair", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Odd-Even Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
   comb: {
     START: { text: "Starting Comb Sort...", type: MSG_TYPES.INFO },
     GAP: { text: "Shrinking Gap", type: MSG_TYPES.TARGET },
@@ -94,6 +102,12 @@ export const ALGO_MESSAGES = {
     COMPARE: { text: "Comparing Network Pair", type: MSG_TYPES.COMPARE },
     SWAP: { text: "Positioning Elements", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Bitonic Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  oddevenmerge: {
+    START: { text: "Starting Odd-Even Merge Sort...", type: MSG_TYPES.INFO },
+    COMPARE: { text: "Comparing Network Wire", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Swapping Network Wire", type: MSG_TYPES.SWAP },
+    FINISHED: { text: "Odd-Even Merge Sort Completed!", type: MSG_TYPES.SUCCESS }
   },
   radix: {
     START: { text: "Starting Radix Sort...", type: MSG_TYPES.INFO },
