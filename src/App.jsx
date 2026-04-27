@@ -136,7 +136,7 @@ function App() {
         </header>
       )}
 
-      <main className={`relative transition-all duration-700 ${isFullView ? 'pr-0 pt-10' : 'lg:pr-80'}`}>
+      <main className={`relative transition-all duration-700 ${isFullView ? 'pr-0 pt-2' : 'lg:pr-80'}`}>
         {/* Desktop Configuration Sidebar (Hidden on Mobile) */}
         {!isFullView && (
           <Sidebar 
