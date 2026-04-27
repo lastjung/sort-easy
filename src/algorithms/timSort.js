@@ -2,7 +2,7 @@
 export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDisableGroupGaps, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
-    const RUN = Math.min(32, n);
+    const RUN = Math.min(16, n);
     const { COLORS } = await import('../constants/colors');
     const palette = COLORS.GROUP_PALETTE;
 
@@ -13,20 +13,27 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
     setGoodIndices([]);
     setSortedIndices([]);
     setDescription(msg.START);
+    const allRunColors = {};
+    for (let i = 0, idx = 0; i < n; i += RUN, idx++) {
+        const right = Math.min(i + RUN - 1, n - 1);
+        const color = palette[idx % palette.length];
+        for (let k = i; k <= right; k++) allRunColors[k] = color;
+    }
+    setGroupIndices({ ...allRunColors });
     if (!(await wait(1))) return;
 
     // Phase 1: Rich Insertion sort on small runs
     const insertionSortRun = async (left, right, runIdx) => {
+        const runColor = allRunColors[left];
         for (let i = left + 1; i <= right; i++) {
             if (!sortingRef.current) return;
 
             setGoodIndices([i]);
 
-            const splitGroups = {};
-            for (let k = 0; k < n; k++) {
-                splitGroups[k] = (k >= left && k < i) ? palette[0] : palette[1];
-            }
-            setGroupIndices(splitGroups);
+            // 현재 정렬 중인 아이템까지는 원래 런의 색상을 진하게 유지
+            const activeGroups = { ...allRunColors };
+            setGroupIndices(activeGroups);
+            
             setSortedIndices([]);
             setCompareIndices([]);
             setSwapIndices([]);
@@ -35,11 +42,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             if (!sortingRef.current) return;
             if (!(await wait(0.5))) return;
 
-            const joinedGroups = {};
-            for (let k = 0; k < n; k++) {
-                joinedGroups[k] = (k >= left && k <= i) ? palette[0] : palette[1];
-            }
-            setGroupIndices(joinedGroups);
+            setDescription({ text: `Run ${runIdx}: Comparing pivot`, type: 'COMPARE' });
             if (!(await wait(0.4))) return;
             if (!sortingRef.current) return;
 
@@ -77,10 +80,6 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
 
             setCompareIndices([]);
             setSwapIndices([]);
-            setGroupIndices({});
-            const settledPrefix = [];
-            for (let k = left; k <= i; k++) settledPrefix.push(k);
-            setSortedIndices(settledPrefix);
             setGoodIndices([]);
             playSound(arr[i], 'sine', i);
         }
@@ -91,11 +90,13 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
         const leftArr = arr.slice(l, m + 1);
         const rightArr = arr.slice(m + 1, r + 1);
 
-        const mergeGroups = {};
+        // 병합 중인 구간은 강조를 위해 별도 색상 처리 (또는 기존 색상 유지)
+        const mergeGroups = { ...allRunColors };
         for (let idx = l; idx <= r; idx++) {
             mergeGroups[idx] = idx <= m ? palette[2] : palette[3];
         }
         setGroupIndices(mergeGroups);
+        
         setCompareIndices([]);
         setGoodIndices([l]);
         setDescription({ text: 'Merging sorted runs', type: 'SWAP' });
@@ -119,8 +120,6 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                 arr[k] = rightArr[j++];
             }
 
-            delete mergeGroups[k];
-            setGroupIndices({ ...mergeGroups });
             setSwapIndices([k]);
             countSwap();
             setArray([...arr]);
@@ -138,8 +137,6 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                 setArray([...arr]);
                 setSwapIndices([k]);
                 countSwap();
-                delete mergeGroups[k];
-                setGroupIndices({ ...mergeGroups });
                 if (!(await wait(0.8))) break;
                 setSwapIndices([]);
                 pointer++; k++;
@@ -149,9 +146,13 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
         await finalize(leftArr, i);
         await finalize(rightArr, j);
 
+        // 병합 완료 후 해당 구간의 색상을 통일 (새로운 큰 Run의 색상)
+        const newColor = palette[Math.floor(l / (2 * RUN)) % palette.length];
+        for (let idx = l; idx <= r; idx++) allRunColors[idx] = newColor;
+        setGroupIndices({ ...allRunColors });
+        
         setCompareIndices([]);
         setGoodIndices([]);
-        setGroupIndices({});
     };
 
     // 1. Divide and Insertion Sort Runs
