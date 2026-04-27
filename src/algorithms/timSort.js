@@ -24,26 +24,17 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
 
     // Phase 1: Rich Insertion sort on small runs
     const insertionSortRun = async (left, right, runIdx) => {
-        const runColor = allRunColors[left];
         for (let i = left + 1; i <= right; i++) {
             if (!sortingRef.current) return;
 
             setGoodIndices([i]);
-
-            // 현재 정렬 중인 아이템까지는 원래 런의 색상을 진하게 유지
-            const activeGroups = { ...allRunColors };
-            setGroupIndices(activeGroups);
+            setGroupIndices({ ...allRunColors });
             
             setSortedIndices([]);
             setCompareIndices([]);
             setSwapIndices([]);
             setDescription({ text: `Run ${runIdx}: Picking next pivot`, type: 'TARGET' });
-            if (!(await wait(0.4))) return;
-            if (!sortingRef.current) return;
-            if (!(await wait(0.5))) return;
-
-            setDescription({ text: `Run ${runIdx}: Comparing pivot`, type: 'COMPARE' });
-            if (!(await wait(0.4))) return;
+            if (!(await wait(0.6))) return;
             if (!sortingRef.current) return;
 
             let pivotPos = i;
@@ -52,22 +43,25 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             while (j >= left) {
                 if (!sortingRef.current) return;
                 
+                // 스캔 중인 대상(j)과 현재 피벗(pivotPos) 표시
+                setCompareIndices([j]);
                 setGoodIndices([pivotPos]);
-                setCompareIndices([]);
+                
                 countCompare();
-                setDescription({ text: `Run ${runIdx}: Comparing pivot`, type: 'COMPARE' });
+                setDescription({ text: `Run ${runIdx}: Scanning for insertion point`, type: 'COMPARE' });
                 playSound(arr[j], 'sine', j);
-                if (!(await wait(1))) return;
+                if (!(await wait(0.8))) return;
                 
                 if (arr[j] > arr[j + 1]) {
+                    setCompareIndices([]); // 비교 해제
                     setGoodIndices([pivotPos]);
-                    setSortedIndices([j]);
+                    setSortedIndices([j]); // 이동할 자리를 잠시 강조
                     setDescription({ text: `Run ${runIdx}: Shifting right`, type: 'SWAP' });
                     playSound(arr[j], 'triangle', j);
                     countSwap();
                     [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
                     setArray([...arr]);
-                    if (!(await wait(1))) return;
+                    if (!(await wait(0.8))) return;
                     
                     pivotPos = j;
                     setSortedIndices([]);
@@ -81,7 +75,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             setCompareIndices([]);
             setSwapIndices([]);
             setGoodIndices([]);
-            playSound(arr[i], 'sine', i);
+            playSound(arr[pivotPos], 'sine', pivotPos);
         }
     };
 

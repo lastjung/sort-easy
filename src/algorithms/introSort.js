@@ -27,38 +27,21 @@ export const introSort = async ({
   setDescription(msg.START);
   if (!(await wait(1))) return false;
 
-  const updateGroups = () => {
-    const groups = {};
-    const sortedSet = new Set(sortedIndices);
-    for (let k = 0; k < n; k++) {
-        groups[k] = sortedSet.has(k) ? COLORS.GROUP_PALETTE[12] : COLORS.GROUP_PALETTE[1];
-    }
-    setGroupIndices(groups);
-  };
+  let currentGroups = {};
+  const palette = COLORS.GROUP_PALETTE;
+  let colorIdx = 0;
 
-  const insertionSortRange = async (lo, hi) => {
+  // 초기 색상 설정
+  for (let k = 0; k < n; k++) currentGroups[k] = palette[0];
+  setGroupIndices({ ...currentGroups });
+
+  const insertionSortRange = async (lo, hi, runColor) => {
     for (let i = lo + 1; i <= hi; i++) {
       if (!sortingRef.current) return false;
 
       setGoodIndices([i]);
-
-      const splitGroups = {};
-      for (let k = 0; k < n; k++) {
-        splitGroups[k] = (k >= lo && k < i) ? COLORS.GROUP_PALETTE[0] : COLORS.GROUP_PALETTE[1];
-      }
-      setGroupIndices(splitGroups);
       setDescription(msg.PICK);
-      if (!(await wait(0.4))) return false;
-      if (!sortingRef.current) return false;
-      if (!(await wait(0.5))) return false;
-
-      const joinedGroups = {};
-      for (let k = 0; k < n; k++) {
-        joinedGroups[k] = (k >= lo && k <= i) ? COLORS.GROUP_PALETTE[0] : COLORS.GROUP_PALETTE[1];
-      }
-      setGroupIndices(joinedGroups);
-      if (!(await wait(0.4))) return false;
-      if (!sortingRef.current) return false;
+      if (!(await wait(0.6))) return false;
 
       let pivotPos = i;
       let j = i - 1;
@@ -66,14 +49,15 @@ export const introSort = async ({
       while (j >= lo) {
         if (!sortingRef.current) return false;
 
+        setCompareIndices([j]);
         setGoodIndices([pivotPos]);
-        setCompareIndices([]);
         countCompare();
         setDescription(msg.COMPARE);
         playSound(arr[j], 'sine', j);
-        if (!(await wait(1))) return false;
+        if (!(await wait(0.8))) return false;
 
         if (arr[j] > arr[j + 1]) {
+          setCompareIndices([]);
           setGoodIndices([pivotPos]);
           setSortedIndices([j]);
           setDescription(msg.SHIFT);
@@ -81,7 +65,7 @@ export const introSort = async ({
           countSwap();
           [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
           setArray([...arr]);
-          if (!(await wait(1))) return false;
+          if (!(await wait(0.8))) return false;
 
           pivotPos = j;
           setSortedIndices([]);
@@ -94,23 +78,19 @@ export const introSort = async ({
 
       setCompareIndices([]);
       setSwapIndices([]);
-      setGroupIndices({});
-
-      const settledRange = [...sortedIndices];
-      for (let k = lo; k <= i; k++) {
-        if (!settledRange.includes(k)) settledRange.push(k);
-      }
-      sortedIndices = settledRange;
-      setSortedIndices([...sortedIndices]);
-      setGoodIndices([]);
-      playSound(arr[i], 'sine', i);
     }
-
-    updateGroups();
+    
+    // 이 구간 정렬 완료 표시
+    for (let k = lo; k <= hi; k++) {
+        currentGroups[k] = COLORS.SORTED;
+        if (!sortedIndices.includes(k)) sortedIndices.push(k);
+    }
+    setGroupIndices({ ...currentGroups });
+    setSortedIndices([...sortedIndices]);
     return true;
   };
 
-  const heapSortRange = async (lo, hi) => {
+  const heapSortRange = async (lo, hi, runColor) => {
     const len = hi - lo + 1;
     const heapify = async (size, root) => {
       let largest = root;
@@ -157,17 +137,17 @@ export const introSort = async ({
       if (!(await wait(0.8))) return false;
       if (!(await heapify(end, 0))) return false;
     }
+    
     for (let k = lo; k <= hi; k++) {
-      if (!sortedIndices.includes(k)) sortedIndices.push(k);
+        currentGroups[k] = COLORS.SORTED;
+        if (!sortedIndices.includes(k)) sortedIndices.push(k);
     }
     setSortedIndices([...sortedIndices]);
-    playSound(arr[hi], 'sine', hi);
-    updateGroups();
-    if (!(await wait(0.3))) return false;
+    setGroupIndices({ ...currentGroups });
     return true;
   };
 
-  const partition = async (lo, hi) => {
+  const partition = async (lo, hi, groupColor) => {
     const pivot = arr[hi];
     setGoodIndices([hi]);
     let i = lo - 1;
@@ -204,35 +184,48 @@ export const introSort = async ({
       if (lo === hi && !sortedIndices.includes(lo)) {
         sortedIndices.push(lo);
         setSortedIndices([...sortedIndices]);
-        updateGroups();
+        currentGroups[lo] = COLORS.SORTED;
+        setGroupIndices({ ...currentGroups });
       }
       return true;
     }
 
     const size = hi - lo + 1;
+    const currentRunColor = currentGroups[lo];
+
     if (size <= INSERTION_THRESHOLD) {
       setDescription(msg.INSERT || msg.COMPARE);
-      return insertionSortRange(lo, hi);
+      return insertionSortRange(lo, hi, currentRunColor);
     }
 
     if (depth <= 0) {
       setDescription(msg.FALLBACK || msg.SWAP);
-      return heapSortRange(lo, hi);
+      return heapSortRange(lo, hi, currentRunColor);
     }
 
-    const p = await partition(lo, hi);
+    const p = await partition(lo, hi, currentRunColor);
     if (p === -1) return false;
+
     if (!sortedIndices.includes(p)) {
       sortedIndices.push(p);
       setSortedIndices([...sortedIndices]);
-      updateGroups();
+      currentGroups[p] = COLORS.SORTED;
       playSound(arr[p], 'sine', p);
     }
+
+    // 좌우 하위 그룹에 새로운 색상 할당
+    const leftColor = palette[++colorIdx % palette.length];
+    const rightColor = palette[++colorIdx % palette.length];
+    
+    for (let k = lo; k < p; k++) if (!sortedIndices.includes(k)) currentGroups[k] = leftColor;
+    for (let k = p + 1; k <= hi; k++) if (!sortedIndices.includes(k)) currentGroups[k] = rightColor;
+    setGroupIndices({ ...currentGroups });
+    if (!(await wait(0.5))) return false;
+
     if (!(await sort(lo, p - 1, depth - 1))) return false;
     return sort(p + 1, hi, depth - 1);
   };
 
-  updateGroups();
   const done = await sort(0, n - 1, depthLimit);
   if (!done || !sortingRef.current) return false;
 
