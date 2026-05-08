@@ -157,5 +157,13 @@ export const ALGO_MESSAGES = {
   tree: {
     START: { text: "Tree Sort Started", type: MSG_TYPES.INFO },
     FINISHED: { text: "Tree Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  bogo: {
+    START: { text: "Bogo Sort Started", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Bogo Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  stooge: {
+    START: { text: "Stooge Sort Started", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Stooge Sort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };

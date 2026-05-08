@@ -29,6 +29,8 @@ import { oddEvenSort } from './oddEvenSort';
 import { oddEvenMergeSort } from './oddEvenMergeSort';
 import { patienceSort } from './patienceSort';
 import { treeSort } from './treeSort';
+import { bogoSort } from './bogoSort';
+import { stoogeSort } from './stoogeSort';
 
 export {
     bubbleSort,
@@ -60,7 +62,9 @@ export {
     oddEvenSort,
     oddEvenMergeSort,
     patienceSort,
-    treeSort
+    treeSort,
+    bogoSort,
+    stoogeSort
 };
 
 export const ALGORITHMS = [
@@ -333,5 +337,23 @@ export const ALGORITHMS = [
         desc: 'Builds a Binary Search Tree and performs an in-order traversal.',
         icon: '🌲',
         slogan: "Grow a search tree and harvest elements in order!"
+    },
+    { 
+        id: 'bogo', 
+        title: 'Bogo Sort', 
+        fn: bogoSort, 
+        complexity: 'O(n!)', 
+        desc: 'Randomly shuffles the array until it is sorted.',
+        icon: '🫧',
+        slogan: "Shuffle randomly and pray for sorting luck!"
+    },
+    { 
+        id: 'stooge', 
+        title: 'Stooge Sort', 
+        fn: stoogeSort, 
+        complexity: 'O(n^2.7)', 
+        desc: 'A recursive sorting algorithm that sorts by thirds recursively.',
+        icon: '🌀',
+        slogan: "Sort the first two-thirds, last two-thirds, and first two-thirds again!"
     }
 ];
