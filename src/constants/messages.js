@@ -165,5 +165,13 @@ export const ALGO_MESSAGES = {
   stooge: {
     START: { text: "Stooge Sort Started", type: MSG_TYPES.INFO },
     FINISHED: { text: "Stooge Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  sleep: {
+    START: { text: "Sleep Sort Started", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Sleep Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  smooth: {
+    START: { text: "Smoothsort Started", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Smoothsort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };

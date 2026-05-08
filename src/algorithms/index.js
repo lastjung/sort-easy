@@ -31,6 +31,8 @@ import { patienceSort } from './patienceSort';
 import { treeSort } from './treeSort';
 import { bogoSort } from './bogoSort';
 import { stoogeSort } from './stoogeSort';
+import { sleepSort } from './sleepSort';
+import { smoothSort } from './smoothSort';
 
 export {
     bubbleSort,
@@ -64,7 +66,9 @@ export {
     patienceSort,
     treeSort,
     bogoSort,
-    stoogeSort
+    stoogeSort,
+    sleepSort,
+    smoothSort
 };
 
 export const ALGORITHMS = [
@@ -355,5 +359,23 @@ export const ALGORITHMS = [
         desc: 'A recursive sorting algorithm that sorts by thirds recursively.',
         icon: '🌀',
         slogan: "Sort the first two-thirds, last two-thirds, and first two-thirds again!"
+    },
+    { 
+        id: 'sleep', 
+        title: 'Sleep Sort', 
+        fn: sleepSort, 
+        complexity: 'O(n + max(val))', 
+        desc: 'Simulates multithreaded sleeping proportional to value sizes.',
+        icon: '💤',
+        slogan: "Fall asleep and wake up in perfect order!"
+    },
+    { 
+        id: 'smooth', 
+        title: 'Smooth Sort', 
+        fn: smoothSort, 
+        complexity: 'O(n log n)', 
+        desc: 'A variant of heapsort using Leonardo numbers for maximum order adaptive sorting.',
+        icon: '💎',
+        slogan: "Adaptive heapsort using Leonardo numbers for majestic smoothness!"
     }
 ];
