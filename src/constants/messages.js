@@ -149,5 +149,13 @@ export const ALGO_MESSAGES = {
     DISTRIBUTE: { text: "Distributing into Buckets", type: MSG_TYPES.TARGET },
     SORT: { text: "Sorting Each Bucket", type: MSG_TYPES.SWAP },
     FINISHED: { text: "Bucket Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  patience: {
+    START: { text: "Patience Sort Started", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Patience Sort Completed!", type: MSG_TYPES.SUCCESS }
+  },
+  tree: {
+    START: { text: "Tree Sort Started", type: MSG_TYPES.INFO },
+    FINISHED: { text: "Tree Sort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };

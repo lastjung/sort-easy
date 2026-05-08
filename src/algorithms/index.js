@@ -27,6 +27,8 @@ import { strandSort } from './strandSort';
 import { librarySort } from './librarySort';
 import { oddEvenSort } from './oddEvenSort';
 import { oddEvenMergeSort } from './oddEvenMergeSort';
+import { patienceSort } from './patienceSort';
+import { treeSort } from './treeSort';
 
 export {
     bubbleSort,
@@ -56,7 +58,9 @@ export {
     strandSort,
     librarySort,
     oddEvenSort,
-    oddEvenMergeSort
+    oddEvenMergeSort,
+    patienceSort,
+    treeSort
 };
 
 export const ALGORITHMS = [
@@ -311,5 +315,23 @@ export const ALGORITHMS = [
         desc: 'An insertion sort variation that keeps gaps between items for faster shelving.',
         icon: '📚',
         slogan: "Make some room for the new books on the shelf!"
+    },
+    { 
+        id: 'patience', 
+        title: 'Patience Sort', 
+        fn: patienceSort, 
+        complexity: 'O(n log n)', 
+        desc: 'Sorts by partitioning elements into piles like sorting cards.',
+        icon: '🃏',
+        slogan: "Distribute elements into piles and merge them perfectly!"
+    },
+    { 
+        id: 'tree', 
+        title: 'Tree Sort', 
+        fn: treeSort, 
+        complexity: 'O(n log n)', 
+        desc: 'Builds a Binary Search Tree and performs an in-order traversal.',
+        icon: '🌲',
+        slogan: "Grow a search tree and harvest elements in order!"
     }
 ];
