@@ -31,7 +31,7 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
         setCompareIndices([i]);
         setGoodIndices([i]);
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.2))) return false;
+        if (!(await wait(0.5))) return false;
     }
     setCompareIndices([]);
     setGoodIndices([]);
@@ -54,7 +54,7 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
         // Highlight the start of a strand
         setGoodIndices([sortedList.length]);
         setDescription({ text: `Extracting strand from ${unsortedList.length} remaining items...`, type: "TARGET" });
-        if (!(await wait(0.3))) return false;
+        if (!(await wait(0.8))) return false;
         
         for (let i = 1; i < unsortedList.length; i++) {
             if (!sortingRef.current) return false;
@@ -88,7 +88,7 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
                 setDescription({ text: `Skipped ${unsortedList[i]} for a later strand`, type: "COMPARE" });
                 playSound(unsortedList[i], 'sine', candidateIdx);
             }
-            if (!(await wait(0.25))) return false;
+            if (!(await wait(1))) return false;
         }
 
         // Merge strand into sortedList
@@ -120,7 +120,7 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
         setSwapIndices(strand.map((_, idx) => idx));
         countSwap();
         if (strand.length > 0) playSound(strand[0], 'triangle', 0);
-        if (!(await wait(0.8))) return false;
+        if (!(await wait(1))) return false;
         
         setSwapIndices([]);
         setCompareIndices([]);

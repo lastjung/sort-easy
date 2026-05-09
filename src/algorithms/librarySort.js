@@ -46,7 +46,7 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
         }
         setArray([...libArr]);
         setGroupIndices({ ...groups });
-        if (!(await wait(0.8))) return false;
+        if (!(await wait(1))) return false;
         return true;
     };
 
@@ -54,11 +54,11 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
     const firstTargetIdx = Math.floor(n / 2);
     setGoodIndices([0, firstTargetIdx]);
     setDescription({ text: "Opening shelf: moving first book to the center...", type: "TARGET" });
-    if (!(await wait(0.4))) return false;
+    if (!(await wait(0.8))) return false;
 
     setSwapIndices([0, firstTargetIdx]);
     playSound(originalArr[0], 'triangle', firstTargetIdx);
-    if (!(await wait(0.4))) return false;
+    if (!(await wait(0.8))) return false;
 
     libArr[firstTargetIdx] = originalArr[0];
     groups[firstTargetIdx] = getColor(originalArr[0]);
@@ -92,7 +92,7 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
                 if (libArr[j] !== GAP_VAL) {
                     setCompareIndices([j]);
                     playSound(libArr[j], 'sine', j);
-                    if (!(await wait(0.1))) return false;
+                    if (!(await wait(0.5))) return false;
                     if (libArr[j] >= val) {
                         insertIdx = j;
                         break;
@@ -160,7 +160,7 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
         setSwapIndices([targetPos]);
         countSwap();
         playSound(val, 'triangle', targetPos);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(1))) return false;
         setSwapIndices([]);
 
         // Periodically rebalance to keep gaps open
@@ -182,12 +182,12 @@ export const librarySort = async ({ array, setArray, setCompareIndices, setSwapI
     setArray([...resultArr]);
     setGroupIndices({ ...compactGroups });
     setSortedIndices([]);
-    if (!(await wait(0.5))) return false;
+    if (!(await wait(0.8))) return false;
 
     for (let i = 0; i < n; i++) {
         setSortedIndices([...Array(i + 1).keys()]);
         playSound(resultArr[i], 'sine', i);
-        if (!(await wait(0.1))) return false;
+        if (!(await wait(0.3))) return false;
     }
 
     setDisableGroupGaps(true);

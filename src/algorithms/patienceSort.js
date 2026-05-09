@@ -38,7 +38,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
             setCompareIndices([currentElementIdx, topIdx]);
             playSound(piles[p].topValue, 'sine', topIdx);
             
-            if (!(await wait(0.5))) return false;
+            if (!(await wait(1))) return false;
 
             if (val <= piles[p].topValue) {
                 foundPileIdx = p;
@@ -78,7 +78,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
         let newPlacedIdx = idx - 1;
         setGoodIndices([newPlacedIdx]);
         playSound(val, 'triangle', newPlacedIdx);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(1))) return false;
         setGoodIndices([]);
     }
     setCompareIndices([]);
@@ -116,7 +116,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
         
         setCompareIndices(activeTops);
         setDescription({ text: "Scanning pile tops", type: "INFO" });
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(0.8))) return false;
 
         for (let p = 0; p < piles.length; p++) {
             if (piles[p].cards.length > 0) {
@@ -135,7 +135,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
         setSwapIndices([writeIdx]);
         setDescription({ text: "Extracting min: " + minVal, type: "SWAP" });
         playSound(minVal, 'sine', sourceIdx);
-        if (!(await wait(0.6))) return false;
+        if (!(await wait(1))) return false;
 
         // Pop from min pile
         piles[minPileIdx].cards.pop();
@@ -169,7 +169,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
         setCompareIndices([]);
         
         playSound(minVal, 'triangle', writeIdx);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(1))) return false;
 
         writeIdx++;
     }

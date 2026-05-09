@@ -31,7 +31,7 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
         setCompareIndices([i]);
         setGoodIndices([i]);
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.2))) return false;
+        if (!(await wait(0.5))) return false;
     }
     setCompareIndices([]);
     setGoodIndices([]);
@@ -52,7 +52,7 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
 
         setDescription({ text: `Tournament Round ${round + 1}: Competing for Rank ${round + 1}`, type: "TARGET" });
         setGoodIndices(tournament);
-        if (!(await wait(0.3))) return false;
+        if (!(await wait(0.8))) return false;
 
         // Simulate bracket levels
         let bracketLevel = 1;
@@ -74,7 +74,7 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
                 setGoodIndices([left, right]);
                 countCompare();
                 playSound(arr[left], 'sine', left);
-                if (!(await wait(0.4))) return false;
+                if (!(await wait(1))) return false;
 
                 if (arr[left] <= arr[right]) {
                     setGoodIndices([left]);
@@ -83,11 +83,11 @@ export const tournamentSort = async ({ array, setArray, setCompareIndices, setSw
                     setGoodIndices([right]);
                     nextLevel.push(right);
                 }
-                if (!(await wait(0.4))) return false;
+                if (!(await wait(1))) return false;
                 setGoodIndices([]);
             }
             setGoodIndices(nextLevel);
-            if (!(await wait(0.25))) return false;
+            if (!(await wait(0.5))) return false;
             tournament = nextLevel;
             bracketLevel++;
         }

@@ -60,7 +60,7 @@ export const treeSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             setGroupIndices({ ...groups });
             setGoodIndices([0]);
             playSound(val, 'triangle', 0);
-            if (!(await wait(0.5))) return false;
+            if (!(await wait(1))) return false;
             setGoodIndices([]);
         } else {
             let curr = root;
@@ -72,7 +72,7 @@ export const treeSort = async ({ array, setArray, setCompareIndices, setSwapIndi
                 // Compare with current node's BFS position
                 setCompareIndices([currentElementIdx, curr.bfsIndex]);
                 playSound(curr.val, 'sine', curr.bfsIndex);
-                if (!(await wait(0.5))) return false;
+                if (!(await wait(1))) return false;
 
                 depth++;
                 if (val < curr.val) {
@@ -115,7 +115,7 @@ export const treeSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             let newInsertedIdx = bfsList.length - 1;
             setGoodIndices([newInsertedIdx]);
             playSound(val, 'triangle', newInsertedIdx);
-            if (!(await wait(0.5))) return false;
+            if (!(await wait(1))) return false;
             setGoodIndices([]);
         }
     }
@@ -141,7 +141,7 @@ export const treeSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             setCompareIndices([node.bfsIndex]);
             playSound(node.val, 'sine', node.bfsIndex);
             setDescription({ text: "Visiting node: " + node.val, type: "COMPARE" });
-            if (!(await wait(0.6))) return;
+            if (!(await wait(1))) return;
             
             // Traverse right
             await inOrderTraversal(node.right);
@@ -167,7 +167,7 @@ export const treeSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         setSwapIndices([i]);
         setDescription({ text: "Placing value: " + node.val, type: "SWAP" });
         playSound(node.val, 'sine', node.bfsIndex);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(1))) return false;
 
         currentArr[i] = node.val;
         setArray([...currentArr]);
@@ -180,7 +180,7 @@ export const treeSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         setGroupIndices({ ...groups, ...sortedGroups });
         
         playSound(node.val, 'triangle', i);
-        if (!(await wait(0.5))) return false;
+        if (!(await wait(1))) return false;
     }
 
     setGroupIndices({});

@@ -30,7 +30,7 @@ export const stoogeSort = async ({ array, setArray, setCompareIndices, setSwapIn
         setCompareIndices([l, h]);
         setDescription({ text: "Comparing endpoints", type: "COMPARE" });
         playSound(arr[l], 'sine', l);
-        if (!(await wait(0.4))) return false;
+        if (!(await wait(1))) return false;
 
         if (arr[l] > arr[h]) {
             // Swap if out of order
@@ -44,7 +44,7 @@ export const stoogeSort = async ({ array, setArray, setCompareIndices, setSwapIn
             setDescription({ text: "Swapping endpoints", type: "SWAP" });
             setArray([...arr]);
             playSound(arr[l], 'triangle', l);
-            if (!(await wait(0.4))) return false;
+            if (!(await wait(1))) return false;
             setSwapIndices([]);
         }
 

@@ -24,7 +24,7 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setGoodIndices([i]);
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.1))) return false;
+        if (!(await wait(0.5))) return false;
     }
     setCompareIndices([]);
     setGoodIndices([]);
@@ -54,7 +54,7 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setGoodIndices([i]);
         countCompare();
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.3))) return false;
+        if (!(await wait(0.8))) return false;
     }
     setCompareIndices([]);
     setGoodIndices([]);
@@ -83,7 +83,7 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setSwapIndices([writeIdx]);
             countSwap();
             playSound(val, 'triangle', writeIdx);
-            if (!(await wait(0.35))) return false;
+            if (!(await wait(1))) return false;
             setSwapIndices([]);
             setGoodIndices([]);
             writeIdx++;
@@ -108,7 +108,7 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
             setGroupIndices({ ...groups });
             setGoodIndices([j + 1]);
             setSwapIndices([j + 1]);
-            if (!(await wait(0.2))) return false;
+            if (!(await wait(0.8))) return false;
             j--;
         }
         arr[j + 1] = key;
@@ -118,7 +118,7 @@ export const flashSort = async ({ array, setArray, setCompareIndices, setSwapInd
         setSortedIndices([...Array(i).keys()]);
         setGoodIndices([j + 1]);
         setSwapIndices([j + 1]);
-        if (!(await wait(0.2))) return false;
+        if (!(await wait(0.8))) return false;
         setSwapIndices([]);
         setCompareIndices([]);
         setGoodIndices([]);

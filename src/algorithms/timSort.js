@@ -34,7 +34,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             setCompareIndices([]);
             setSwapIndices([]);
             setDescription({ text: `Run ${runIdx}: Picking next pivot`, type: 'TARGET' });
-            if (!(await wait(0.6))) return;
+            if (!(await wait(1))) return;
             if (!sortingRef.current) return;
 
             let pivotPos = i;
@@ -50,7 +50,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                 countCompare();
                 setDescription({ text: `Run ${runIdx}: Scanning for insertion point`, type: 'COMPARE' });
                 playSound(arr[j], 'sine', j);
-                if (!(await wait(0.8))) return;
+                if (!(await wait(1))) return;
                 
                 if (arr[j] > arr[j + 1]) {
                     setCompareIndices([]); // 비교 해제
@@ -61,7 +61,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                     countSwap();
                     [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
                     setArray([...arr]);
-                    if (!(await wait(0.8))) return;
+                    if (!(await wait(1))) return;
                     
                     pivotPos = j;
                     setSortedIndices([]);
@@ -94,7 +94,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
         setCompareIndices([]);
         setGoodIndices([l]);
         setDescription({ text: 'Merging sorted runs', type: 'SWAP' });
-        if (!(await wait(0.8))) return;
+        if (!(await wait(1))) return;
 
         let i = 0, j = 0, k = l;
 
@@ -106,7 +106,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             countCompare();
             setDescription({ text: 'Writing next merged value', type: 'COMPARE' });
             playSound(arr[k], 'sine', k);
-            if (!(await wait(0.8))) return;
+            if (!(await wait(1))) return;
 
             if (leftArr[i] <= rightArr[j]) {
                 arr[k] = leftArr[i++];
@@ -118,7 +118,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
             countSwap();
             setArray([...arr]);
             playSound(arr[k], 'triangle', k);
-            if (!(await wait(0.8))) return;
+            if (!(await wait(1))) return;
             setSwapIndices([]);
             k++;
         }
@@ -131,7 +131,7 @@ export const timSort = async ({ array, setArray, setCompareIndices, setSwapIndic
                 setArray([...arr]);
                 setSwapIndices([k]);
                 countSwap();
-                if (!(await wait(0.8))) break;
+                if (!(await wait(1))) break;
                 setSwapIndices([]);
                 pointer++; k++;
             }
