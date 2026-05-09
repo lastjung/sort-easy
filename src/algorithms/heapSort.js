@@ -33,7 +33,6 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             playSound(arr[left], 'sine', left);
             if (!(await wait(1))) return;
             setCompareIndices([]);
-            if (!(await wait(0.25))) return;
             if (arr[left] > arr[largest]) largest = left;
         }
         if (right < heapSize) {
@@ -43,7 +42,6 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
             playSound(arr[right], 'sine', right);
             if (!(await wait(1))) return;
             setCompareIndices([]);
-            if (!(await wait(0.25))) return;
             if (arr[right] > arr[largest]) largest = right;
         }
 
@@ -62,7 +60,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
 
     // --- Phase 1: Build Max Heap ---
     setDescription({ type: 'TARGET', text: "Building Max Heap..." });
-    if (!(await wait(2))) return false;
+    if (!(await wait(1.2))) return false;
 
     const lastParent = Math.floor(n / 2) - 1;
     if (lastParent >= 0) {
@@ -81,24 +79,24 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
     }
     
     setDescription({ type: 'INFO', text: "Max Heap Built! ✨" });
-    if (!(await wait(2.5))) return false;
+    if (!(await wait(1.2))) return false;
 
     // --- Phase 2: Actual Sorting ---
     setDescription({ type: 'TARGET', text: "Sorting: Extracting Max..." });
-    if (!(await wait(2))) return false;
+    if (!(await wait(1.2))) return false;
 
     for (let i = n - 1; i > 0; i--) {
         if (!sortingRef.current) break;
         
         setDescription({ type: 'SWAP', text: `Extracting Max to Position ${i + 1}` });
-        if (!(await wait(1.5))) break;
+        if (!(await wait(1))) break;
 
         setSwapIndices([0, i]);
         countSwap();
         playSound(arr[i], 'triangle', i);
         [arr[0], arr[i]] = [arr[i], arr[0]];
         setArray([...arr]);
-        if (!(await wait(1.5))) break;
+        if (!(await wait(1))) break;
         
         sortedIndices.push(i);
         setSortedIndices([...sortedIndices]);
@@ -106,7 +104,7 @@ export const heapSort = async ({ array, setArray, setCompareIndices, setSwapIndi
         setSwapIndices([]);
         
         setDescription({ type: 'INFO', text: `Restoring heap...` });
-        if (!(await wait(1.5))) break;
+        if (!(await wait(1))) break;
         await heapify(i, 0);
     }
     

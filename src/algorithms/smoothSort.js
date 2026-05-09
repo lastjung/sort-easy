@@ -1,8 +1,14 @@
 export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIndices, setGoodIndices, setSortedIndices, setGroupIndices, setDisableGroupGaps, setDescription, playSound, wait, sortingRef, countCompare, countSwap, msg }) => {
     const arr = [...array];
     const n = arr.length;
-    const { COLORS } = await import('../constants/colors');
-    const palette = COLORS.GROUP_PALETTE;
+    const palette = [
+        'bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.5)]',
+        'bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.5)]',
+        'bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.5)]',
+        'bg-fuchsia-600 shadow-[0_0_15px_rgba(192,38,211,0.5)]',
+        'bg-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.5)]',
+        'bg-slate-500 shadow-[0_0_15px_rgba(100,116,139,0.5)]'
+    ];
 
     setSortedIndices([]);
     setGoodIndices([]);
@@ -39,9 +45,10 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
             let lc = curr - 1 - leo[currK - 2]; // left child
 
             countCompare();
+            setDescription(msg.COMPARE);
             setCompareIndices([lc, rc]);
             playSound(arr[lc], 'sine', lc);
-            if (!(await wait(0.4))) return;
+            if (!(await wait(1))) return;
 
             let child = rc;
             let childK = currK - 2;
@@ -51,9 +58,10 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
             }
 
             countCompare();
+            setDescription(msg.COMPARE);
             setCompareIndices([curr, child]);
             playSound(arr[curr], 'sine', curr);
-            if (!(await wait(0.4))) return;
+            if (!(await wait(1))) return;
 
             if (arr[curr] >= arr[child]) {
                 break;
@@ -64,12 +72,13 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
             arr[curr] = arr[child];
             arr[child] = temp;
             countSwap();
+            setDescription(msg.SWAP);
 
             setCompareIndices([]);
             setSwapIndices([curr, child]);
             setArray([...arr]);
             playSound(arr[curr], 'triangle', curr);
-            if (!(await wait(0.4))) return;
+            if (!(await wait(1))) return;
             setSwapIndices([]);
 
             curr = child;
@@ -89,9 +98,10 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
             let prevK = heaps[heapIdx - 1].order;
 
             countCompare();
+            setDescription(msg.COMPARE);
             setCompareIndices([currR, prevR]);
             playSound(arr[currR], 'sine', currR);
-            if (!(await wait(0.4))) return;
+            if (!(await wait(1))) return;
 
             if (arr[prevR] > arr[currR]) {
                 let swapWithPrev = true;
@@ -108,12 +118,13 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
                     arr[currR] = arr[prevR];
                     arr[prevR] = temp;
                     countSwap();
+                    setDescription(msg.SWAP);
 
                     setCompareIndices([]);
                     setSwapIndices([currR, prevR]);
                     setArray([...arr]);
                     playSound(arr[currR], 'triangle', currR);
-                    if (!(await wait(0.4))) return;
+                    if (!(await wait(1))) return;
                     setSwapIndices([]);
 
                     currR = prevR;
@@ -130,7 +141,7 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
     };
 
     // Phase 1: Build Leonardo Heaps (Growing)
-    setDescription({ text: "Building Leonardo Heaps", type: "TARGET" });
+    setDescription(msg.BUILD);
     for (let i = 0; i < n; i++) {
         if (!sortingRef.current) return false;
 
@@ -162,7 +173,7 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
         setArray([...arr]);
         setCompareIndices([i]);
         playSound(arr[i], 'sine', i);
-        if (!(await wait(0.4))) return false;
+        if (!(await wait(1))) return false;
         setCompareIndices([]);
 
         // Trinkle to restore heap top sorted order
@@ -170,7 +181,7 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
     }
 
     // Phase 2: Shrink Heaps (Extracting Max)
-    setDescription({ text: "Extracting elements", type: "INFO" });
+    setDescription(msg.EXTRACT);
     const sortedIdxs = [];
 
     for (let i = n - 1; i >= 0; i--) {
@@ -184,7 +195,7 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
             // Nothing to split, heap order 1 or 0 is already single element
             updateColors();
             playSound(arr[i], 'triangle', i);
-            if (!(await wait(0.4))) return false;
+            if (!(await wait(1))) return false;
         } else {
             // Split order k heap into its two sub-heaps: order k-1 and k-2
             const k = currentHeap.order;
@@ -203,8 +214,8 @@ export const smoothSort = async ({ array, setArray, setCompareIndices, setSwapIn
             });
 
             updateColors();
-            setDescription({ text: "Splitting heap", type: "TARGET" });
-            if (!(await wait(0.4))) return false;
+            setDescription(msg.SPLIT);
+            if (!(await wait(1))) return false;
 
             // Re-heapify and sort roots after split
             // First trinkle left child, then right child

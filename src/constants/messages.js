@@ -172,6 +172,11 @@ export const ALGO_MESSAGES = {
   },
   smooth: {
     START: { text: "Smoothsort Started", type: MSG_TYPES.INFO },
+    BUILD: { text: "Building Leonardo Heaps", type: MSG_TYPES.TARGET },
+    COMPARE: { text: "Comparing Heap Elements", type: MSG_TYPES.COMPARE },
+    SWAP: { text: "Swapping Elements in Heap", type: MSG_TYPES.SWAP },
+    SPLIT: { text: "Splitting Heap", type: MSG_TYPES.TARGET },
+    EXTRACT: { text: "Extracting elements", type: MSG_TYPES.INFO },
     FINISHED: { text: "Smoothsort Completed!", type: MSG_TYPES.SUCCESS }
   }
 };
