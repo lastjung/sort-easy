@@ -38,7 +38,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
             setCompareIndices([currentElementIdx, topIdx]);
             playSound(piles[p].topValue, 'sine', topIdx);
             
-            if (!(await wait(0.3))) return false;
+            if (!(await wait(0.5))) return false;
 
             if (val <= piles[p].topValue) {
                 foundPileIdx = p;
@@ -116,6 +116,7 @@ export const patienceSort = async ({ array, setArray, setCompareIndices, setSwap
         
         setCompareIndices(activeTops);
         setDescription({ text: "Scanning pile tops", type: "INFO" });
+        if (!(await wait(0.5))) return false;
 
         for (let p = 0; p < piles.length; p++) {
             if (piles[p].cards.length > 0) {
