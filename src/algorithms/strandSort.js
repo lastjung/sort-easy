@@ -99,37 +99,51 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
         while (sPtr < strand.length || dPtr < sortedList.length) {
             if (!sortingRef.current) return false;
             countCompare();
+
+            let pickedVal;
             if (sPtr < strand.length && (dPtr === sortedList.length || strand[sPtr] <= sortedList[dPtr])) {
-                merged.push(strand[sPtr]);
-                playSound(strand[sPtr], 'triangle', sortedList.length + sPtr);
+                pickedVal = strand[sPtr];
                 sPtr++;
             } else {
-                merged.push(sortedList[dPtr]);
-                playSound(sortedList[dPtr], 'triangle', dPtr);
+                pickedVal = sortedList[dPtr];
                 dPtr++;
             }
+            merged.push(pickedVal);
+
+            // Progressively rebuild display array: merged + remaining strand + remaining sorted + unsorted
+            const displayArr = [...merged, ...strand.slice(sPtr), ...sortedList.slice(dPtr), ...remaining];
+            for (let i = 0; i < n; i++) {
+                arr[i] = displayArr[i];
+            }
+
+            // Color each section distinctly
+            const mergeGroups = {};
+            const mergedLen = merged.length;
+            const remainStrand = strand.length - sPtr;
+            const remainSorted = sortedList.length - dPtr;
+            for (let i = 0; i < mergedLen; i++) mergeGroups[i] = palette[2];
+            for (let i = mergedLen; i < mergedLen + remainStrand; i++) mergeGroups[i] = palette[0];
+            for (let i = mergedLen + remainStrand; i < mergedLen + remainStrand + remainSorted; i++) mergeGroups[i] = palette[5];
+            for (let i = mergedLen + remainStrand + remainSorted; i < n; i++) mergeGroups[i] = getColor(arr[i]);
+
+            setArray([...arr]);
+            setGroupIndices(mergeGroups);
+            setSwapIndices([mergedLen - 1]);
+            playSound(pickedVal, 'triangle', mergedLen - 1);
             if (!(await wait(1))) return false;
+            setSwapIndices([]);
         }
         
         sortedList = merged;
         unsortedList = remaining;
 
-        // Update the main array for visualization
-        const combined = [...sortedList, ...unsortedList];
+        // Update groups after merge complete
         for (let i = 0; i < n; i++) {
-            arr[i] = combined[i];
             groups[i] = getColor(arr[i]);
         }
-        
-        setArray([...arr]);
         setGroupIndices({ ...groups });
         setSortedIndices([...Array(sortedList.length).keys()]);
-        setSwapIndices(strand.map((_, idx) => idx));
         countSwap();
-        if (strand.length > 0) playSound(strand[0], 'triangle', 0);
-        if (!(await wait(1))) return false;
-        
-        setSwapIndices([]);
         setCompareIndices([]);
         setGoodIndices([]);
     }
