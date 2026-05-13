@@ -62,16 +62,20 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
             const candidateIdx = sortedList.length + i;
             const strandIndices = strand.map((_, idx) => sortedList.length + idx);
             const previewGroups = {};
+            // Already sorted portion
             for (let idx = 0; idx < sortedList.length; idx++) {
                 previewGroups[idx] = palette[2];
             }
+            // Unsorted portion: keep original getColor for all, then override specific roles
             for (let idx = 0; idx < unsortedList.length; idx++) {
                 const globalIdx = sortedList.length + idx;
-                previewGroups[globalIdx] = idx < i ? palette[5] : getColor(unsortedList[idx]);
+                previewGroups[globalIdx] = getColor(unsortedList[idx]);
             }
+            // Strand members highlighted distinctly
             strandIndices.forEach((idx) => {
                 previewGroups[idx] = palette[0];
             });
+            // Current candidate highlighted
             previewGroups[candidateIdx] = palette[3];
             setGroupIndices(previewGroups);
             setCompareIndices([sortedList.length + strand.length - 1, candidateIdx]);
