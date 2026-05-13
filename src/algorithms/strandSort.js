@@ -97,11 +97,18 @@ export const strandSort = async ({ array, setArray, setCompareIndices, setSwapIn
         let sPtr = 0, dPtr = 0;
         
         while (sPtr < strand.length || dPtr < sortedList.length) {
+            if (!sortingRef.current) return false;
+            countCompare();
             if (sPtr < strand.length && (dPtr === sortedList.length || strand[sPtr] <= sortedList[dPtr])) {
-                merged.push(strand[sPtr++]);
+                merged.push(strand[sPtr]);
+                playSound(strand[sPtr], 'triangle', sortedList.length + sPtr);
+                sPtr++;
             } else {
-                merged.push(sortedList[dPtr++]);
+                merged.push(sortedList[dPtr]);
+                playSound(sortedList[dPtr], 'triangle', dPtr);
+                dPtr++;
             }
+            if (!(await wait(1))) return false;
         }
         
         sortedList = merged;
